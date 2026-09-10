@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository contains live standard collectors for CPU, memory, processes, interface network, storage, and power. Overview still shows labeled sample readings until the next checkpoint. No SQLite yet.
+The repository Overview is bound to live standard collectors. Other profiles remain placeholders. History is session-only; SQLite is next.
 
 ## Product In One Sentence
 

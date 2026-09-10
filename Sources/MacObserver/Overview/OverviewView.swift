@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct OverviewView: View {
-    private let readings = SystemReading.samples
-    private let processes = ProcessActivity.samples
+    let store: OverviewStore
+
+    private var model: OverviewModel {
+        OverviewModel.from(snapshot: store.snapshot)
+    }
 
     var body: some View {
         ScrollView {
@@ -27,7 +30,7 @@ struct OverviewView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 7) {
-                Text("M4 Air")
+                Text(model.machineName)
                     .font(.system(size: 28, weight: .semibold))
                 Text("A quiet look at your Mac, right now.")
                     .font(.body)
@@ -37,13 +40,29 @@ struct OverviewView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 6) {
-                Label("Healthy", systemImage: "checkmark.circle.fill")
+                Label(model.health.state.rawValue, systemImage: healthSymbol)
                     .font(.headline)
-                    .foregroundStyle(.green)
-                Text("Sample data")
+                    .foregroundStyle(healthColor)
+                Text(model.freshness)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+        }
+    }
+
+    private var healthSymbol: String {
+        switch model.health.state {
+        case .healthy: "checkmark.circle.fill"
+        case .attention: "exclamationmark.circle.fill"
+        case .investigate: "exclamationmark.triangle.fill"
+        }
+    }
+
+    private var healthColor: Color {
+        switch model.health.state {
+        case .healthy: .green
+        case .attention: .orange
+        case .investigate: .red
         }
     }
 
@@ -52,7 +71,7 @@ struct OverviewView: View {
             columns: [GridItem(.adaptive(minimum: 190), spacing: 12)],
             spacing: 12
         ) {
-            ForEach(readings) { reading in
+            ForEach(model.readings) { reading in
                 MetricTile(reading: reading)
             }
         }
@@ -64,34 +83,43 @@ struct OverviewView: View {
                 Text("Top Activity")
                     .font(.headline)
                 Spacer()
-                Text("Sample data")
+                Text("CPU and memory · network is not per-process")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 12) {
-                GridRow {
-                    Text("Process")
-                    Text("CPU")
-                    Text("Memory")
-                    Text("Network")
-                }
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-
-                ForEach(processes) { process in
+            if model.processes.isEmpty {
+                Text("Waiting for process samples.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .padding(18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
+            } else {
+                Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 12) {
                     GridRow {
-                        Label(process.name, systemImage: process.symbol)
-                        Text(process.cpu)
-                        Text(process.memory)
-                        Text(process.network)
+                        Text("Process")
+                        Text("CPU")
+                        Text("Memory")
+                        Text("Network")
                     }
-                    .font(.body.monospacedDigit())
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                    ForEach(model.processes) { process in
+                        GridRow {
+                            Label(process.name, systemImage: "cpu")
+                            Text(process.cpu)
+                            Text(process.memory)
+                            Text(process.network)
+                        }
+                        .font(.body.monospacedDigit())
+                    }
                 }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
         }
     }
 }

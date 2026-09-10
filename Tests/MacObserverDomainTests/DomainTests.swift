@@ -104,3 +104,41 @@ struct EventContractTests {
         #expect(EventType(rawValue: "launched") == nil)
     }
 }
+
+struct HealthRulesTests {
+    @Test func heavyCPUIsInvestigate() {
+        let result = HealthRules.assess(
+            cpuRatio: 0.96,
+            memoryPressure: "normal",
+            thermal: "nominal",
+            coreUnavailable: false,
+            stale: false,
+            hasAnySample: true
+        )
+        #expect(result.state == .investigate)
+    }
+
+    @Test func firstSampleWaitIsAttention() {
+        let result = HealthRules.assess(
+            cpuRatio: nil,
+            memoryPressure: nil,
+            thermal: nil,
+            coreUnavailable: false,
+            stale: false,
+            hasAnySample: false
+        )
+        #expect(result.state == .attention)
+    }
+
+    @Test func normalLoadIsHealthy() {
+        let result = HealthRules.assess(
+            cpuRatio: 0.21,
+            memoryPressure: "normal",
+            thermal: "nominal",
+            coreUnavailable: false,
+            stale: false,
+            hasAnySample: true
+        )
+        #expect(result.state == .healthy)
+    }
+}

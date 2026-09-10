@@ -1,17 +1,15 @@
 import SwiftUI
-import MacObserverDomain
-import MacObserverCollectors
 
 @main
 struct MacObserverApp: App {
-    private let telemetry = CollectorPipeline(collectors: StandardCollectors.make())
+    @State private var store = OverviewStore()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(store: store)
                 .frame(minWidth: 960, minHeight: 640)
                 .task {
-                    try? await telemetry.start()
+                    await store.run()
                 }
         }
         .windowStyle(.hiddenTitleBar)

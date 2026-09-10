@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Bindable var store: OverviewStore
     @State private var selectedProfile: Profile = .overview
 
     var body: some View {
@@ -17,16 +18,9 @@ struct ContentView: View {
     private var detail: some View {
         switch selectedProfile {
         case .overview:
-            OverviewView()
+            OverviewView(store: store)
         default:
             PlaceholderView(profile: selectedProfile)
         }
     }
 }
-
-#if !SWIFT_PACKAGE
-#Preview {
-    ContentView()
-        .frame(width: 1_120, height: 740)
-}
-#endif

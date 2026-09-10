@@ -6,6 +6,18 @@ public struct LiveSnapshot: Sendable, Equatable {
     public var availability: [String: CapabilityAvailability]
     public var capturedAt: ObservationTime
 
+    public init(
+        metrics: [Metric],
+        events: [Event],
+        availability: [String: CapabilityAvailability],
+        capturedAt: ObservationTime
+    ) {
+        self.metrics = metrics
+        self.events = events
+        self.availability = availability
+        self.capturedAt = capturedAt
+    }
+
     public func metric(named name: MetricName, entity: Entity) -> Metric? {
         metrics.first { $0.name == name && $0.entity == entity }
     }

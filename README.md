@@ -24,4 +24,4 @@ Or run the Swift package executable from the repository root:
 swift run
 ```
 
-Overview still uses labeled sample readings. Other sidebar views are placeholders. No system data is collected or persisted yet.
+Overview shows live CPU, memory, network, storage, power, and thermal readings. Other sidebar views are placeholders. Telemetry stays in memory for the session; nothing is written to SQLite yet.

@@ -23,8 +23,6 @@ Later, when supported data exists:
 
 The selected context determines the detail view. Selecting Chrome in Overview should open Chrome’s investigation context; it should not merely apply a filter to the old machine-wide screen.
 
-The selected context determines the detail view. Selecting Chrome in Overview should open Chrome’s investigation context; it should not merely apply a filter to the old machine-wide screen.
-
 ## Overview
 
 The default screen answers only: **Is my Mac okay, and what is currently consuming resources?**

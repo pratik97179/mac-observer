@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MetricTile: View {
-    let reading: SystemReading
+    let reading: OverviewReading
 
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
