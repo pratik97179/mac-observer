@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository currently contains a SwiftUI dashboard shell with sample readings. It collects no telemetry, persists no data, and requests no permissions. The next implementation milestone is a working app shell and live standard Overview collectors. Local SQLite history comes after live readings exist.
+The repository contains a macOS app shell with working sidebar routing. Overview still uses labeled sample readings. Other profiles are honest placeholders. It collects no telemetry, persists no data, and requests no permissions. Next is the typed telemetry domain, then live collectors.
 
 ## Product In One Sentence
 

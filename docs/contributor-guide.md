@@ -51,4 +51,4 @@ Before a push:
 
 ## Current Toolchain Note
 
-This machine currently has Command Line Tools selected but no full Xcode application. The installed Swift compiler and SDK revisions did not match during the first build attempt. Select or install a matching Xcode toolchain before treating local build validation as complete.
+The macOS app target builds with Xcode 26.6 on macOS 15+. Open `MacObserver.xcodeproj` for the app bundle. `swift run` still builds the package executable.

@@ -12,10 +12,16 @@ A privacy-minded, local macOS observability app. It starts with one question: is
 
 ## Development
 
-Run the app from the repository root:
+Open the macOS app:
+
+```sh
+open MacObserver.xcodeproj
+```
+
+Or run the Swift package executable from the repository root:
 
 ```sh
 swift run
 ```
 
-The first milestone uses display-only sample readings. No system data is collected or persisted yet.
+Overview still uses labeled sample readings. Other sidebar views are placeholders. No system data is collected or persisted yet.
