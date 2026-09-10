@@ -155,7 +155,11 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         if query.entityKey != nil { sql += " AND entity_key = ?" }
         if query.type != nil { sql += " AND type = ?" }
         if query.domain != nil { sql += " AND domain = ?" }
-        sql += " ORDER BY wall_time ASC, monotonic_ns ASC"
+        if query.limit != nil {
+            sql += " ORDER BY wall_time DESC, monotonic_ns DESC LIMIT ?"
+        } else {
+            sql += " ORDER BY wall_time ASC, monotonic_ns ASC"
+        }
 
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
@@ -178,13 +182,17 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         }
         if let domain = query.domain {
             sqlite3_bind_text(statement, index, domain.rawValue, -1, SQLITE_TRANSIENT)
+            index += 1
+        }
+        if let limit = query.limit {
+            sqlite3_bind_int(statement, index, Int32(limit))
         }
 
         var rows: [Event] = []
         while sqlite3_step(statement) == SQLITE_ROW {
             rows.append(try decodeEvent(statement))
         }
-        return rows
+        return query.limit == nil ? rows : rows.reversed()
     }
 
     public func applyRetention(_ policy: RetentionPolicy, now: Date) async throws {

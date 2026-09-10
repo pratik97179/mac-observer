@@ -27,7 +27,7 @@ public actor MemoryTelemetryStore: TelemetryStore {
     }
 
     public func events(matching query: EventQuery) async throws -> [Event] {
-        self.events.filter { event in
+        let matched = self.events.filter { event in
             event.time.wallTime >= query.range.start
                 && event.time.wallTime <= query.range.end
                 && (query.entityKey == nil || event.entity.identityKey == query.entityKey)
@@ -35,6 +35,8 @@ public actor MemoryTelemetryStore: TelemetryStore {
                 && (query.domain == nil || event.domain == query.domain)
         }
         .sorted { $0.time.wallTime < $1.time.wallTime }
+        guard let limit = query.limit, matched.count > limit else { return matched }
+        return Array(matched.suffix(limit))
     }
 
     public func applyRetention(_ policy: RetentionPolicy, now: Date) async throws {

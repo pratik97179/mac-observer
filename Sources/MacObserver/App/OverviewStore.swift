@@ -14,6 +14,8 @@ final class OverviewStore {
     private(set) var capabilities: [CapabilityDescriptor] = []
     private(set) var historyPath: String?
     private(set) var historyMessage: String?
+    private(set) var historyEvents: [Event] = []
+    private(set) var eventWindow: EventHistoryWindow = .lastHour
     private var disabledCapabilityIDs: Set<String> = []
 
     init() {
@@ -58,6 +60,7 @@ final class OverviewStore {
             try? await pipeline?.setEnabled(id, enabled: enabled)
             if let pipeline {
                 snapshot = await pipeline.snapshot()
+                await refreshHistory()
             }
         }
     }
@@ -71,9 +74,36 @@ final class OverviewStore {
         do {
             try await store?.deleteAll()
             historyMessage = "Local history deleted. Live sampling continues."
+            await refreshHistory()
         } catch {
             historyMessage = "Could not delete local history."
         }
+    }
+
+    func setEventWindow(_ window: EventHistoryWindow) {
+        eventWindow = window
+        Task { await refreshHistory() }
+    }
+
+    func refreshHistory() async {
+        let end = Date()
+        let start = end.addingTimeInterval(-eventWindow.duration)
+        if let store {
+            await persisting?.flush()
+            do {
+                let rows = try await store.events(matching: EventQuery(
+                    range: TimeRange(start: start, end: end),
+                    limit: 500
+                ))
+                historyEvents = Array(rows.reversed())
+                return
+            } catch {
+                historyMessage = "Could not read local event history."
+            }
+        }
+        historyEvents = snapshot.events
+            .filter { $0.time.wallTime >= start && $0.time.wallTime <= end }
+            .reversed()
     }
 
     func run() async {
@@ -106,6 +136,7 @@ final class OverviewStore {
         var ticks = 0
         while !Task.isCancelled {
             snapshot = await pipeline.snapshot()
+            await refreshHistory()
             ticks += 1
             if ticks.isMultiple(of: 5) {
                 await persisting?.flush()

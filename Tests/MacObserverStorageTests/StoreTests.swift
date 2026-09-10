@@ -64,6 +64,38 @@ struct TelemetryStoreTests {
         #expect(try await store.metrics(matching: MetricQuery(range: range)).isEmpty)
     }
 
+    @Test func eventQueriesHonorDomainAndNewestLimit() async throws {
+        try await assertEventLimit(MemoryTelemetryStore())
+        try await assertEventLimit(SQLiteTelemetryStore.inMemory())
+    }
+
+    private func assertEventLimit(_ store: some TelemetryStore) async throws {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        try await store.insert(events: [
+            sampleEvent(entity: system, at: 1, domain: .memory, summary: "one"),
+            sampleEvent(entity: system, at: 2, domain: .thermal, summary: "two"),
+            sampleEvent(entity: system, at: 3, domain: .memory, summary: "three")
+        ])
+        let range = TimeRange(start: Date(timeIntervalSince1970: 0), end: Date(timeIntervalSince1970: 10))
+        let limited = try await store.events(matching: EventQuery(range: range, limit: 2))
+        #expect(limited.map(\.summary) == ["two", "three"])
+        let memory = try await store.events(matching: EventQuery(range: range, domain: .memory))
+        #expect(memory.map(\.summary) == ["one", "three"])
+    }
+
+    private func sampleEvent(entity: Entity, at seconds: TimeInterval, domain: TelemetryDomain, summary: String) -> Event {
+        Event(
+            time: ObservationTime(wallTime: Date(timeIntervalSince1970: seconds)),
+            domain: domain,
+            type: domain == .memory ? .memoryPressureChanged : .thermalStateChanged,
+            entity: entity,
+            summary: summary,
+            source: "test",
+            quality: .direct,
+            privacyClass: .operational
+        )
+    }
+
     private func assertQueryBehavior(_ store: some TelemetryStore) async throws {
         let system = Entity.system(bootSession: BootSessionID("boot-1"))
         try await store.insert(metrics: [

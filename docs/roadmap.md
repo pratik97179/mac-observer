@@ -12,7 +12,7 @@ Current series (live dashboard first) is complete. Persistence series:
 2. Persist live collector output.
 3. Downsampling and inspection charts later.
 
-Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events lists discrete collector changes from the live buffer. Time-range inspection over SQLite remains later.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric inspection charts remain later.
 
 ## Milestone 1: Application Foundation
 
@@ -56,7 +56,7 @@ Acceptance criteria:
 
 ## Milestone 3: Telemetry Domain Persistence
 
-**Status:** In progress. Live collectors persist to SQLite. Downsampling and history views are not shipped yet.
+**Status:** In progress. Live collectors persist to SQLite. Events can query stored history by time range. Downsampling and metric charts are not shipped yet.
 
 Deliverables:
 

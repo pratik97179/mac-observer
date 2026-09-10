@@ -91,7 +91,7 @@ The initial target policy is intentionally conservative and may be refined after
 | Live | 1 to 10 seconds | Memory only or short local buffer | Responsive current UI and immediate explanations. |
 | Recent | 1 minute | 7 days | Investigation of recent slowdowns and changes. |
 | Long-term | 5 to 15 minutes | 90 days | Trend comparison without a large local database. |
-| Events | Individually preserved | 30 days by default | Timeline and causal context. |
+| Events | Individually preserved | 30 days by default | Timeline and causal context. The Events screen queries up to 500 newest rows in the selected range. |
 
 Retention is a user-visible privacy control. Individual sensitive event categories may use shorter defaults. Downsampling records must preserve min, max, average, count, and gap information where a chart needs them.
 

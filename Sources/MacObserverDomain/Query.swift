@@ -34,17 +34,20 @@ public struct EventQuery: Sendable, Hashable {
     public var entityKey: String?
     public var type: EventType?
     public var domain: TelemetryDomain?
+    public var limit: Int?
 
     public init(
         range: TimeRange,
         entityKey: String? = nil,
         type: EventType? = nil,
-        domain: TelemetryDomain? = nil
+        domain: TelemetryDomain? = nil,
+        limit: Int? = nil
     ) {
         self.range = range
         self.entityKey = entityKey
         self.type = type
         self.domain = domain
+        self.limit = limit
     }
 }
 

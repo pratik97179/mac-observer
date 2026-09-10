@@ -1,25 +1,44 @@
 import SwiftUI
 import MacObserverDomain
 
+enum EventHistoryWindow: String, CaseIterable, Identifiable {
+    case lastHour = "1 hour"
+    case lastDay = "24 hours"
+    case lastWeek = "7 days"
+
+    var id: Self { self }
+
+    var duration: TimeInterval {
+        switch self {
+        case .lastHour: 60 * 60
+        case .lastDay: 24 * 60 * 60
+        case .lastWeek: 7 * 24 * 60 * 60
+        }
+    }
+
+    var showsCalendarDate: Bool {
+        self != .lastHour
+    }
+}
+
 struct EventsView: View {
     let store: OverviewStore
     @State private var domainFilter: TelemetryDomain?
 
     private var events: [Event] {
-        let all = store.snapshot.events.reversed()
-        guard let domainFilter else { return Array(all) }
-        return all.filter { $0.domain == domainFilter }
+        guard let domainFilter else { return store.historyEvents }
+        return store.historyEvents.filter { $0.domain == domainFilter }
     }
 
     private var domains: [TelemetryDomain] {
-        Array(Set(store.snapshot.events.map(\.domain))).sorted { $0.rawValue < $1.rawValue }
+        Array(Set(store.historyEvents.map(\.domain))).sorted { $0.rawValue < $1.rawValue }
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
-                filter
+                filters
                 if events.isEmpty {
                     empty
                 } else {
@@ -37,28 +56,42 @@ struct EventsView: View {
         VStack(alignment: .leading, spacing: 7) {
             Text("Events")
                 .font(.system(size: 28, weight: .semibold))
-            Text("Only discrete changes appear here: memory pressure, thermal state, and collector enablement. CPU and memory samples stay on the live profiles.")
+            Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, and collector enablement.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: 720, alignment: .leading)
         }
     }
 
-    private var filter: some View {
-        Picker("Domain", selection: $domainFilter) {
-            Text("All domains").tag(Optional<TelemetryDomain>.none)
-            ForEach(domains, id: \.self) { domain in
-                Text(domain.rawValue).tag(Optional(domain))
+    private var filters: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Picker("Range", selection: windowBinding) {
+                ForEach(EventHistoryWindow.allCases) { window in
+                    Text(window.rawValue).tag(window)
+                }
             }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 420)
+
+            Picker("Domain", selection: $domainFilter) {
+                Text("All domains").tag(Optional<TelemetryDomain>.none)
+                ForEach(domains, id: \.self) { domain in
+                    Text(domain.rawValue).tag(Optional(domain))
+                }
+            }
+            .pickerStyle(.menu)
         }
-        .pickerStyle(.segmented)
-        .frame(maxWidth: 520)
+    }
+
+    private var windowBinding: Binding<EventHistoryWindow> {
+        Binding(
+            get: { store.eventWindow },
+            set: { store.setEventWindow($0) }
+        )
     }
 
     private var empty: some View {
-        Text(domainFilter == nil
-             ? "No events yet. Disable a collector in Capabilities, or wait for a memory or thermal change."
-             : "No events in this domain.")
+        Text(emptyCopy)
             .font(.body)
             .foregroundStyle(.secondary)
             .padding(18)
@@ -66,15 +99,22 @@ struct EventsView: View {
             .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
     }
 
+    private var emptyCopy: String {
+        if domainFilter != nil {
+            return "No events in this domain for the selected range."
+        }
+        return "No stored events in this range. Disable a collector in Capabilities, or wait for a memory or thermal change."
+    }
+
     private var list: some View {
         VStack(alignment: .leading, spacing: 1) {
             ForEach(events) { event in
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text(event.time.wallTime, format: .dateTime.hour().minute().second())
+                        Text(event.time.wallTime, format: timeFormat)
                             .font(.body.monospacedDigit())
                             .foregroundStyle(.secondary)
-                            .frame(width: 88, alignment: .leading)
+                            .frame(width: store.eventWindow.showsCalendarDate ? 148 : 88, alignment: .leading)
                         Text(event.summary)
                             .font(.body)
                         Spacer()
@@ -98,5 +138,12 @@ struct EventsView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var timeFormat: Date.FormatStyle {
+        if store.eventWindow.showsCalendarDate {
+            return .dateTime.month(.abbreviated).day().hour().minute().second()
+        }
+        return .dateTime.hour().minute().second()
     }
 }

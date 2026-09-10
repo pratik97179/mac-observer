@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources and can turn them off. Settings shows retention and can delete the local SQLite history. Events lists discrete collector changes from the live snapshot.
+The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources and can turn them off. Settings shows retention and can delete the local SQLite history. Events queries that store by time range.
 
 ## Product In One Sentence
 

@@ -9,7 +9,7 @@ Shipped now:
 - Overview, Performance, Network, Processes, Storage, Power: live readings from the same snapshot
 - Capabilities: standard collectors, live state, and an enable/disable path
 - Settings: retention policy, history path, and delete local history
-- Events: live timeline of discrete collector changes, filterable by domain
+- Events: local SQLite history with 1 hour, 24 hour, and 7 day ranges, filterable by domain
 
 Later, when supported data exists:
 
@@ -55,9 +55,9 @@ Process identity must include more than a display name or PID. A PID can be reus
 
 ## Events Timeline
 
-The timeline is a cross-domain investigation surface, not an unbounded log dump. The live Events screen lists discrete changes newest first and can filter by domain. Time-range, entity, and importance filters over SQLite history remain later work.
+The timeline is a cross-domain investigation surface, not an unbounded log dump. Events reads stored rows for the selected range (1 hour, 24 hours, or 7 days), newest first, and can filter by domain. Entity and importance filters remain later work.
 
-Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, and `capability.availability_changed`. Process lifecycle and I/O bursts are not emitted yet.
+Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, and `capability.availability_changed`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
 
 Events need a concise human summary, a source capability, a precise timestamp, and structured detail for the inspector. Avoid recording high-frequency resource samples as individual events.
 
