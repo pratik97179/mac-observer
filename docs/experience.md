@@ -2,7 +2,9 @@
 
 ## Navigation Model
 
-The application has a persistent sidebar for profiles and one detail area. Profiles are saved viewpoints, not independent products:
+The application has a persistent sidebar for profiles and one detail area. Profiles are saved viewpoints, not independent products.
+
+Shipped now:
 
 - Overview
 - Performance
@@ -10,9 +12,16 @@ The application has a persistent sidebar for profiles and one detail area. Profi
 - Processes
 - Storage
 - Power
-- Security (available only when supported capability data exists)
-- Privacy
 - Events
+- Capabilities
+- Settings
+
+Later, when supported data exists:
+
+- Security
+- Privacy
+
+The selected context determines the detail view. Selecting Chrome in Overview should open Chrome’s investigation context; it should not merely apply a filter to the old machine-wide screen.
 
 The selected context determines the detail view. Selecting Chrome in Overview should open Chrome’s investigation context; it should not merely apply a filter to the old machine-wide screen.
 

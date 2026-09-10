@@ -12,6 +12,8 @@
 | Ship standard telemetry before privileged features. | Accepted | The base product must be useful without sensitive or Apple-restricted capabilities. |
 | Start explanations with deterministic rules. | Accepted | Evidence-backed correlation is more useful and auditable than speculative automation. |
 | Treat network interception as optional. | Accepted | It changes privacy and deployment expectations and is not a prerequisite for the core product. |
+| Ship live standard telemetry before local SQLite. | Accepted, 2026-09-11 | A polished Overview is the product users judge. Domain types still land first; persistence waits until live readings exist. |
+| Deliver in progressive GitHub pushes. | Accepted, 2026-09-11 | Each checkpoint is a small commit the maintainer pushes. The coding agent never commits or pushes. |
 
 ## Working Assumptions
 

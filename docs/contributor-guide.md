@@ -4,7 +4,7 @@
 
 1. Read [the product brief](product-brief.md), [architecture](architecture.md), and the relevant domain document.
 2. Check [decisions and open questions](decisions.md) for an existing constraint.
-3. Keep the change within one roadmap milestone unless scope expansion is explicitly agreed.
+3. Keep the change within one push checkpoint unless scope expansion is explicitly agreed.
 4. Update documentation in the same change when behavior, data collection, storage, permissions, or product scope changes.
 
 ## Implementation Conventions
@@ -31,6 +31,16 @@
 ## Git And Pushes
 
 Use small commits with a single intent. Suggested prefixes are `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `chore:`. Do not mix a broad refactor with a behavioral feature.
+
+The coding agent implements one checkpoint and stops. It never runs `git commit` or `git push`. The maintainer owns every push to `origin`.
+
+When the maintainer asks for the git command, use:
+
+```sh
+git add . && git commit -m "[commit message]" && git push
+```
+
+Commit messages stay under 15 words.
 
 Before a push:
 
