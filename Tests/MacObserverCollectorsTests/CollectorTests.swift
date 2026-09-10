@@ -70,6 +70,27 @@ struct CollectorContractTests {
         await collector.stop()
     }
 
+    @Test func disablingACollectorStopsFutureSamples() async throws {
+        let clock = FakeClock()
+        let collector = FakeCollector(
+            clock: clock,
+            initial: [.metric(cpu(ratio: 0.10, quality: .direct))]
+        )
+        let pipeline = CollectorPipeline(collectors: [collector], buffer: LiveTelemetryBuffer(clock: clock))
+        try await pipeline.start()
+        try await pipeline.setEnabled(collector.capability.id, enabled: false)
+        await collector.emit(.metric(cpu(ratio: 0.90, quality: .direct)))
+
+        let snapshot = await pipeline.snapshot()
+        if case .ratio(let value) = snapshot.metric(named: .cpuUtilizationRatio, entity: system)?.value {
+            #expect(value == 0.10)
+        } else {
+            Issue.record("expected the last sample from before disable")
+        }
+        #expect(snapshot.availability[collector.capability.id] == .unavailable(reason: "Disabled in Capabilities"))
+        await pipeline.stop()
+    }
+
     private func cpu(
         ratio: Double,
         quality: ObservationQuality,
@@ -99,5 +120,119 @@ struct SampleMathTests {
         #expect(SampleMath.perSecond(previous: 100, current: 200, elapsed: 2) == 50)
         #expect(SampleMath.perSecond(previous: 200, current: 100, elapsed: 2) == nil)
         #expect(SampleMath.perSecond(previous: 100, current: 200, elapsed: 0) == nil)
+    }
+
+    @Test func cpuTimeRatioUsesNanosecondsOverElapsedWall() {
+        #expect(SampleMath.cpuTimeRatio(previousNanoseconds: 0, currentNanoseconds: 500_000_000, elapsedSeconds: 1) == 0.5)
+        #expect(SampleMath.cpuTimeRatio(previousNanoseconds: 0, currentNanoseconds: 4_000_000_000, elapsedSeconds: 1) == 1)
+        #expect(SampleMath.cpuTimeRatio(previousNanoseconds: 200, currentNanoseconds: 100, elapsedSeconds: 1) == nil)
+    }
+}
+
+final class ScriptedProcessSource: ProcessResourceSource, @unchecked Sendable {
+    private let lock = NSLock()
+    private var current: [ProcessResourceSnapshot]
+
+    init(_ current: [ProcessResourceSnapshot]) {
+        self.current = current
+    }
+
+    func set(_ processes: [ProcessResourceSnapshot]) {
+        lock.lock()
+        current = processes
+        lock.unlock()
+    }
+
+    func currentProcesses() -> [ProcessResourceSnapshot] {
+        lock.lock()
+        defer { lock.unlock() }
+        return current
+    }
+}
+
+struct ProcessCollectorTests {
+    @Test func darwinSamplerDoesNotTrap() {
+        _ = DarwinProcessSampler.sample()
+    }
+
+    @Test func processCollectorEmitsInstanceCPUFromTaskTimes() async throws {
+        let clock = FakeClock()
+        let first = ProcessResourceSnapshot(pid: 442, startSeconds: 1, startMicroseconds: 0, displayName: "demo", cpuNanoseconds: 0, residentBytes: 4_096)
+        let second = ProcessResourceSnapshot(pid: 442, startSeconds: 1, startMicroseconds: 0, displayName: "demo", cpuNanoseconds: 500_000_000, residentBytes: 8_192)
+        let source = ScriptedProcessSource([first])
+        let collector = ProcessCollector(clock: clock, bootSession: BootSessionID("boot-1"), source: source, interval: .milliseconds(20))
+        let buffer = LiveTelemetryBuffer(clock: clock)
+        let entity = Entity.processInstance(
+            ProcessInstanceIdentity(pid: 442, startNanoseconds: 1_000_000_000, bootSession: BootSessionID("boot-1"), attributes: ProcessAttributes(displayName: "demo"))
+        )
+
+        try await collector.start(sink: buffer)
+        var snapshot = await buffer.snapshot()
+        for _ in 0..<40 where snapshot.metrics.isEmpty {
+            try await Task.sleep(for: .milliseconds(10))
+            snapshot = await buffer.snapshot()
+        }
+        #expect(!snapshot.metrics.isEmpty)
+
+        clock.advance(seconds: 1)
+        source.set([second])
+        var ratio: Double?
+        for _ in 0..<40 {
+            try await Task.sleep(for: .milliseconds(10))
+            snapshot = await buffer.snapshot()
+            if case .ratio(let value) = snapshot.metric(named: .cpuUtilizationRatio, entity: entity)?.value, value > 0 {
+                ratio = value
+                break
+            }
+        }
+        #expect(ratio == 0.5)
+        await collector.stop()
+    }
+}
+
+actor RecordingPersist: TelemetryPersisting {
+    var metrics: [Metric] = []
+    var events: [Event] = []
+
+    func insert(metrics: [Metric]) async throws {
+        self.metrics.append(contentsOf: metrics)
+    }
+
+    func insert(events: [Event]) async throws {
+        self.events.append(contentsOf: events)
+    }
+}
+
+struct PersistenceSinkTests {
+    @Test func fanoutAndBatchPersistMetrics() async throws {
+        let clock = FakeClock()
+        let persist = RecordingPersist()
+        let persisting = PersistingSink(persist: persist, batchSize: 2)
+        let buffer = LiveTelemetryBuffer(clock: clock)
+        let fanout = FanoutTelemetrySink([buffer, persisting])
+        let collector = FakeCollector(clock: clock)
+        try await collector.start(sink: fanout)
+
+        await collector.emit(.metric(cpuMetric(ratio: 0.1, clock: clock)))
+        await collector.emit(.metric(cpuMetric(ratio: 0.2, clock: clock)))
+        #expect(await persist.metrics.count == 2)
+
+        let snapshot = await buffer.snapshot()
+        #expect(snapshot.metrics.count == 1)
+
+        await collector.stop()
+    }
+
+    private func cpuMetric(ratio: Double, clock: FakeClock) -> Metric {
+        Metric(
+            time: clock.observationTime,
+            domain: .cpu,
+            name: .cpuUtilizationRatio,
+            entity: .system(bootSession: BootSessionID("boot-1")),
+            value: .ratio(ratio),
+            unit: .ratio,
+            source: "test",
+            quality: .direct
+        )
     }
 }

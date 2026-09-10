@@ -13,6 +13,7 @@ Mac Observer observes sensitive facts about a person’s device use. The product
 - Do not collect content from user files, clipboard, camera, microphone, or messages.
 - Every stored record has a retention class and privacy class.
 - A user can delete locally retained history without uninstalling the application.
+- Standard collectors can be turned off from Capabilities. Disabled collectors stop immediately and do not emit further samples.
 
 ## Data Classes
 

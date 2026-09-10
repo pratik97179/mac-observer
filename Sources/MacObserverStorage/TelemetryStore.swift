@@ -1,7 +1,7 @@
 import Foundation
 import MacObserverDomain
 
-public protocol TelemetryStore: Sendable {
+public protocol TelemetryStore: TelemetryPersisting, Sendable {
     func insert(metrics: [Metric]) async throws
     func insert(events: [Event]) async throws
     func metrics(matching query: MetricQuery) async throws -> [Metric]

@@ -12,16 +12,20 @@ A privacy-minded, local macOS observability app. It starts with one question: is
 
 ## Development
 
-Open the macOS app:
+The GUI is a SwiftUI `App`. It must run as a macOS application bundle, not as a raw SwiftPM binary. `open` on the naked executable launches Terminal and the process is not a normal app.
 
 ```sh
-open MacObserver.xcodeproj
+./scripts/dev-run.sh
 ```
 
-Or run the Swift package executable from the repository root:
+That script points Swift at Command Line Tools and `MacOSX26.5.sdk` (the SDK this compiler can actually compile), builds `MacObserver`, stages `.build/MacObserver.app`, and opens the bundle.
+
+If Xcode matches this Mac, you can also open `MacObserver.xcodeproj`.
+
+Domain and collector tests:
 
 ```sh
-swift run
+./scripts/dev-test.sh
 ```
 
-Overview shows live CPU, memory, network, storage, power, and thermal readings. Other sidebar views are placeholders. Telemetry stays in memory for the session; nothing is written to SQLite yet.
+Overview, Performance, Network, Processes, Storage, and Power show live readings. Capabilities lists each standard collector and can turn it off. Events and Settings remain placeholders. Live observations are also saved locally in SQLite under Application Support.

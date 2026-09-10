@@ -19,6 +19,10 @@ struct ContentView: View {
         switch selectedProfile {
         case .overview:
             OverviewView(store: store)
+        case .performance, .network, .processes, .storage, .power:
+            LiveProfileView(store: store, profile: selectedProfile)
+        case .capabilities:
+            CapabilitiesView(store: store)
         default:
             PlaceholderView(profile: selectedProfile)
         }

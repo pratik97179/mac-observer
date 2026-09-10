@@ -38,15 +38,15 @@ enum Profile: String, Identifiable, Hashable {
         case .overview:
             "Current machine health and top resource use."
         case .performance:
-            "CPU, memory, and thermal history will land here after live collectors."
+            "CPU, memory, pressure, and thermal from the live host collectors."
         case .network:
-            "Interface throughput and link state will land here after live collectors."
+            "Interface receive and transmit rates. Not per-process."
         case .processes:
-            "Process identity, CPU, and memory will land here after live collectors."
+            "Process identity, CPU, and resident memory from proc_pidinfo."
         case .storage:
-            "Volume capacity and I/O will land here after live collectors."
+            "Root volume capacity and system block I/O."
         case .power:
-            "Battery, watts, and thermal state will land here after live collectors."
+            "Battery, watts, and thermal state from IOKit and ProcessInfo."
         case .events:
             "A filtered timeline of meaningful changes will land here later."
         case .capabilities:

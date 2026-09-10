@@ -6,15 +6,9 @@ The application has a persistent sidebar for profiles and one detail area. Profi
 
 Shipped now:
 
-- Overview
-- Performance
-- Network
-- Processes
-- Storage
-- Power
-- Events
-- Capabilities
-- Settings
+- Overview, Performance, Network, Processes, Storage, Power: live readings from the same snapshot
+- Capabilities: standard collectors, live state, and an enable/disable path
+- Events and Settings: named screens, still placeholders until those checkpoints
 
 Later, when supported data exists:
 

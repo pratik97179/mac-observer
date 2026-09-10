@@ -12,6 +12,9 @@
 | Ship standard telemetry before privileged features. | Accepted | The base product must be useful without sensitive or Apple-restricted capabilities. |
 | Start explanations with deterministic rules. | Accepted | Evidence-backed correlation is more useful and auditable than speculative automation. |
 | Treat network interception as optional. | Accepted | It changes privacy and deployment expectations and is not a prerequisite for the core product. |
+| Run the SwiftUI client as an app bundle. | Accepted, 2026-09-11 | A SwiftPM executable is not an `APPL` bundle. Launch Services opens it in Terminal. Stage `.build/MacObserver.app` via `scripts/dev-run.sh` until Xcode matches the host OS. |
+| Compile with Command Line Tools and the 26.5 SDK on macOS 27. | Accepted, 2026-09-11 | Xcode 26.6 GUI does not launch. CLT Swift 6.4 cannot compile the 27.0 SDK (`SwiftUIMacros`, `_SwiftifyImport`). The 26.5 SDK is the compiler-compatible SDK; collectors must not assume kernel struct sizes match that SDK. |
+| Sample process resources with `proc_pidinfo`. | Accepted, 2026-09-11 | `proc_pid_rusage` writes a flavor-sized record with no caller length. On macOS 27 that overflowed `rusage_info_v4` (296 bytes vs current 464) and aborted the pipeline. |
 | Ship live standard telemetry before local SQLite. | Accepted, 2026-09-11 | A polished Overview is the product users judge. Domain types still land first; persistence waits until live readings exist. |
 | Deliver in progressive GitHub pushes. | Accepted, 2026-09-11 | Each checkpoint is a small commit the maintainer pushes. The coding agent never commits or pushes. |
 

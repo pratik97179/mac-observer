@@ -51,4 +51,10 @@ Before a push:
 
 ## Current Toolchain Note
 
-The macOS app target builds with Xcode 26.6 on macOS 15+. Open `MacObserver.xcodeproj` for the app bundle. Use the Xcode toolchain for `swift test` (`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`). `swift run` still builds the package executable.
+Develop against Command Line Tools. On this Mac the compiler is Swift 6.4. It builds SwiftUI against `MacOSX26.5.sdk`. The `macosx` symlink currently points at 27.0, which this compiler cannot compile (`SwiftUIMacros`, `_SwiftifyImport`). `scripts/dev-run.sh` pins `SDKROOT` to 26.5.
+
+Because the kernel is newer than that SDK, collectors may only call Darwin APIs that take an explicit buffer size. Process CPU and RSS use `proc_pidinfo`. Do not call `proc_pid_rusage`.
+
+Run the app with `./scripts/dev-run.sh`. That produces `.build/MacObserver.app`. Do not `open` the product under `swift build --show-bin-path`; Launch Services treats that file as a command-line tool.
+
+`scripts/dev-test.sh` runs `swift test` with the Testing macros plugin this Command Line Tools install keeps under `usr/lib/swift/host/plugins/testing`.

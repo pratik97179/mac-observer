@@ -50,29 +50,3 @@ public actor FakeCollector: TelemetryCollector {
         }
     }
 }
-
-public actor CollectorPipeline {
-    private let collectors: [any TelemetryCollector]
-    public let buffer: LiveTelemetryBuffer
-
-    public init(collectors: [any TelemetryCollector], buffer: LiveTelemetryBuffer = LiveTelemetryBuffer()) {
-        self.collectors = collectors
-        self.buffer = buffer
-    }
-
-    public func start() async throws {
-        for collector in collectors {
-            try await collector.start(sink: buffer)
-        }
-    }
-
-    public func stop() async {
-        for collector in collectors {
-            await collector.stop()
-        }
-    }
-
-    public func snapshot() async -> LiveSnapshot {
-        await buffer.snapshot()
-    }
-}

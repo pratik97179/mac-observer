@@ -22,6 +22,16 @@ enum SampleMath {
         guard elapsed > 0, current >= previous else { return nil }
         return Double(current - previous) / elapsed
     }
+
+    static func cpuTimeRatio(
+        previousNanoseconds: UInt64,
+        currentNanoseconds: UInt64,
+        elapsedSeconds: TimeInterval
+    ) -> Double? {
+        guard elapsedSeconds > 0, currentNanoseconds >= previousNanoseconds else { return nil }
+        let cpuSeconds = Double(currentNanoseconds - previousNanoseconds) / 1_000_000_000
+        return min(1, max(0, cpuSeconds / elapsedSeconds))
+    }
 }
 
 enum BootSession {

@@ -48,6 +48,11 @@ public struct EventQuery: Sendable, Hashable {
     }
 }
 
+public protocol TelemetryPersisting: Sendable {
+    func insert(metrics: [Metric]) async throws
+    func insert(events: [Event]) async throws
+}
+
 public struct RetentionPolicy: Sendable, Hashable {
     public var recentMetrics: TimeInterval
     public var events: TimeInterval

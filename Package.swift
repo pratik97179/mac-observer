@@ -28,7 +28,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "MacObserver",
-            dependencies: ["MacObserverDomain", "MacObserverCollectors"],
+            dependencies: ["MacObserverDomain", "MacObserverCollectors", "MacObserverStorage"],
             linkerSettings: [
                 .linkedFramework("IOKit")
             ]

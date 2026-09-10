@@ -114,7 +114,7 @@ struct OverviewModel {
             health: health,
             freshness: freshness,
             readings: readings,
-            processes: processRows(from: snapshot)
+            processes: processRows(from: snapshot, limit: 8)
         )
     }
 
@@ -214,13 +214,13 @@ struct OverviewModel {
         }
     }
 
-    private static func processRows(from snapshot: LiveSnapshot) -> [OverviewProcessRow] {
+    static func processRows(from snapshot: LiveSnapshot, limit: Int) -> [OverviewProcessRow] {
         let cpuMetrics = snapshot.metrics.filter { isProcessCPU($0) }
             .sorted { lhs, rhs in
                 (ratio(lhs) ?? 0) > (ratio(rhs) ?? 0)
             }
 
-        return cpuMetrics.prefix(8).map { metric in
+        return cpuMetrics.prefix(limit).map { metric in
             guard case .processInstance(let identity) = metric.entity else {
                 return OverviewProcessRow(id: metric.id.uuidString, name: "Process", cpu: "—", memory: "—", network: "—")
             }

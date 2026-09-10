@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository Overview is bound to live standard collectors. A SQLite metrics and event store exists with migrations, queries, and retention, but the UI still uses the in-memory live buffer. Other profiles remain placeholders.
+The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources, their access level, and an enable/disable path that actually stops collection. Observations are batched into a local SQLite file under Application Support, with retention. Events and Settings remain placeholders.
 
 ## Product In One Sentence
 

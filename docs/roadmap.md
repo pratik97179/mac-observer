@@ -8,11 +8,11 @@ The agent implements one checkpoint, then stops. It does not commit or push. The
 
 Current series (live dashboard first) is complete. Persistence series:
 
-1. SQLite store, queries, and retention (this checkpoint).
+1. SQLite store, queries, and retention.
 2. Persist live collector output.
-3. Downsampling and inspection views later.
+3. Downsampling and inspection charts later.
 
-SQLite, inspection, timeline, and explanations continue after Overview.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Events, Settings, and time-range inspection remain later checkpoints.
 
 ## Milestone 1: Application Foundation
 
@@ -42,6 +42,7 @@ Deliverables:
 - Collector protocol, in-memory live buffer, and fakes.
 - CPU, memory, process, basic network, storage, battery, and thermal collectors where public APIs support them.
 - Live Overview replacing sample data, with freshness and unavailable states.
+- Live Performance, Network, Processes, Storage, and Power profiles on the same snapshot.
 
 Acceptance criteria:
 
@@ -55,7 +56,7 @@ Acceptance criteria:
 
 ## Milestone 3: Telemetry Domain Persistence
 
-**Status:** In progress. Store and retention exist; collectors are not writing to SQLite yet.
+**Status:** In progress. Live collectors persist to SQLite. Downsampling and history views are not shipped yet.
 
 Deliverables:
 

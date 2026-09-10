@@ -14,13 +14,13 @@ The product uses three access levels. The standard tier defines the baseline pro
 
 | Domain | Initial target | Likely source class | Status and caveats |
 | --- | --- | --- | --- |
-| CPU | System and process utilization, thread counts, load-like signals. | Standard. | Core v1. Normalize sampling windows carefully. |
+| CPU | System and process utilization, thread counts, load-like signals. | Standard. | Host CPU from Mach `host_processor_info`. Process CPU from `proc_pidinfo`/`PROC_PIDTASKINFO` (`pti_total_user` + `pti_total_system`). Never `proc_pid_rusage`; that API has no buffer length and aborts when the kernel writes a larger `rusage_info` than the SDK struct. |
 | Memory | Used, wired, compressed, cache approximation, swap, pressure, process memory. | Standard. | Core v1. Define each displayed term precisely. |
 | Storage | Volume capacity and system I/O; per-process I/O where supported. | Standard. | Core v1 after memory/CPU. File-level tracking is not a v1 goal. |
 | Network baseline | Interface state, routes, counters, throughput, gateway/DNS configuration. | Standard. | Core v1. Per-process attribution is not assumed. |
 | Wi-Fi | Interface, SSID/BSSID, channel, RSSI/link data, state changes. | Standard. | Candidate v1 enhancement using CoreWLAN. |
 | Power and thermal | Battery charge/charging state and thermal state. | Standard. | Core v1 where public sources provide it. Treat watts and per-process energy as conditional. |
-| Processes | Lifecycle, hierarchy, CPU/RAM/I/O, bundle/signing metadata where available. | Standard plus privileged optional. | Standard view first; security-grade event coverage requires a different tier. |
+| Processes | Lifecycle, hierarchy, CPU/RAM/I/O, bundle/signing metadata where available. | Standard plus privileged optional. | Standard view: `proc_listallpids`, `PROC_PIDTBSDINFO`, `PROC_PIDTASKINFO`, `proc_name`. Identity is PID plus start time plus boot. Security-grade event coverage remains a privileged tier. |
 | GPU | System or process GPU activity. | Conditional. | Do not promise broad live metrics until a public, supported source is verified for the target data. |
 | DNS and network flows | DNS/flow observations and app attribution. | Privileged. | Optional and privacy-sensitive. DNS proxying changes the DNS handling role; encrypted DNS may not be visible. |
 | Security events | Execution, file, mount, and similar system events. | Privileged. | Endpoint Security requires an Apple-granted entitlement and privileged deployment. |

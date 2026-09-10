@@ -1,5 +1,4 @@
 import Foundation
-import Darwin
 import MacObserverDomain
 
 public actor ProcessCollector: TelemetryCollector {
@@ -8,21 +7,34 @@ public actor ProcessCollector: TelemetryCollector {
         title: "Processes",
         accessLevel: .standard,
         domains: [.process, .cpu, .memory],
-        summary: "Process CPU and resident memory from libproc. Identity is PID plus start time plus boot."
+        summary: "Process CPU and resident memory from proc_pidinfo. Identity is PID plus start time plus boot."
     )
 
     private let clock: any Clock
     private let bootSession: BootSessionID
+    private let source: any ProcessResourceSource
+    private let interval: Duration
     private let loop = LoopingCollector()
     private var previousCPU: [Int32: (nanoseconds: UInt64, sampledAt: UInt64)] = [:]
 
     public init(clock: any Clock = SystemClock(), bootSession: BootSessionID) {
+        self.init(clock: clock, bootSession: bootSession, source: DarwinProcessResourceSource())
+    }
+
+    init(
+        clock: any Clock,
+        bootSession: BootSessionID,
+        source: any ProcessResourceSource,
+        interval: Duration = .seconds(2)
+    ) {
         self.clock = clock
         self.bootSession = bootSession
+        self.source = source
+        self.interval = interval
     }
 
     public func start(sink: any TelemetrySink) async throws {
-        await loop.start {
+        await loop.start(interval: interval) {
             await self.publish(to: sink)
         }
     }
@@ -32,60 +44,37 @@ public actor ProcessCollector: TelemetryCollector {
     }
 
     private func publish(to sink: any TelemetrySink) async {
-        var pids = [Int32](repeating: 0, count: 4096)
-        let bytes = pids.withUnsafeMutableBufferPointer { buffer in
-            proc_listallpids(buffer.baseAddress, Int32(buffer.count * MemoryLayout<Int32>.size))
-        }
-        guard bytes > 0 else {
-            await sink.send(.availability(capabilityID: capability.id, .unavailable(reason: "proc_listallpids failed")))
+        let processes = source.currentProcesses()
+        guard !processes.isEmpty else {
+            await sink.send(.availability(capabilityID: capability.id, .unavailable(reason: "proc_listallpids returned no processes")))
             return
         }
 
-        let count = Int(bytes) / MemoryLayout<Int32>.size
         let nowMono = clock.monotonicNanoseconds
         var ranked: [(identity: ProcessInstanceIdentity, cpu: Double, resident: UInt64)] = []
-        ranked.reserveCapacity(min(count, 256))
+        ranked.reserveCapacity(min(processes.count, 256))
 
-        for pid in pids.prefix(count) where pid > 0 {
-            var bsd = proc_bsdinfo()
-            let bsdSize = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &bsd, Int32(MemoryLayout<proc_bsdinfo>.size))
-            guard bsdSize > 0 else { continue }
-
-            var usage = rusage_info_v4()
-            let usageStatus = withUnsafeMutablePointer(to: &usage) { pointer -> Int32 in
-                var buffer: rusage_info_t? = UnsafeMutableRawPointer(pointer)
-                return proc_pid_rusage(pid, RUSAGE_INFO_V4, &buffer)
-            }
-
-            var task = proc_taskinfo()
-            let taskSize = proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &task, Int32(MemoryLayout<proc_taskinfo>.size))
-            let resident = taskSize > 0 ? UInt64(task.pti_resident_size) : 0
-
-            var name = [CChar](repeating: 0, count: Int(MAXCOMLEN) + 1)
-            proc_name(pid, &name, UInt32(name.count))
-            let display = name.prefix { $0 != 0 }.map { Character(UnicodeScalar(UInt8(bitPattern: $0))) }
-            let displayName = String(display)
-
+        for process in processes {
             let identity = ProcessInstanceIdentity(
-                pid: pid,
-                startNanoseconds: UInt64(bsd.pbi_start_tvsec) &* 1_000_000_000 &+ UInt64(bsd.pbi_start_tvusec) &* 1_000,
+                pid: process.pid,
+                startNanoseconds: process.startSeconds &* 1_000_000_000 &+ process.startMicroseconds &* 1_000,
                 bootSession: bootSession,
-                attributes: ProcessAttributes(displayName: displayName.isEmpty ? nil : displayName)
+                attributes: ProcessAttributes(displayName: process.displayName.isEmpty ? nil : process.displayName)
             )
 
             var cpuRatio = 0.0
-            if usageStatus == 0 {
-                let cpuNanos = usage.ri_user_time &+ usage.ri_system_time
-                if let previous = previousCPU[pid], nowMono > previous.sampledAt {
-                    let elapsed = Double(nowMono - previous.sampledAt) / 1_000_000_000
-                    if let rate = SampleMath.perSecond(previous: previous.nanoseconds, current: cpuNanos, elapsed: elapsed) {
-                        cpuRatio = min(1, rate)
-                    }
+            if let previous = previousCPU[process.pid], nowMono > previous.sampledAt {
+                let elapsed = Double(nowMono - previous.sampledAt) / 1_000_000_000
+                if let ratio = SampleMath.cpuTimeRatio(
+                    previousNanoseconds: previous.nanoseconds,
+                    currentNanoseconds: process.cpuNanoseconds,
+                    elapsedSeconds: elapsed
+                ) {
+                    cpuRatio = ratio
                 }
-                previousCPU[pid] = (cpuNanos, nowMono)
             }
-
-            ranked.append((identity, cpuRatio, resident))
+            previousCPU[process.pid] = (process.cpuNanoseconds, nowMono)
+            ranked.append((identity, cpuRatio, process.residentBytes))
         }
 
         ranked.sort { $0.cpu == $1.cpu ? $0.resident > $1.resident : $0.cpu > $1.cpu }

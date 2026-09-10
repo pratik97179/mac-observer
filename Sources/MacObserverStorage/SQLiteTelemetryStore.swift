@@ -19,6 +19,13 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         try Self.migrate(handle)
     }
 
+    public nonisolated static func applicationSupportPath() throws -> String {
+        let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("MacObserver", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        return root.appendingPathComponent("telemetry.sqlite").path
+    }
+
     public static func inMemory() throws -> SQLiteTelemetryStore {
         try SQLiteTelemetryStore(path: ":memory:")
     }
