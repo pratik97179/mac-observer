@@ -4,14 +4,14 @@ import MacObserverCollectors
 
 @main
 struct MacObserverApp: App {
-    private let telemetry = CollectorPipeline(collectors: [])
+    private let telemetry = CollectorPipeline(collectors: StandardCollectors.make())
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .frame(minWidth: 960, minHeight: 640)
                 .task {
-                    _ = await telemetry.snapshot()
+                    try? await telemetry.start()
                 }
         }
         .windowStyle(.hiddenTitleBar)

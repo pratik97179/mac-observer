@@ -28,6 +28,15 @@
 		B30000000000000000000004 /* FakeCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000004 /* FakeCollector.swift */; };
 		B30000000000000000000005 /* libMacObserverCollectors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A30000000000000000000011 /* libMacObserverCollectors.a */; };
 		B30000000000000000000006 /* libMacObserverDomain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* libMacObserverDomain.a */; };
+		B31000000000000000000001 /* Sampling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000001 /* Sampling.swift */; };
+		B31000000000000000000002 /* MachHostSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000002 /* MachHostSampler.swift */; };
+		B31000000000000000000003 /* LoopingCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000003 /* LoopingCollector.swift */; };
+		B31000000000000000000004 /* CPUMemoryCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000004 /* CPUMemoryCollector.swift */; };
+		B31000000000000000000005 /* ProcessCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000005 /* ProcessCollector.swift */; };
+		B31000000000000000000006 /* NetworkCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000006 /* NetworkCollector.swift */; };
+		B31000000000000000000007 /* StorageCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000007 /* StorageCollector.swift */; };
+		B31000000000000000000008 /* PowerCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000008 /* PowerCollector.swift */; };
+		B31000000000000000000009 /* StandardCollectors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000009 /* StandardCollectors.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +62,15 @@
 		A30000000000000000000003 /* LiveTelemetryBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTelemetryBuffer.swift; sourceTree = "<group>"; };
 		A30000000000000000000004 /* FakeCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCollector.swift; sourceTree = "<group>"; };
 		A30000000000000000000011 /* libMacObserverCollectors.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverCollectors.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A31000000000000000000001 /* Sampling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sampling.swift; sourceTree = "<group>"; };
+		A31000000000000000000002 /* MachHostSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MachHostSampler.swift; sourceTree = "<group>"; };
+		A31000000000000000000003 /* LoopingCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopingCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000004 /* CPUMemoryCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPUMemoryCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000005 /* ProcessCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000006 /* NetworkCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000007 /* StorageCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000008 /* PowerCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000009 /* StandardCollectors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardCollectors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -182,6 +200,15 @@
 				A30000000000000000000002 /* TelemetryCollector.swift */,
 				A30000000000000000000003 /* LiveTelemetryBuffer.swift */,
 				A30000000000000000000004 /* FakeCollector.swift */,
+				A31000000000000000000001 /* Sampling.swift */,
+				A31000000000000000000002 /* MachHostSampler.swift */,
+				A31000000000000000000003 /* LoopingCollector.swift */,
+				A31000000000000000000004 /* CPUMemoryCollector.swift */,
+				A31000000000000000000005 /* ProcessCollector.swift */,
+				A31000000000000000000006 /* NetworkCollector.swift */,
+				A31000000000000000000007 /* StorageCollector.swift */,
+				A31000000000000000000008 /* PowerCollector.swift */,
+				A31000000000000000000009 /* StandardCollectors.swift */,
 			);
 			name = Collectors;
 			path = Sources/MacObserverCollectors;
@@ -318,6 +345,15 @@
 				B30000000000000000000002 /* TelemetryCollector.swift in Sources */,
 				B30000000000000000000003 /* LiveTelemetryBuffer.swift in Sources */,
 				B30000000000000000000004 /* FakeCollector.swift in Sources */,
+				B31000000000000000000001 /* Sampling.swift in Sources */,
+				B31000000000000000000002 /* MachHostSampler.swift in Sources */,
+				B31000000000000000000003 /* LoopingCollector.swift in Sources */,
+				B31000000000000000000004 /* CPUMemoryCollector.swift in Sources */,
+				B31000000000000000000005 /* ProcessCollector.swift in Sources */,
+				B31000000000000000000006 /* NetworkCollector.swift in Sources */,
+				B31000000000000000000007 /* StorageCollector.swift in Sources */,
+				B31000000000000000000008 /* PowerCollector.swift in Sources */,
+				B31000000000000000000009 /* StandardCollectors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +426,11 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					IOKit,
+				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.macobserver.MacObserver;
 				PRODUCT_NAME = MacObserver;
@@ -415,6 +456,11 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					IOKit,
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.macobserver.MacObserver;
@@ -466,6 +512,11 @@
 				PRODUCT_NAME = MacObserverCollectors;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					IOKit,
+				);
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
@@ -481,6 +532,11 @@
 				PRODUCT_NAME = MacObserverCollectors;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					IOKit,
+				);
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;

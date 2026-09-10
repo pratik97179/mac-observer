@@ -28,10 +28,20 @@ public struct MetricName: Sendable, Hashable, Codable, RawRepresentable {
 
     public static let cpuUtilizationRatio = MetricName(valid: "cpu.utilization_ratio")
     public static let memoryUsedBytes = MetricName(valid: "memory.used_bytes")
+    public static let memoryWiredBytes = MetricName(valid: "memory.wired_bytes")
+    public static let memoryCompressedBytes = MetricName(valid: "memory.compressed_bytes")
     public static let memorySwapUsedBytes = MetricName(valid: "memory.swap_used_bytes")
+    public static let memoryTotalBytes = MetricName(valid: "memory.total_bytes")
+    public static let memoryPressureState = MetricName(valid: "memory.pressure_state")
     public static let networkRxBytesPerSecond = MetricName(valid: "network.rx_bytes_per_second")
+    public static let networkTxBytesPerSecond = MetricName(valid: "network.tx_bytes_per_second")
     public static let storageWriteBytesPerSecond = MetricName(valid: "storage.write_bytes_per_second")
+    public static let storageReadBytesPerSecond = MetricName(valid: "storage.read_bytes_per_second")
+    public static let storageCapacityBytes = MetricName(valid: "storage.capacity_bytes")
+    public static let storageAvailableBytes = MetricName(valid: "storage.available_bytes")
+    public static let processResidentBytes = MetricName(valid: "process.resident_bytes")
     public static let powerBatteryChargeRatio = MetricName(valid: "power.battery_charge_ratio")
+    public static let powerLoadWatts = MetricName(valid: "power.load_watts")
     public static let thermalState = MetricName(valid: "thermal.state")
 
     public static func isValid(_ rawValue: String) -> Bool {

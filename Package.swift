@@ -13,11 +13,17 @@ let package = Package(
         .target(name: "MacObserverDomain"),
         .target(
             name: "MacObserverCollectors",
-            dependencies: ["MacObserverDomain"]
+            dependencies: ["MacObserverDomain"],
+            linkerSettings: [
+                .linkedFramework("IOKit")
+            ]
         ),
         .executableTarget(
             name: "MacObserver",
-            dependencies: ["MacObserverDomain", "MacObserverCollectors"]
+            dependencies: ["MacObserverDomain", "MacObserverCollectors"],
+            linkerSettings: [
+                .linkedFramework("IOKit")
+            ]
         ),
         .testTarget(
             name: "MacObserverDomainTests",

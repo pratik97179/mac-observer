@@ -87,3 +87,17 @@ struct CollectorContractTests {
         )
     }
 }
+
+struct SampleMathTests {
+    @Test func cpuUtilizationIgnoresIdleTicks() {
+        let previous: [UInt32] = [10, 10, 80, 0]
+        let current: [UInt32] = [20, 20, 100, 0]
+        #expect(SampleMath.cpuUtilizationRatio(previous: previous, current: current) == 0.5)
+    }
+
+    @Test func perSecondRequiresForwardTimeAndCounters() {
+        #expect(SampleMath.perSecond(previous: 100, current: 200, elapsed: 2) == 50)
+        #expect(SampleMath.perSecond(previous: 200, current: 100, elapsed: 2) == nil)
+        #expect(SampleMath.perSecond(previous: 100, current: 200, elapsed: 0) == nil)
+    }
+}
