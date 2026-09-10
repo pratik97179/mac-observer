@@ -1,4 +1,5 @@
 import SwiftUI
+import MacObserverDomain
 
 @main
 struct MacObserverApp: App {

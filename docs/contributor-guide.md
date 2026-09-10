@@ -51,4 +51,4 @@ Before a push:
 
 ## Current Toolchain Note
 
-The macOS app target builds with Xcode 26.6 on macOS 15+. Open `MacObserver.xcodeproj` for the app bundle. `swift run` still builds the package executable.
+The macOS app target builds with Xcode 26.6 on macOS 15+. Open `MacObserver.xcodeproj` for the app bundle. `swift test` covers the domain library. `swift run` still builds the package executable.

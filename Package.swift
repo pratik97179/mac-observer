@@ -5,9 +5,18 @@ let package = Package(
     name: "MacObserver",
     platforms: [.macOS(.v15)],
     products: [
+        .library(name: "MacObserverDomain", targets: ["MacObserverDomain"]),
         .executable(name: "MacObserver", targets: ["MacObserver"])
     ],
     targets: [
-        .executableTarget(name: "MacObserver")
+        .target(name: "MacObserverDomain"),
+        .executableTarget(
+            name: "MacObserver",
+            dependencies: ["MacObserverDomain"]
+        ),
+        .testTarget(
+            name: "MacObserverDomainTests",
+            dependencies: ["MacObserverDomain"]
+        )
     ]
 )

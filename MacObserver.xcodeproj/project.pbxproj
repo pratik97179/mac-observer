@@ -16,6 +16,12 @@
 		B10000000000000000000007 /* MetricTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* MetricTile.swift */; };
 		B10000000000000000000008 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008 /* SampleData.swift */; };
 		B10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* Assets.xcassets */; };
+		B20000000000000000000001 /* Observation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Observation.swift */; };
+		B20000000000000000000002 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* Entity.swift */; };
+		B20000000000000000000003 /* Metric.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* Metric.swift */; };
+		B20000000000000000000004 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* Event.swift */; };
+		B20000000000000000000005 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Capability.swift */; };
+		B20000000000000000000006 /* libMacObserverDomain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* libMacObserverDomain.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,13 +36,30 @@
 		A10000000000000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000000000000000000011 /* MacObserver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacObserver.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000001 /* Observation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observation.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* Entity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entity.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* Metric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metric.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* Capability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capability.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* libMacObserverDomain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverDomain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		P20000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E20000000000000000000001;
+			remoteInfo = MacObserverDomain;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C10000000000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20000000000000000000006 /* libMacObserverDomain.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				D10000000000000000000002 /* Sources */,
+				D20000000000000000000001 /* Domain */,
 				D10000000000000000000003 /* App */,
 				D10000000000000000000004 /* Products */,
 			);
@@ -76,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000011 /* MacObserver.app */,
+				A20000000000000000000011 /* libMacObserverDomain.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,6 +126,19 @@
 			path = Overview;
 			sourceTree = "<group>";
 		};
+		D20000000000000000000001 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* Observation.swift */,
+				A20000000000000000000002 /* Entity.swift */,
+				A20000000000000000000003 /* Metric.swift */,
+				A20000000000000000000004 /* Event.swift */,
+				A20000000000000000000005 /* Capability.swift */,
+			);
+			name = Domain;
+			path = Sources/MacObserverDomain;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -115,11 +153,27 @@
 			buildRules = (
 			);
 			dependencies = (
+				T20000000000000000000001 /* PBXTargetDependency */,
 			);
 			name = MacObserver;
 			productName = MacObserver;
 			productReference = A10000000000000000000011 /* MacObserver.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E20000000000000000000001 /* MacObserverDomain */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F20000000000000000000001 /* Build configuration list for PBXNativeTarget "MacObserverDomain" */;
+			buildPhases = (
+				E20000000000000000000002 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacObserverDomain;
+			productName = MacObserverDomain;
+			productReference = A20000000000000000000011 /* libMacObserverDomain.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -145,6 +199,7 @@
 			projectRoot = "";
 			targets = (
 				E10000000000000000000001 /* MacObserver */,
+				E20000000000000000000001 /* MacObserverDomain */,
 			);
 		};
 /* End PBXProject section */
@@ -176,7 +231,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E20000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B20000000000000000000001 /* Observation.swift in Sources */,
+				B20000000000000000000002 /* Entity.swift in Sources */,
+				B20000000000000000000003 /* Metric.swift in Sources */,
+				B20000000000000000000004 /* Event.swift in Sources */,
+				B20000000000000000000005 /* Capability.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		T20000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E20000000000000000000001 /* MacObserverDomain */;
+			targetProxy = P20000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F10000000000000000000010 /* Debug */ = {
@@ -262,6 +337,36 @@
 			};
 			name = Release;
 		};
+		F20000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_MODULE_NAME = MacObserverDomain;
+				PRODUCT_NAME = MacObserverDomain;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F20000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_MODULE_NAME = MacObserverDomain;
+				PRODUCT_NAME = MacObserverDomain;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -279,6 +384,15 @@
 			buildConfigurations = (
 				F10000000000000000000012 /* Debug */,
 				F10000000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F20000000000000000000001 /* Build configuration list for PBXNativeTarget "MacObserverDomain" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F20000000000000000000010 /* Debug */,
+				F20000000000000000000011 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
