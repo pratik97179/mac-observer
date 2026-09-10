@@ -78,4 +78,23 @@ public enum Entity: Sendable, Hashable, Codable {
     case volume(uuid: String)
     case device(stableID: String)
     case capability(id: String)
+
+    public var identityKey: String {
+        switch self {
+        case .system(let bootSession):
+            "system:\(bootSession.value)"
+        case .processInstance(let process):
+            "process:\(process.identityKey)"
+        case .app(let bundleIdentifier):
+            "app:\(bundleIdentifier)"
+        case .networkInterface(let name, let hardwareID):
+            "iface:\(name):\(hardwareID ?? "")"
+        case .volume(let uuid):
+            "volume:\(uuid)"
+        case .device(let stableID):
+            "device:\(stableID)"
+        case .capability(let id):
+            "capability:\(id)"
+        }
+    }
 }

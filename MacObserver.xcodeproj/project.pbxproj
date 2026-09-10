@@ -22,6 +22,12 @@
 		B20000000000000000000004 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* Event.swift */; };
 		B20000000000000000000005 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Capability.swift */; };
 		B20000000000000000000006 /* libMacObserverDomain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* libMacObserverDomain.a */; };
+		B30000000000000000000001 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000001 /* Clock.swift */; };
+		B30000000000000000000002 /* TelemetryCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000002 /* TelemetryCollector.swift */; };
+		B30000000000000000000003 /* LiveTelemetryBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000003 /* LiveTelemetryBuffer.swift */; };
+		B30000000000000000000004 /* FakeCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30000000000000000000004 /* FakeCollector.swift */; };
+		B30000000000000000000005 /* libMacObserverCollectors.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A30000000000000000000011 /* libMacObserverCollectors.a */; };
+		B30000000000000000000006 /* libMacObserverDomain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* libMacObserverDomain.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,10 +48,29 @@
 		A20000000000000000000004 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* Capability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capability.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* libMacObserverDomain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverDomain.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A30000000000000000000001 /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
+		A30000000000000000000002 /* TelemetryCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryCollector.swift; sourceTree = "<group>"; };
+		A30000000000000000000003 /* LiveTelemetryBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTelemetryBuffer.swift; sourceTree = "<group>"; };
+		A30000000000000000000004 /* FakeCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeCollector.swift; sourceTree = "<group>"; };
+		A30000000000000000000011 /* libMacObserverCollectors.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverCollectors.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
 		P20000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E20000000000000000000001;
+			remoteInfo = MacObserverDomain;
+		};
+		P30000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E30000000000000000000001;
+			remoteInfo = MacObserverCollectors;
+		};
+		P30000000000000000000002 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E10000000000000000000000 /* Project object */;
 			proxyType = 1;
@@ -60,6 +85,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B20000000000000000000006 /* libMacObserverDomain.a in Frameworks */,
+				B30000000000000000000005 /* libMacObserverCollectors.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C30000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30000000000000000000006 /* libMacObserverDomain.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +105,7 @@
 			children = (
 				D10000000000000000000002 /* Sources */,
 				D20000000000000000000001 /* Domain */,
+				D30000000000000000000001 /* Collectors */,
 				D10000000000000000000003 /* App */,
 				D10000000000000000000004 /* Products */,
 			);
@@ -101,6 +136,7 @@
 			children = (
 				A10000000000000000000011 /* MacObserver.app */,
 				A20000000000000000000011 /* libMacObserverDomain.a */,
+				A30000000000000000000011 /* libMacObserverCollectors.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -139,6 +175,18 @@
 			path = Sources/MacObserverDomain;
 			sourceTree = "<group>";
 		};
+		D30000000000000000000001 /* Collectors */ = {
+			isa = PBXGroup;
+			children = (
+				A30000000000000000000001 /* Clock.swift */,
+				A30000000000000000000002 /* TelemetryCollector.swift */,
+				A30000000000000000000003 /* LiveTelemetryBuffer.swift */,
+				A30000000000000000000004 /* FakeCollector.swift */,
+			);
+			name = Collectors;
+			path = Sources/MacObserverCollectors;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -154,6 +202,7 @@
 			);
 			dependencies = (
 				T20000000000000000000001 /* PBXTargetDependency */,
+				T30000000000000000000001 /* PBXTargetDependency */,
 			);
 			name = MacObserver;
 			productName = MacObserver;
@@ -173,6 +222,23 @@
 			name = MacObserverDomain;
 			productName = MacObserverDomain;
 			productReference = A20000000000000000000011 /* libMacObserverDomain.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		E30000000000000000000001 /* MacObserverCollectors */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F30000000000000000000001 /* Build configuration list for PBXNativeTarget "MacObserverCollectors" */;
+			buildPhases = (
+				E30000000000000000000002 /* Sources */,
+				C30000000000000000000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				T30000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = MacObserverCollectors;
+			productName = MacObserverCollectors;
+			productReference = A30000000000000000000011 /* libMacObserverCollectors.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -200,6 +266,7 @@
 			targets = (
 				E10000000000000000000001 /* MacObserver */,
 				E20000000000000000000001 /* MacObserverDomain */,
+				E30000000000000000000001 /* MacObserverCollectors */,
 			);
 		};
 /* End PBXProject section */
@@ -243,6 +310,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E30000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30000000000000000000001 /* Clock.swift in Sources */,
+				B30000000000000000000002 /* TelemetryCollector.swift in Sources */,
+				B30000000000000000000003 /* LiveTelemetryBuffer.swift in Sources */,
+				B30000000000000000000004 /* FakeCollector.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -250,6 +328,16 @@
 			isa = PBXTargetDependency;
 			target = E20000000000000000000001 /* MacObserverDomain */;
 			targetProxy = P20000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		T30000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E30000000000000000000001 /* MacObserverCollectors */;
+			targetProxy = P30000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		T30000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E20000000000000000000001 /* MacObserverDomain */;
+			targetProxy = P30000000000000000000002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -367,6 +455,36 @@
 			};
 			name = Release;
 		};
+		F30000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_MODULE_NAME = MacObserverCollectors;
+				PRODUCT_NAME = MacObserverCollectors;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F30000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				EXECUTABLE_PREFIX = lib;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_MODULE_NAME = MacObserverCollectors;
+				PRODUCT_NAME = MacObserverCollectors;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -393,6 +511,15 @@
 			buildConfigurations = (
 				F20000000000000000000010 /* Debug */,
 				F20000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F30000000000000000000001 /* Build configuration list for PBXNativeTarget "MacObserverCollectors" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F30000000000000000000010 /* Debug */,
+				F30000000000000000000011 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

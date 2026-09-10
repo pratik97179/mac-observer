@@ -24,7 +24,9 @@ struct ContentView: View {
     }
 }
 
+#if !SWIFT_PACKAGE
 #Preview {
     ContentView()
         .frame(width: 1_120, height: 740)
 }
+#endif

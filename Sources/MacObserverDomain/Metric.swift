@@ -98,6 +98,26 @@ public struct Metric: Sendable, Identifiable, Hashable, Codable {
         self.retentionClass = retentionClass
         self.derivation = derivation
     }
+
+    public func replacing(
+        time: ObservationTime? = nil,
+        quality: ObservationQuality? = nil
+    ) -> Metric {
+        Metric(
+            id: id,
+            time: time ?? self.time,
+            domain: domain,
+            name: name,
+            entity: entity,
+            value: value,
+            unit: unit,
+            dimensions: dimensions,
+            source: source,
+            quality: quality ?? self.quality,
+            retentionClass: retentionClass,
+            derivation: derivation
+        )
+    }
 }
 
 public enum MetricFormatter {

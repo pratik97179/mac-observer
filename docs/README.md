@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository contains a macOS app shell with working sidebar routing and a typed telemetry domain library with tests. Overview still uses labeled sample readings. It collects no telemetry and persists no data. Next is the collector protocol and in-memory live buffer.
+The repository contains a macOS app shell, a typed telemetry domain, and an in-memory collector pipeline with fakes. Overview still uses labeled sample readings. No macOS sampling or SQLite yet. Next is live standard collectors.
 
 ## Product In One Sentence
 
