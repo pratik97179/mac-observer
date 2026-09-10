@@ -17,6 +17,7 @@
 		B10000000000000000000008 /* OverviewPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008 /* OverviewPresentation.swift */; };
 		B10000000000000000000010 /* OverviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000012 /* OverviewStore.swift */; };
 		B20000000000000000000007 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Health.swift */; };
+		B20000000000000000000008 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Query.swift */; };
 		B10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* Assets.xcassets */; };
 		B20000000000000000000001 /* Observation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Observation.swift */; };
 		B20000000000000000000002 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* Entity.swift */; };
@@ -60,6 +61,7 @@
 		A20000000000000000000004 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* Capability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capability.swift; sourceTree = "<group>"; };
 		A20000000000000000000006 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* libMacObserverDomain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverDomain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A30000000000000000000001 /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		A30000000000000000000002 /* TelemetryCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryCollector.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				A20000000000000000000004 /* Event.swift */,
 				A20000000000000000000005 /* Capability.swift */,
 				A20000000000000000000006 /* Health.swift */,
+				A20000000000000000000008 /* Query.swift */,
 			);
 			name = Domain;
 			path = Sources/MacObserverDomain;
@@ -342,6 +345,7 @@
 				B20000000000000000000004 /* Event.swift in Sources */,
 				B20000000000000000000005 /* Capability.swift in Sources */,
 				B20000000000000000000007 /* Health.swift in Sources */,
+				B20000000000000000000008 /* Query.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

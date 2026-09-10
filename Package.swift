@@ -7,6 +7,7 @@ let package = Package(
     products: [
         .library(name: "MacObserverDomain", targets: ["MacObserverDomain"]),
         .library(name: "MacObserverCollectors", targets: ["MacObserverCollectors"]),
+        .library(name: "MacObserverStorage", targets: ["MacObserverStorage"]),
         .executable(name: "MacObserver", targets: ["MacObserver"])
     ],
     targets: [
@@ -16,6 +17,13 @@ let package = Package(
             dependencies: ["MacObserverDomain"],
             linkerSettings: [
                 .linkedFramework("IOKit")
+            ]
+        ),
+        .target(
+            name: "MacObserverStorage",
+            dependencies: ["MacObserverDomain"],
+            linkerSettings: [
+                .linkedLibrary("sqlite3")
             ]
         ),
         .executableTarget(
@@ -32,6 +40,10 @@ let package = Package(
         .testTarget(
             name: "MacObserverCollectorsTests",
             dependencies: ["MacObserverCollectors", "MacObserverDomain"]
+        ),
+        .testTarget(
+            name: "MacObserverStorageTests",
+            dependencies: ["MacObserverStorage", "MacObserverDomain"]
         )
     ]
 )

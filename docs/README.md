@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository Overview is bound to live standard collectors. Other profiles remain placeholders. History is session-only; SQLite is next.
+The repository Overview is bound to live standard collectors. A SQLite metrics and event store exists with migrations, queries, and retention, but the UI still uses the in-memory live buffer. Other profiles remain placeholders.
 
 ## Product In One Sentence
 

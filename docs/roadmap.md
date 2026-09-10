@@ -6,16 +6,13 @@ Ship in small GitHub pushes. Each checkpoint is reviewable on its own. Do not wa
 
 The agent implements one checkpoint, then stops. It does not commit or push. The maintainer commits and pushes when ready.
 
-Current series (live dashboard first):
+Current series (live dashboard first) is complete. Persistence series:
 
-1. Docs realign: live Overview before SQLite.
-2. App shell and working sidebar routing.
-3. Typed telemetry domain (no store).
-4. Collector protocol and in-memory live buffer.
-5. Standard Apple Silicon collectors.
-6. Overview bound to live metrics.
+1. SQLite store, queries, and retention (this checkpoint).
+2. Persist live collector output.
+3. Downsampling and inspection views later.
 
-SQLite, inspection, timeline, and explanations come after that series.
+SQLite, inspection, timeline, and explanations continue after Overview.
 
 ## Milestone 1: Application Foundation
 
@@ -36,7 +33,7 @@ Acceptance criteria:
 
 ## Milestone 2: Live Standard Overview
 
-**Status:** Next.
+**Status:** Complete locally.
 
 Deliverables:
 
@@ -57,6 +54,8 @@ Acceptance criteria:
 - Resource usage of Mac Observer itself is measured and bounded.
 
 ## Milestone 3: Telemetry Domain Persistence
+
+**Status:** In progress. Store and retention exist; collectors are not writing to SQLite yet.
 
 Deliverables:
 
