@@ -52,7 +52,7 @@ enum Profile: String, Identifiable, Hashable {
         case .capabilities:
             "Each data source, its access level, and how to turn it off."
         case .settings:
-            "Retention, appearance, and local history controls."
+            "Retention and local history. Appearance follows the system."
         }
     }
 }

@@ -8,7 +8,8 @@ Shipped now:
 
 - Overview, Performance, Network, Processes, Storage, Power: live readings from the same snapshot
 - Capabilities: standard collectors, live state, and an enable/disable path
-- Events and Settings: named screens, still placeholders until those checkpoints
+- Settings: retention policy, history path, and delete local history
+- Events: named screen, still a placeholder until that checkpoint
 
 Later, when supported data exists:
 

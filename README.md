@@ -28,4 +28,4 @@ Domain and collector tests:
 ./scripts/dev-test.sh
 ```
 
-Overview, Performance, Network, Processes, Storage, and Power show live readings. Capabilities lists each standard collector and can turn it off. Events and Settings remain placeholders. Live observations are also saved locally in SQLite under Application Support.
+Overview, Performance, Network, Processes, Storage, and Power show live readings. Capabilities lists each standard collector and can turn it off. Settings can delete local history. Events remains a placeholder. Live observations are also saved locally in SQLite under Application Support.

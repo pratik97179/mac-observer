@@ -20,6 +20,7 @@
 		B10000000000000000000014 /* ProfilePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000014 /* ProfilePresentation.swift */; };
 		B10000000000000000000015 /* CapabilitiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000015 /* CapabilitiesView.swift */; };
 		B10000000000000000000016 /* CapabilityPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000016 /* CapabilityPreferences.swift */; };
+		B10000000000000000000017 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000017 /* SettingsView.swift */; };
 		B20000000000000000000007 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Health.swift */; };
 		B20000000000000000000008 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Query.swift */; };
 		B10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* Assets.xcassets */; };
@@ -68,6 +69,7 @@
 		A10000000000000000000014 /* ProfilePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresentation.swift; sourceTree = "<group>"; };
 		A10000000000000000000015 /* CapabilitiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilitiesView.swift; sourceTree = "<group>"; };
 		A10000000000000000000016 /* CapabilityPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilityPreferences.swift; sourceTree = "<group>"; };
+		A10000000000000000000017 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000000000000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10000000000000000000010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000000000000000000011 /* MacObserver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacObserver.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -225,6 +227,7 @@
 				A10000000000000000000014 /* ProfilePresentation.swift */,
 				A10000000000000000000015 /* CapabilitiesView.swift */,
 				A10000000000000000000016 /* CapabilityPreferences.swift */,
+				A10000000000000000000017 /* SettingsView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -421,6 +424,7 @@
 				B10000000000000000000014 /* ProfilePresentation.swift in Sources */,
 				B10000000000000000000015 /* CapabilitiesView.swift in Sources */,
 				B10000000000000000000016 /* CapabilityPreferences.swift in Sources */,
+				B10000000000000000000017 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

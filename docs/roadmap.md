@@ -12,7 +12,7 @@ Current series (live dashboard first) is complete. Persistence series:
 2. Persist live collector output.
 3. Downsampling and inspection charts later.
 
-Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Events, Settings, and time-range inspection remain later checkpoints.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events and time-range inspection remain later checkpoints.
 
 ## Milestone 1: Application Foundation
 

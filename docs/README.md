@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources, their access level, and an enable/disable path that actually stops collection. Observations are batched into a local SQLite file under Application Support, with retention. Events and Settings remain placeholders.
+The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources and can turn them off. Settings shows retention and can delete the local SQLite history. Events remains a placeholder.
 
 ## Product In One Sentence
 

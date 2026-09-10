@@ -12,6 +12,8 @@ final class OverviewStore {
     private let preferences = CapabilityPreferences()
     private(set) var snapshot: LiveSnapshot
     private(set) var capabilities: [CapabilityDescriptor] = []
+    private(set) var historyPath: String?
+    private(set) var historyMessage: String?
     private var disabledCapabilityIDs: Set<String> = []
 
     init() {
@@ -60,6 +62,20 @@ final class OverviewStore {
         }
     }
 
+    func deleteLocalHistory() async {
+        guard store != nil else {
+            historyMessage = "No local history file is open."
+            return
+        }
+        await persisting?.flush()
+        do {
+            try await store?.deleteAll()
+            historyMessage = "Local history deleted. Live sampling continues."
+        } catch {
+            historyMessage = "Could not delete local history."
+        }
+    }
+
     func run() async {
         let extraSinks: [any TelemetrySink]
         if let path = try? SQLiteTelemetryStore.applicationSupportPath(),
@@ -68,6 +84,7 @@ final class OverviewStore {
             let sink = PersistingSink(persist: store)
             persisting = sink
             self.store = store
+            historyPath = path
             extraSinks = [sink]
         } else {
             extraSinks = []
