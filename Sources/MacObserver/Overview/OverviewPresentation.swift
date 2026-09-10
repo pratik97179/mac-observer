@@ -9,7 +9,24 @@ struct OverviewReading: Identifiable {
     let detail: String
     let symbol: String
     let tint: Color
+    let inspect: MetricInspectTarget?
     var id: String { name }
+
+    init(
+        name: String,
+        value: String,
+        detail: String,
+        symbol: String,
+        tint: Color,
+        inspect: MetricInspectTarget? = nil
+    ) {
+        self.name = name
+        self.value = value
+        self.detail = detail
+        self.symbol = symbol
+        self.tint = tint
+        self.inspect = inspect
+    }
 }
 
 struct OverviewProcessRow: Identifiable {
@@ -77,14 +94,16 @@ struct OverviewModel {
             value: cpu.map(MetricFormatter.displayString) ?? "Unavailable",
             detail: cpu == nil ? "Waiting for a sample" : "System load",
             symbol: "cpu",
-            tint: .blue
+            tint: .blue,
+            inspect: .from(title: "CPU", metric: cpu)
         ))
         readings.append(OverviewReading(
             name: "Memory",
             value: memoryUsed.map(MetricFormatter.displayString) ?? "Unavailable",
             detail: memoryDetail(used: memoryUsed, total: memoryTotal, pressure: pressure),
             symbol: "memorychip",
-            tint: .indigo
+            tint: .indigo,
+            inspect: .from(title: "Memory", metric: memoryUsed)
         ))
         readings.append(OverviewReading(
             name: "Network",
@@ -106,7 +125,8 @@ struct OverviewModel {
             value: thermal.map(MetricFormatter.displayString)?.capitalized ?? "Unavailable",
             detail: battery.map { "Battery \(MetricFormatter.displayString(for: $0))" } ?? "ProcessInfo thermal state",
             symbol: "thermometer.medium",
-            tint: .green
+            tint: .green,
+            inspect: .from(title: "Thermal", metric: thermal)
         ))
 
         return OverviewModel(
@@ -163,7 +183,8 @@ struct OverviewModel {
                 value: MetricFormatter.displayString(for: watts),
                 detail: battery.map { "Battery \(MetricFormatter.displayString(for: $0))" } ?? "Estimated from voltage and current",
                 symbol: "bolt",
-                tint: .yellow
+                tint: .yellow,
+                inspect: .from(title: "Power", metric: watts)
             )
         }
         if let battery {
@@ -172,7 +193,8 @@ struct OverviewModel {
                 value: MetricFormatter.displayString(for: battery),
                 detail: "Battery charge",
                 symbol: "bolt",
-                tint: .yellow
+                tint: .yellow,
+                inspect: .from(title: "Power", metric: battery)
             )
         }
         return OverviewReading(

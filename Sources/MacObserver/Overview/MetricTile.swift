@@ -5,9 +5,17 @@ struct MetricTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Label(reading.name, systemImage: reading.symbol)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline) {
+                Label(reading.name, systemImage: reading.symbol)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if reading.inspect != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
             Text(reading.value)
                 .font(.system(size: 28, weight: .semibold, design: .rounded))
                 .monospacedDigit()

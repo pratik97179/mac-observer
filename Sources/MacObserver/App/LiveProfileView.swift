@@ -9,28 +9,33 @@ struct LiveProfileView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                header
-                if !model.readings.isEmpty {
-                    tiles
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    header
+                    if !model.readings.isEmpty {
+                        tiles
+                    }
+                    if let empty = model.emptyRows {
+                        Text(empty)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .padding(18)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
+                    } else if !model.rows.isEmpty {
+                        table
+                    }
                 }
-                if let empty = model.emptyRows {
-                    Text(empty)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .padding(18)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
-                } else if !model.rows.isEmpty {
-                    table
-                }
+                .padding(32)
+                .frame(maxWidth: 1_280, alignment: .leading)
             }
-            .padding(32)
-            .frame(maxWidth: 1_280, alignment: .leading)
+            .background(Color(nsColor: .windowBackgroundColor))
+            .navigationTitle(model.title)
+            .navigationDestination(for: MetricInspectTarget.self) { target in
+                MetricInspectView(store: store, target: target)
+            }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .navigationTitle(model.title)
     }
 
     private var header: some View {
@@ -60,7 +65,14 @@ struct LiveProfileView: View {
             spacing: 12
         ) {
             ForEach(model.readings) { reading in
-                MetricTile(reading: reading)
+                if let inspect = reading.inspect {
+                    NavigationLink(value: inspect) {
+                        MetricTile(reading: reading)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    MetricTile(reading: reading)
+                }
             }
         }
     }

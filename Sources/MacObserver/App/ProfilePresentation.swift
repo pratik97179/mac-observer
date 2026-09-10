@@ -233,7 +233,8 @@ enum ProfilePresentation {
             value: metric.map(MetricFormatter.displayString) ?? "Unavailable",
             detail: metric == nil ? missing : "Direct sample",
             symbol: symbol,
-            tint: tint
+            tint: tint,
+            inspect: .from(title: name, metric: metric)
         )
     }
 

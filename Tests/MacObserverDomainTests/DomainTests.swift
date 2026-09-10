@@ -98,6 +98,28 @@ struct MetricContractTests {
     }
 }
 
+struct SeriesBucketingTests {
+    @Test func lastSampleKeepsNewestPointInEachBucket() {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        let points = [0.0, 1.0, 3.0].map { seconds in
+            Metric(
+                time: ObservationTime(wallTime: Date(timeIntervalSince1970: seconds)),
+                domain: .cpu,
+                name: .cpuUtilizationRatio,
+                entity: system,
+                value: .ratio(seconds / 10),
+                unit: .ratio,
+                source: "test",
+                quality: .direct
+            )
+        }
+        let bucketed = SeriesBucketing.lastSample(in: points, bucketSeconds: 2)
+        #expect(bucketed.count == 2)
+        #expect(bucketed[0].time.wallTime.timeIntervalSince1970 == 1)
+        #expect(bucketed[1].time.wallTime.timeIntervalSince1970 == 3)
+    }
+}
+
 struct EventContractTests {
     @Test func eventTypesFollowTheSameNameRulesAsMetrics() {
         #expect(EventType(rawValue: "process.launched") != nil)

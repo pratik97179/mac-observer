@@ -103,16 +103,33 @@ public actor SQLiteTelemetryStore: TelemetryStore {
 
     public func metrics(matching query: MetricQuery) async throws -> [Metric] {
         guard let db else { return [] }
-        var sql = """
-            SELECT entity_json, value_json, dimensions_json, derivation_json,
-                   id, wall_time, monotonic_ns, domain, name, unit, source, quality, retention_class
-            FROM metrics
-            WHERE wall_time >= ? AND wall_time <= ?
-            """
-        if query.entityKey != nil { sql += " AND entity_key = ?" }
-        if query.name != nil { sql += " AND name = ?" }
-        if query.domain != nil { sql += " AND domain = ?" }
-        sql += " ORDER BY wall_time ASC, monotonic_ns ASC"
+        let filters = metricFilterSQL(query)
+        let sql: String
+        if let bucket = query.bucketSeconds, bucket > 0 {
+            sql = """
+                SELECT m.entity_json, m.value_json, m.dimensions_json, m.derivation_json,
+                       m.id, m.wall_time, m.monotonic_ns, m.domain, m.name, m.unit, m.source, m.quality, m.retention_class
+                FROM metrics m
+                INNER JOIN (
+                    SELECT entity_key, name, MAX(wall_time) AS wall_time
+                    FROM metrics
+                    WHERE wall_time >= ? AND wall_time <= ?
+                    \(filters)
+                    GROUP BY entity_key, name, CAST(wall_time / ? AS INTEGER)
+                ) b
+                ON m.entity_key = b.entity_key AND m.name = b.name AND m.wall_time = b.wall_time
+                ORDER BY m.wall_time ASC, m.monotonic_ns ASC
+                """
+        } else {
+            sql = """
+                SELECT entity_json, value_json, dimensions_json, derivation_json,
+                       id, wall_time, monotonic_ns, domain, name, unit, source, quality, retention_class
+                FROM metrics
+                WHERE wall_time >= ? AND wall_time <= ?
+                \(filters)
+                ORDER BY wall_time ASC, monotonic_ns ASC
+                """
+        }
 
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
@@ -125,6 +142,28 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         index += 1
         sqlite3_bind_double(statement, index, query.range.end.timeIntervalSince1970)
         index += 1
+        index = bindMetricFilters(statement, query: query, index: index)
+        if let bucket = query.bucketSeconds, bucket > 0 {
+            sqlite3_bind_double(statement, index, bucket)
+        }
+
+        var rows: [Metric] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            rows.append(try decodeMetric(statement))
+        }
+        return rows
+    }
+
+    private func metricFilterSQL(_ query: MetricQuery) -> String {
+        var sql = ""
+        if query.entityKey != nil { sql += " AND entity_key = ?" }
+        if query.name != nil { sql += " AND name = ?" }
+        if query.domain != nil { sql += " AND domain = ?" }
+        return sql
+    }
+
+    private func bindMetricFilters(_ statement: OpaquePointer, query: MetricQuery, index: Int32) -> Int32 {
+        var index = index
         if let entityKey = query.entityKey {
             sqlite3_bind_text(statement, index, entityKey, -1, SQLITE_TRANSIENT)
             index += 1
@@ -135,13 +174,9 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         }
         if let domain = query.domain {
             sqlite3_bind_text(statement, index, domain.rawValue, -1, SQLITE_TRANSIENT)
+            index += 1
         }
-
-        var rows: [Metric] = []
-        while sqlite3_step(statement) == SQLITE_ROW {
-            rows.append(try decodeMetric(statement))
-        }
-        return rows
+        return index
     }
 
     public func events(matching query: EventQuery) async throws -> [Event] {

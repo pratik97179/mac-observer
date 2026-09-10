@@ -15,17 +15,20 @@ public struct MetricQuery: Sendable, Hashable {
     public var entityKey: String?
     public var name: MetricName?
     public var domain: TelemetryDomain?
+    public var bucketSeconds: TimeInterval?
 
     public init(
         range: TimeRange,
         entityKey: String? = nil,
         name: MetricName? = nil,
-        domain: TelemetryDomain? = nil
+        domain: TelemetryDomain? = nil,
+        bucketSeconds: TimeInterval? = nil
     ) {
         self.range = range
         self.entityKey = entityKey
         self.name = name
         self.domain = domain
+        self.bucketSeconds = bucketSeconds
     }
 }
 

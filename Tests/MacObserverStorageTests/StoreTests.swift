@@ -83,6 +83,25 @@ struct TelemetryStoreTests {
         #expect(memory.map(\.summary) == ["one", "three"])
     }
 
+    @Test func metricQueriesKeepLastSamplePerTimeBucket() async throws {
+        try await assertMetricBuckets(MemoryTelemetryStore())
+        try await assertMetricBuckets(SQLiteTelemetryStore.inMemory())
+    }
+
+    private func assertMetricBuckets(_ store: some TelemetryStore) async throws {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        try await store.insert(metrics: [
+            cpu(entity: system, at: 0, ratio: 0.1),
+            cpu(entity: system, at: 1, ratio: 0.2),
+            cpu(entity: system, at: 3, ratio: 0.9)
+        ])
+        let range = TimeRange(start: Date(timeIntervalSince1970: 0), end: Date(timeIntervalSince1970: 10))
+        let bucketed = try await store.metrics(matching: MetricQuery(range: range, name: .cpuUtilizationRatio, bucketSeconds: 2))
+        #expect(bucketed.count == 2)
+        if case .ratio(let value) = bucketed[0].value { #expect(value == 0.2) }
+        if case .ratio(let value) = bucketed[1].value { #expect(value == 0.9) }
+    }
+
     private func sampleEvent(entity: Entity, at seconds: TimeInterval, domain: TelemetryDomain, summary: String) -> Event {
         Event(
             time: ObservationTime(wallTime: Date(timeIntervalSince1970: seconds)),

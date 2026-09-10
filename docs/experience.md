@@ -33,7 +33,7 @@ It does not contain timelines, connection lists, dense tables, or permissions pr
 
 ## Metric Inspection
 
-Selecting a metric opens a dedicated investigation view. For example, Memory includes total, used, compressed, cached, wired, swap, pressure state, a timeline, and top contributing processes.
+Selecting a metric tile with a chevron opens a history view. It shows the latest stored value, a 1 hour / 24 hour / 7 day range, a chart of typed query results (about 240 buckets), and related events in the same domain. Network and Storage totals that sum several entities are not inspectable yet.
 
 Every metric inspection view has the same structural order:
 

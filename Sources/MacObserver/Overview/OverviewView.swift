@@ -8,21 +8,26 @@ struct OverviewView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                header
-                metrics
-                activity
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    header
+                    metrics
+                    activity
+                }
+                .padding(32)
+                .frame(maxWidth: 1_280, alignment: .leading)
             }
-            .padding(32)
-            .frame(maxWidth: 1_280, alignment: .leading)
-        }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .navigationTitle("Overview")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Search", systemImage: "magnifyingglass") {}
-                    .keyboardShortcut("k", modifiers: .command)
+            .background(Color(nsColor: .windowBackgroundColor))
+            .navigationTitle("Overview")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Search", systemImage: "magnifyingglass") {}
+                        .keyboardShortcut("k", modifiers: .command)
+                }
+            }
+            .navigationDestination(for: MetricInspectTarget.self) { target in
+                MetricInspectView(store: store, target: target)
             }
         }
     }
@@ -72,7 +77,14 @@ struct OverviewView: View {
             spacing: 12
         ) {
             ForEach(model.readings) { reading in
-                MetricTile(reading: reading)
+                if let inspect = reading.inspect {
+                    NavigationLink(value: inspect) {
+                        MetricTile(reading: reading)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    MetricTile(reading: reading)
+                }
             }
         }
     }

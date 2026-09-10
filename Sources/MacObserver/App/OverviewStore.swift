@@ -15,7 +15,7 @@ final class OverviewStore {
     private(set) var historyPath: String?
     private(set) var historyMessage: String?
     private(set) var historyEvents: [Event] = []
-    private(set) var eventWindow: EventHistoryWindow = .lastHour
+    private(set) var eventWindow: HistoryWindow = .lastHour
     private var disabledCapabilityIDs: Set<String> = []
 
     init() {
@@ -80,7 +80,7 @@ final class OverviewStore {
         }
     }
 
-    func setEventWindow(_ window: EventHistoryWindow) {
+    func setEventWindow(_ window: HistoryWindow) {
         eventWindow = window
         Task { await refreshHistory() }
     }
@@ -104,6 +104,55 @@ final class OverviewStore {
         historyEvents = snapshot.events
             .filter { $0.time.wallTime >= start && $0.time.wallTime <= end }
             .reversed()
+    }
+
+    func metricSeries(for target: MetricInspectTarget, window: HistoryWindow) async -> [Metric] {
+        await queryWindow(window) { range, bucket in
+            if let store {
+                return (try? await store.metrics(matching: MetricQuery(
+                    range: range,
+                    entityKey: target.entityKey,
+                    name: target.metricName,
+                    bucketSeconds: bucket
+                ))) ?? []
+            }
+            return snapshot.metrics.filter {
+                $0.name == target.metricName
+                    && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
+                    && $0.time.wallTime >= range.start
+                    && $0.time.wallTime <= range.end
+            }
+        }
+    }
+
+    func relatedEvents(for target: MetricInspectTarget, window: HistoryWindow) async -> [Event] {
+        await queryWindow(window) { range, _ in
+            if let store {
+                return (try? await store.events(matching: EventQuery(
+                    range: range,
+                    domain: target.domain,
+                    limit: 20
+                ))) ?? []
+            }
+            return snapshot.events.filter {
+                $0.domain == target.domain
+                    && $0.time.wallTime >= range.start
+                    && $0.time.wallTime <= range.end
+            }
+        }
+    }
+
+    private func queryWindow<T>(
+        _ window: HistoryWindow,
+        load: (TimeRange, TimeInterval) async -> [T]
+    ) async -> [T] {
+        let end = Date()
+        let start = end.addingTimeInterval(-window.duration)
+        await persisting?.flush()
+        return await load(
+            TimeRange(start: start, end: end),
+            max(window.duration / 240, 2)
+        )
     }
 
     func run() async {

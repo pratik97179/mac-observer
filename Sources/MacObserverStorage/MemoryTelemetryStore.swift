@@ -16,7 +16,7 @@ public actor MemoryTelemetryStore: TelemetryStore {
     }
 
     public func metrics(matching query: MetricQuery) async throws -> [Metric] {
-        self.metrics.filter { metric in
+        let matched = self.metrics.filter { metric in
             metric.time.wallTime >= query.range.start
                 && metric.time.wallTime <= query.range.end
                 && (query.entityKey == nil || metric.entity.identityKey == query.entityKey)
@@ -24,6 +24,10 @@ public actor MemoryTelemetryStore: TelemetryStore {
                 && (query.domain == nil || metric.domain == query.domain)
         }
         .sorted { $0.time.wallTime < $1.time.wallTime }
+        if let bucket = query.bucketSeconds {
+            return SeriesBucketing.lastSample(in: matched, bucketSeconds: bucket)
+        }
+        return matched
     }
 
     public func events(matching query: EventQuery) async throws -> [Event] {

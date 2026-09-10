@@ -1,7 +1,7 @@
 import SwiftUI
 import MacObserverDomain
 
-enum EventHistoryWindow: String, CaseIterable, Identifiable {
+enum HistoryWindow: String, CaseIterable, Identifiable {
     case lastHour = "1 hour"
     case lastDay = "24 hours"
     case lastWeek = "7 days"
@@ -66,7 +66,7 @@ struct EventsView: View {
     private var filters: some View {
         VStack(alignment: .leading, spacing: 12) {
             Picker("Range", selection: windowBinding) {
-                ForEach(EventHistoryWindow.allCases) { window in
+                ForEach(HistoryWindow.allCases) { window in
                     Text(window.rawValue).tag(window)
                 }
             }
@@ -83,7 +83,7 @@ struct EventsView: View {
         }
     }
 
-    private var windowBinding: Binding<EventHistoryWindow> {
+    private var windowBinding: Binding<HistoryWindow> {
         Binding(
             get: { store.eventWindow },
             set: { store.setEventWindow($0) }

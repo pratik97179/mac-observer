@@ -154,6 +154,23 @@ public enum MetricFormatter {
         }
     }
 
+    public static func displayString(value: Double, unit: Unit) -> String {
+        switch unit {
+        case .ratio:
+            "\(Int((value * 100).rounded()))%"
+        case .bytes:
+            byteString(value)
+        case .bytesPerSecond:
+            "\(byteString(value))/s"
+        case .watts:
+            "\(value.formatted(.number.precision(.fractionLength(1)))) W"
+        case .count:
+            Int64(value).formatted(.number)
+        default:
+            value.formatted(.number.precision(.fractionLength(2)))
+        }
+    }
+
     private static func byteString(_ value: Double) -> String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useGB, .useMB, .useKB, .useBytes]
