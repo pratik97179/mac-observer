@@ -50,6 +50,8 @@ public struct EventType: Sendable, Hashable, Codable, RawRepresentable {
 
     public static let processLaunched = EventType(valid: "process.launched")
     public static let capabilityAvailabilityChanged = EventType(valid: "capability.availability_changed")
+    public static let memoryPressureChanged = EventType(valid: "memory.pressure_changed")
+    public static let thermalStateChanged = EventType(valid: "thermal.state_changed")
 
     private init(valid rawValue: String) {
         self.rawValue = rawValue

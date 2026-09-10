@@ -88,7 +88,50 @@ struct CollectorContractTests {
             Issue.record("expected the last sample from before disable")
         }
         #expect(snapshot.availability[collector.capability.id] == .unavailable(reason: "Disabled in Capabilities"))
+        #expect(snapshot.events.contains { event in
+            event.type == .capabilityAvailabilityChanged && event.metadata["enabled"] == "false"
+        })
         await pipeline.stop()
+    }
+
+    @Test func liveBufferBoundsEventsAndKeepsNewest() async {
+        let clock = FakeClock()
+        let buffer = LiveTelemetryBuffer(clock: clock, eventLimit: 2)
+        await buffer.send(.event(sampleEvent(clock: clock, summary: "one")))
+        clock.advance(seconds: 1)
+        await buffer.send(.event(sampleEvent(clock: clock, summary: "two")))
+        clock.advance(seconds: 1)
+        await buffer.send(.event(sampleEvent(clock: clock, summary: "three")))
+
+        let snapshot = await buffer.snapshot()
+        #expect(snapshot.events.map(\.summary) == ["two", "three"])
+    }
+
+    @Test func reenablingACollectorEmitsAnAvailabilityEvent() async throws {
+        let clock = FakeClock()
+        let collector = FakeCollector(clock: clock)
+        let pipeline = CollectorPipeline(collectors: [collector], buffer: LiveTelemetryBuffer(clock: clock))
+        try await pipeline.start()
+        try await pipeline.setEnabled(collector.capability.id, enabled: false)
+        try await pipeline.setEnabled(collector.capability.id, enabled: true)
+
+        let snapshot = await pipeline.snapshot()
+        #expect(snapshot.events.filter { $0.type == .capabilityAvailabilityChanged }.count == 2)
+        #expect(snapshot.events.last?.metadata["enabled"] == "true")
+        await pipeline.stop()
+    }
+
+    private func sampleEvent(clock: FakeClock, summary: String) -> Event {
+        Event(
+            time: clock.observationTime,
+            domain: .memory,
+            type: .memoryPressureChanged,
+            entity: system,
+            summary: summary,
+            source: "test",
+            quality: .direct,
+            privacyClass: .operational
+        )
     }
 
     private func cpu(

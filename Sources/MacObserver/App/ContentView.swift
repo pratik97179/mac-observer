@@ -23,10 +23,10 @@ struct ContentView: View {
             LiveProfileView(store: store, profile: selectedProfile)
         case .capabilities:
             CapabilitiesView(store: store)
+        case .events:
+            EventsView(store: store)
         case .settings:
             SettingsView(store: store)
-        default:
-            PlaceholderView(profile: selectedProfile)
         }
     }
 }

@@ -101,6 +101,9 @@ struct MetricContractTests {
 struct EventContractTests {
     @Test func eventTypesFollowTheSameNameRulesAsMetrics() {
         #expect(EventType(rawValue: "process.launched") != nil)
+        #expect(EventType(rawValue: "memory.pressure_changed") != nil)
+        #expect(EventType(rawValue: "thermal.state_changed") != nil)
+        #expect(EventType(rawValue: "capability.availability_changed") != nil)
         #expect(EventType(rawValue: "launched") == nil)
     }
 }

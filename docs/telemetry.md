@@ -46,6 +46,12 @@ An event records a meaningful discrete occurrence.
 
 Events are not free-form logs. New event types require an owner, a documented producer, retention behavior, and privacy classification.
 
+| Type | Producer | When it fires |
+| --- | --- | --- |
+| `memory.pressure_changed` | `standard.cpu_memory` | Memory pressure state differs from the previous sample. The first sample is not an event. |
+| `thermal.state_changed` | `standard.cpu_memory` | ProcessInfo thermal state differs from the previous sample. The first sample is not an event. |
+| `capability.availability_changed` | Collector pipeline | A standard collector is disabled or re-enabled in Capabilities. Disabled collectors at launch also emit this. |
+
 ## Entity Identity
 
 An entity is a typed reference, not a display string. Required forms include:

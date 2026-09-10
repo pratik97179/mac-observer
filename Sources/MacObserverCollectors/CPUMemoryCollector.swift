@@ -15,6 +15,8 @@ public actor CPUMemoryCollector: TelemetryCollector {
     private let bootSession: BootSessionID
     private let loop = LoopingCollector()
     private var previousCPU: [UInt32]?
+    private var previousPressure: String?
+    private var previousThermal: String?
 
     public init(clock: any Clock = SystemClock(), bootSession: BootSessionID) {
         self.clock = clock
@@ -89,16 +91,41 @@ public actor CPUMemoryCollector: TelemetryCollector {
                 clock: clock, domain: .memory, name: .memoryPressureState, entity: system,
                 value: .state(pressure), unit: .enumeration, source: source
             )))
+            if let previousPressure, previousPressure != pressure {
+                await sink.send(.event(EventFactory.make(
+                    clock: clock,
+                    domain: .memory,
+                    type: .memoryPressureChanged,
+                    entity: system,
+                    summary: "Memory pressure changed from \(previousPressure) to \(pressure).",
+                    source: source,
+                    metadata: ["from": previousPressure, "to": pressure]
+                )))
+            }
+            previousPressure = pressure
         }
 
+        let thermal = ThermalNames.stateName(ProcessInfo.processInfo.thermalState)
         await sink.send(.metric(MetricFactory.make(
             clock: clock,
             domain: .thermal,
             name: .thermalState,
             entity: system,
-            value: .state(ThermalNames.stateName(ProcessInfo.processInfo.thermalState)),
+            value: .state(thermal),
             unit: .enumeration,
             source: source
         )))
+        if let previousThermal, previousThermal != thermal {
+            await sink.send(.event(EventFactory.make(
+                clock: clock,
+                domain: .thermal,
+                type: .thermalStateChanged,
+                entity: system,
+                summary: "Thermal state changed from \(previousThermal) to \(thermal).",
+                source: source,
+                metadata: ["from": previousThermal, "to": thermal]
+            )))
+        }
+        previousThermal = thermal
     }
 }

@@ -72,6 +72,49 @@ enum MetricFactory {
     }
 }
 
+enum EventFactory {
+    static func make(
+        clock: any Clock,
+        domain: TelemetryDomain,
+        type: EventType,
+        entity: Entity,
+        summary: String,
+        source: String,
+        metadata: [String: String] = [:],
+        privacyClass: PrivacyClass = .operational
+    ) -> Event {
+        Event(
+            time: clock.observationTime,
+            domain: domain,
+            type: type,
+            entity: entity,
+            summary: summary,
+            metadata: metadata,
+            source: source,
+            quality: .direct,
+            privacyClass: privacyClass
+        )
+    }
+
+    static func capabilityAvailabilityChanged(
+        clock: any Clock,
+        capabilityID: String,
+        enabled: Bool
+    ) -> Event {
+        make(
+            clock: clock,
+            domain: .capability,
+            type: .capabilityAvailabilityChanged,
+            entity: .capability(id: capabilityID),
+            summary: enabled
+                ? "\(capabilityID) started collecting."
+                : "\(capabilityID) was disabled in Capabilities.",
+            source: "capabilities",
+            metadata: ["capability": capabilityID, "enabled": enabled ? "true" : "false"]
+        )
+    }
+}
+
 enum ThermalNames {
     static func stateName(_ state: ProcessInfo.ThermalState) -> String {
         switch state {

@@ -48,7 +48,7 @@ enum Profile: String, Identifiable, Hashable {
         case .power:
             "Battery, watts, and thermal state from IOKit and ProcessInfo."
         case .events:
-            "A filtered timeline of meaningful changes will land here later."
+            "Discrete changes from collectors. Samples are not listed as events."
         case .capabilities:
             "Each data source, its access level, and how to turn it off."
         case .settings:

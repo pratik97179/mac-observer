@@ -33,7 +33,7 @@ public actor CollectorPipeline {
                 try await collector.start(sink: resolved)
                 running.insert(id)
             } else {
-                await buffer.send(.availability(capabilityID: id, .unavailable(reason: "Disabled in Capabilities")))
+                await sendDisabled(id: id, sink: resolved)
             }
         }
     }
@@ -44,11 +44,16 @@ public actor CollectorPipeline {
             guard !running.contains(id) else { return }
             try await collector.start(sink: sink)
             running.insert(id)
+            await sink.send(.event(EventFactory.capabilityAvailabilityChanged(
+                clock: SystemClock(),
+                capabilityID: id,
+                enabled: true
+            )))
         } else {
             guard running.contains(id) else { return }
             await collector.stop()
             running.remove(id)
-            await buffer.send(.availability(capabilityID: id, .unavailable(reason: "Disabled in Capabilities")))
+            await sendDisabled(id: id, sink: sink)
         }
     }
 
@@ -62,5 +67,14 @@ public actor CollectorPipeline {
 
     public func snapshot() async -> LiveSnapshot {
         await buffer.snapshot()
+    }
+
+    private func sendDisabled(id: String, sink: any TelemetrySink) async {
+        await sink.send(.availability(capabilityID: id, .unavailable(reason: "Disabled in Capabilities")))
+        await sink.send(.event(EventFactory.capabilityAvailabilityChanged(
+            clock: SystemClock(),
+            capabilityID: id,
+            enabled: false
+        )))
     }
 }
