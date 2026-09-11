@@ -53,4 +53,9 @@ public actor MemoryTelemetryStore: TelemetryStore {
         metrics.removeAll()
         events.removeAll()
     }
+
+    public func deleteSource(_ source: String) async throws {
+        metrics.removeAll { $0.source == source }
+        events.removeAll { $0.source == source }
+    }
 }

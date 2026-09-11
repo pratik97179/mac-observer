@@ -8,7 +8,8 @@ public actor CPUMemoryCollector: TelemetryCollector {
         title: "CPU and Memory",
         accessLevel: .standard,
         domains: [.cpu, .memory, .thermal],
-        summary: "Host CPU load, VM statistics, swap, and thermal state from Mach and ProcessInfo."
+        summary: "Host CPU load, VM statistics, swap, and thermal state from Mach and ProcessInfo.",
+        collectionMethod: "Mach host_processor_info, VM statistics, and ProcessInfo.thermalState."
     )
 
     private let clock: any Clock

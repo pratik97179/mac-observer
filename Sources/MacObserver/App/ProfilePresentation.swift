@@ -126,12 +126,26 @@ enum ProfilePresentation {
                 symbol: "arrow.up.right",
                 tint: AppTheme.Color.accent,
                 kind: tx.isEmpty ? placeholderKind(networkAvailability) : .live
+            ),
+            tile(
+                "Gateway",
+                snapshot.metrics.first { $0.name == .networkGatewayAddress },
+                "arrow.triangle.swap",
+                pending: "Waiting for gateway",
+                availability: networkAvailability
+            ),
+            tile(
+                "DNS",
+                snapshot.metrics.first { $0.name == .networkDNSResolverAddress },
+                "network",
+                pending: "Waiting for DNS",
+                availability: networkAvailability
             )
         ]
 
         return ProfileLiveModel(
             title: "Network",
-            summary: "Interface throughput from getifaddrs. Loopback is omitted.",
+            summary: "Interface throughput from getifaddrs. Gateway and DNS from SystemConfiguration. Loopback is omitted.",
             freshness: freshness,
             availability: availability(snapshot, prefix: "standard.network"),
             readings: readings,

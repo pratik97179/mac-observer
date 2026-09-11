@@ -164,6 +164,64 @@ struct CollectorContractTests {
     }
 }
 
+struct ScriptedHTTPClient: HTTPGetClient {
+    var body: String = ""
+    var error: (any Error)?
+
+    func get(_ url: URL) async throws -> (Data, TimeInterval) {
+        if let error { throw error }
+        return (Data(body.utf8), 0.042)
+    }
+}
+
+struct ExternalDiagnosticsTests {
+    private let boot = BootSessionID("boot-1")
+    private var system: Entity { .system(bootSession: boot) }
+
+    @Test func externalLookupDoesNotRunUntilStartedAndParsesTrace() async throws {
+        let clock = FakeClock()
+        let client = ScriptedHTTPClient(body: "fl=1\nip=203.0.113.10\n")
+        let collector = ExternalDiagnosticsCollector(
+            clock: clock,
+            bootSession: boot,
+            client: client
+        )
+        let buffer = LiveTelemetryBuffer(clock: clock)
+        await collector.probe()
+        var snapshot = await buffer.snapshot()
+        #expect(snapshot.metrics.isEmpty)
+
+        try await collector.start(sink: buffer)
+        await collector.probe()
+        snapshot = await buffer.snapshot()
+        #expect(snapshot.metric(named: .networkPublicAddress, entity: system).map(MetricFormatter.displayString) == "203.0.113.10")
+        #expect(snapshot.events.contains { $0.type == .networkExternalLookup })
+        #expect(snapshot.events.contains { $0.privacyClass == .identifyingDeviceContext })
+        if case .int(let nanos) = snapshot.metric(named: .networkExternalRoundTripNanoseconds, entity: system)?.value {
+            #expect(nanos == 42_000_000)
+        } else {
+            Issue.record("expected round-trip nanoseconds")
+        }
+        await collector.stop()
+    }
+
+    @Test func failedExternalLookupDoesNotInventAnAddress() async throws {
+        let clock = FakeClock()
+        let collector = ExternalDiagnosticsCollector(
+            clock: clock,
+            bootSession: boot,
+            client: ScriptedHTTPClient(error: URLError(.timedOut))
+        )
+        let buffer = LiveTelemetryBuffer(clock: clock)
+        try await collector.start(sink: buffer)
+        await collector.probe()
+        let snapshot = await buffer.snapshot()
+        #expect(snapshot.metrics.isEmpty)
+        #expect(snapshot.availability[ExternalDiagnosticsCollector.capabilityID] == .unavailable(reason: "Lookup failed"))
+        await collector.stop()
+    }
+}
+
 struct SampleMathTests {
     @Test func cpuUtilizationIgnoresIdleTicks() {
         let previous: [UInt32] = [10, 10, 80, 0]
@@ -202,6 +260,78 @@ final class ScriptedProcessSource: ProcessResourceSource, @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return current
+    }
+}
+
+final class ScriptedNetworkPathSource: NetworkPathSource, @unchecked Sendable {
+    private let lock = NSLock()
+    private var current: NetworkPathSnapshot?
+
+    init(_ current: NetworkPathSnapshot? = nil) {
+        self.current = current
+    }
+
+    func set(_ path: NetworkPathSnapshot?) {
+        lock.lock()
+        current = path
+        lock.unlock()
+    }
+
+    func currentPath() -> NetworkPathSnapshot? {
+        lock.lock()
+        defer { lock.unlock() }
+        return current
+    }
+}
+
+struct NetworkCollectorTests {
+    private let boot = BootSessionID("boot-1")
+    private var system: Entity { .system(bootSession: boot) }
+
+    @Test func systemConfigurationPathSourceDoesNotTrap() {
+        _ = SystemConfigurationPathSource().currentPath()
+    }
+
+    @Test func pathSnapshotKeepsAtMostThreeDNSServers() {
+        let path = NetworkPathSnapshot(dnsServers: ["1.1.1.1", "8.8.8.8", "9.9.9.9", "8.8.4.4"])
+        #expect(path.dnsServers == ["1.1.1.1", "8.8.8.8", "9.9.9.9"])
+    }
+
+    @Test func firstPathIsNotAnEventAndAChangeIs() async throws {
+        let clock = FakeClock()
+        let source = ScriptedNetworkPathSource(
+            NetworkPathSnapshot(primaryInterface: "en0", gateway: "192.0.2.1", dnsServers: ["1.1.1.1"])
+        )
+        let collector = NetworkCollector(
+            clock: clock,
+            bootSession: boot,
+            pathSource: source,
+            interval: .milliseconds(20)
+        )
+        let buffer = LiveTelemetryBuffer(clock: clock)
+        try await collector.start(sink: buffer)
+
+        var snapshot = await buffer.snapshot()
+        for _ in 0..<40 where snapshot.metric(named: .networkGatewayAddress, entity: system) == nil {
+            try await Task.sleep(for: .milliseconds(10))
+            snapshot = await buffer.snapshot()
+        }
+        #expect(snapshot.metric(named: .networkGatewayAddress, entity: system).map(MetricFormatter.displayString) == "192.0.2.1")
+        #expect(!snapshot.events.contains { $0.type == .networkConfigurationChanged })
+
+        source.set(NetworkPathSnapshot(primaryInterface: "en0", gateway: "192.0.2.2", dnsServers: ["1.1.1.1"]))
+        var sawChange = false
+        for _ in 0..<40 {
+            try await Task.sleep(for: .milliseconds(10))
+            snapshot = await buffer.snapshot()
+            if snapshot.events.contains(where: { $0.type == .networkConfigurationChanged }) {
+                sawChange = true
+                break
+            }
+        }
+        #expect(sawChange)
+        #expect(snapshot.events.contains { $0.privacyClass == .identifyingDeviceContext })
+        await collector.stop()
     }
 }
 

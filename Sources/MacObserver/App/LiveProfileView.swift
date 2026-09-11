@@ -167,7 +167,8 @@ struct LiveProfileView: View {
                 } else {
                     UnavailableState(title: "Interface counters unavailable", action: "View Capabilities", onAction: onOpenCapabilities)
                 }
-                UnavailableState(title: "Latency is not collected.")
+                localPath
+                internetCheck
                 UnavailableState(title: "Packet loss is not collected.")
             }
             .padding(Theme.Space.surface)
@@ -186,6 +187,76 @@ struct LiveProfileView: View {
             }
             .padding(Theme.Space.component)
             .glass(.elevated, radius: Theme.Radius.secondary)
+        }
+    }
+
+    private var localPath: some View {
+        let gateway = model.readings.first { $0.name == "Gateway" }
+        let dns = model.readings.first { $0.name == "DNS" }
+        let primary = store.snapshot.metrics.first { $0.name == .networkPrimaryInterface }
+        let count = store.snapshot.metrics.first { $0.name == .networkDNSResolverCount }
+        return VStack(alignment: .leading, spacing: Theme.Space.micro) {
+            if gateway?.kind == .live {
+                Text("Gateway \(gateway?.value ?? "")")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
+            } else {
+                Text("Gateway unavailable")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.tertiary)
+            }
+            if dns?.kind == .live {
+                let extra = count.flatMap { metric -> String? in
+                    if case .int(let value) = metric.value, value > 1 {
+                        return " · \(value) resolvers"
+                    }
+                    return nil
+                } ?? ""
+                Text("DNS \(dns?.value ?? "")\(extra)")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
+            }
+            if let primary {
+                Text("Primary \(MetricFormatter.displayString(for: primary))")
+                    .font(Theme.Typography.metadata)
+                    .foregroundStyle(Theme.Color.tertiary)
+            }
+        }
+    }
+
+    private var internetCheck: some View {
+        let enabled = store.isCapabilityEnabled(ExternalDiagnosticsCollector.capabilityID)
+        let address = store.snapshot.metrics.first { $0.name == .networkPublicAddress }
+        let rtt = store.snapshot.metrics.first { $0.name == .networkExternalRoundTripNanoseconds }
+        return VStack(alignment: .leading, spacing: Theme.Space.compact) {
+            if !enabled {
+                UnavailableState(
+                    title: "Public address and latency stay off until you enable Internet Check.",
+                    action: "View Capabilities",
+                    onAction: onOpenCapabilities
+                )
+            } else if let address {
+                Text("Public address \(MetricFormatter.displayString(for: address))")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
+                if let rtt {
+                    Text("Round trip \(MetricFormatter.displayString(for: rtt))")
+                        .font(Theme.Typography.metadata)
+                        .foregroundStyle(Theme.Color.tertiary)
+                }
+                Button("Run internet check") {
+                    Task { await store.runExternalDiagnostic() }
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.Color.accent)
+                .font(Theme.Typography.metadata)
+            } else {
+                UnavailableState(
+                    title: "No public address yet. This does not run until you ask.",
+                    action: "Run internet check",
+                    onAction: { Task { await store.runExternalDiagnostic() } }
+                )
+            }
         }
     }
 

@@ -52,6 +52,8 @@ Events are not free-form logs. New event types require an owner, a documented pr
 | `thermal.state_changed` | `standard.cpu_memory` | ProcessInfo thermal state differs from the previous sample. The first sample is not an event. |
 | `capability.availability_changed` | Collector pipeline | A standard collector is disabled or re-enabled in Capabilities. Disabled collectors at launch also emit this. |
 | `explanation.generated` | Query / explanation rules | A deterministic explanation was produced for a supported state. One event per explanation id. |
+| `network.external_lookup` | `external.internet` | The user ran an internet check. Stores provider and round-trip metadata, not packet payloads. |
+| `network.configuration_changed` | `standard.network` | Local gateway, primary interface, or DNS resolver set differs from the previous sample. The first sample is not an event. |
 
 ## Entity Identity
 
@@ -80,6 +82,12 @@ Names are lowercase and namespaced by domain. Use base units in storage and form
 | `storage.write_bytes_per_second` | bytes per second | volume or process when supported |
 | `power.battery_charge_ratio` | ratio from 0 to 1 | system |
 | `thermal.state` | enumerated state | system |
+| `network.public_address` | enumerated state | system |
+| `network.external_round_trip_nanoseconds` | nanoseconds | system |
+| `network.gateway_address` | enumerated state | system |
+| `network.primary_interface` | enumerated state | system |
+| `network.dns_resolver_address` | enumerated state | system |
+| `network.dns_resolver_count` | count | system |
 
 Do not store formatted values such as `11.8 GB` or `32%` as telemetry.
 

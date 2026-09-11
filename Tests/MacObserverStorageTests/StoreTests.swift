@@ -64,6 +64,33 @@ struct TelemetryStoreTests {
         #expect(try await store.metrics(matching: MetricQuery(range: range)).isEmpty)
     }
 
+    @Test func deleteSourceRemovesOnlyThatCollectorsRows() async throws {
+        try await assertDeleteSource(MemoryTelemetryStore())
+        try await assertDeleteSource(SQLiteTelemetryStore.inMemory())
+    }
+
+    private func assertDeleteSource(_ store: some TelemetryStore) async throws {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        try await store.insert(metrics: [
+            cpu(entity: system, at: 1, ratio: 0.1),
+            Metric(
+                time: ObservationTime(wallTime: Date(timeIntervalSince1970: 1)),
+                domain: .network,
+                name: .networkPublicAddress,
+                entity: system,
+                value: .state("1.1.1.1"),
+                unit: .enumeration,
+                source: "external.internet",
+                quality: .direct
+            )
+        ])
+        try await store.deleteSource("external.internet")
+        let range = TimeRange(start: Date(timeIntervalSince1970: 0), end: Date(timeIntervalSince1970: 10))
+        let remaining = try await store.metrics(matching: MetricQuery(range: range))
+        #expect(remaining.count == 1)
+        #expect(remaining[0].source == "test")
+    }
+
     @Test func eventQueriesHonorDomainAndNewestLimit() async throws {
         try await assertEventLimit(MemoryTelemetryStore())
         try await assertEventLimit(SQLiteTelemetryStore.inMemory())

@@ -9,7 +9,8 @@ public actor StorageCollector: TelemetryCollector {
         title: "Storage",
         accessLevel: .standard,
         domains: [.storage],
-        summary: "Volume capacity from FileManager. System I/O from IOBlockStorageDriver when available."
+        summary: "Volume capacity from FileManager. System I/O from IOBlockStorageDriver when available.",
+        collectionMethod: "FileManager volume resources and IOKit IOBlockStorageDriver statistics."
     )
 
     private let clock: any Clock

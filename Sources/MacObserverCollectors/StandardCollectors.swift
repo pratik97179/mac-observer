@@ -6,9 +6,10 @@ public enum StandardCollectors {
         return [
             CPUMemoryCollector(clock: clock, bootSession: boot),
             ProcessCollector(clock: clock, bootSession: boot),
-            NetworkCollector(clock: clock),
+            NetworkCollector(clock: clock, bootSession: boot),
             StorageCollector(clock: clock),
-            PowerCollector(clock: clock, bootSession: boot)
+            PowerCollector(clock: clock, bootSession: boot),
+            ExternalDiagnosticsCollector(clock: clock, bootSession: boot)
         ]
     }
 }

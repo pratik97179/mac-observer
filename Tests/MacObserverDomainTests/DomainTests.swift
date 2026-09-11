@@ -196,6 +196,8 @@ struct EventContractTests {
         #expect(EventType(rawValue: "thermal.state_changed") != nil)
         #expect(EventType(rawValue: "capability.availability_changed") != nil)
         #expect(EventType(rawValue: "explanation.generated") != nil)
+        #expect(EventType(rawValue: "network.external_lookup") != nil)
+        #expect(EventType(rawValue: "network.configuration_changed") != nil)
         #expect(EventType(rawValue: "launched") == nil)
     }
 }
@@ -265,5 +267,39 @@ struct InvestigationIntervalTests {
         )
         #expect(focused.start == Date(timeIntervalSince1970: 100))
         #expect(focused.end == Date(timeIntervalSince1970: 112))
+    }
+}
+
+struct CapabilityPolicyTests {
+    @Test func optionalSourcesStayOffUntilExplicitlyEnabled() {
+        let standard = CapabilityDescriptor(
+            id: "standard.cpu_memory",
+            title: "CPU",
+            accessLevel: .standard,
+            domains: [.cpu],
+            summary: "Host CPU"
+        )
+        let external = CapabilityDescriptor(
+            id: "external.internet",
+            title: "Internet Check",
+            accessLevel: .external,
+            domains: [.network],
+            summary: "Lookup",
+            remainsLocal: false,
+            privacyClass: .identifyingDeviceContext,
+            defaultEnabled: false
+        )
+        let none = CapabilityPolicy.enabledIDs(
+            capabilities: [standard, external],
+            disabledStandard: [],
+            enabledOptional: []
+        )
+        #expect(none == ["standard.cpu_memory"])
+        let both = CapabilityPolicy.enabledIDs(
+            capabilities: [standard, external],
+            disabledStandard: [],
+            enabledOptional: ["external.internet"]
+        )
+        #expect(both == ["standard.cpu_memory", "external.internet"])
     }
 }

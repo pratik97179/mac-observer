@@ -33,12 +33,18 @@ final class OverviewStore {
     }
 
     func isCapabilityEnabled(_ id: String) -> Bool {
-        !disabledCapabilityIDs.contains(id)
+        if let capability = capabilities.first(where: { $0.id == id }) {
+            return preferences.isEnabled(capability)
+        }
+        return !disabledCapabilityIDs.contains(id)
     }
 
     func capabilityState(_ id: String) -> String {
-        if disabledCapabilityIDs.contains(id) {
+        if !isCapabilityEnabled(id) {
             return "Off"
+        }
+        if id == ExternalDiagnosticsCollector.capabilityID, snapshot.availability[id] == .available {
+            return "Ready. Run a check from Network or this screen."
         }
         switch snapshot.availability[id] {
         case .available:
@@ -54,8 +60,9 @@ final class OverviewStore {
         }
     }
 
-    func setCapabilityEnabled(_ id: String, enabled: Bool) {
-        preferences.setEnabled(id, enabled: enabled)
+    func setCapabilityEnabled(_ id: String, enabled: Bool, deleteHistory: Bool = false) {
+        guard let capability = capabilities.first(where: { $0.id == id }) else { return }
+        preferences.setEnabled(capability, enabled: enabled)
         if enabled {
             disabledCapabilityIDs.remove(id)
         } else {
@@ -63,12 +70,25 @@ final class OverviewStore {
         }
         Task {
             try? await pipeline?.setEnabled(id, enabled: enabled)
+            if !enabled, deleteHistory {
+                await persisting?.flush()
+                try? await store?.deleteSource(id)
+            }
             if let pipeline {
                 let next = await pipeline.snapshot()
                 applySnapshot(next)
                 await refreshHistory()
                 await refreshExplanation()
             }
+        }
+    }
+
+    func runExternalDiagnostic() async {
+        guard isCapabilityEnabled(ExternalDiagnosticsCollector.capabilityID) else { return }
+        await pipeline?.runExternalDiagnostic()
+        if let pipeline {
+            applySnapshot(await pipeline.snapshot())
+            await refreshHistory()
         }
     }
 
@@ -201,9 +221,8 @@ final class OverviewStore {
 
         let collectors = StandardCollectors.make()
         capabilities = collectors.map(\.capability)
-        let knownIDs = capabilities.map(\.id)
-        let enabled = preferences.enabledIDs(from: knownIDs)
-        disabledCapabilityIDs = Set(knownIDs).subtracting(enabled)
+        let enabled = preferences.enabledIDs(from: capabilities)
+        disabledCapabilityIDs = Set(capabilities.map(\.id)).subtracting(enabled)
 
         let pipeline = CollectorPipeline(
             collectors: collectors,

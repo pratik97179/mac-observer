@@ -40,7 +40,7 @@ enum Profile: String, Identifiable, Hashable {
         case .performance:
             "CPU, memory, pressure, and thermal from the live host collectors."
         case .network:
-            "Interface receive and transmit rates. Not per-process."
+            "Interface rates, local gateway, and DNS. Not per-process."
         case .processes:
             "Process identity, CPU, and resident memory from proc_pidinfo."
         case .storage:

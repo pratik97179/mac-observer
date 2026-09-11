@@ -1,9 +1,12 @@
 import SwiftUI
 import MacObserverDomain
+import MacObserverCollectors
 
 struct CapabilitiesView: View {
     @Bindable var store: OverviewStore
     @State private var selectedID: String?
+    @State private var pendingEnable: CapabilityDescriptor?
+    @State private var pendingDisable: CapabilityDescriptor?
 
     var body: some View {
         ScrollView {
@@ -11,7 +14,7 @@ struct CapabilitiesView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
                     Text("Capabilities")
                         .font(Theme.Typography.pageTitle)
-                    Text("Standard collectors stay on this Mac. Turning one off stops future samples from that source.")
+                    Text("Standard collectors stay on this Mac. Optional sources start off. Turning one off stops future samples from that source.")
                         .font(Theme.Typography.body)
                         .foregroundStyle(Theme.Color.secondary)
                         .frame(maxWidth: 640, alignment: .leading)
@@ -37,6 +40,50 @@ struct CapabilitiesView: View {
             .instrumentContent()
         }
         .instrumentScreen()
+        .confirmationDialog(
+            pendingEnable.map { "Turn on \($0.title)?" } ?? "Turn on this source?",
+            isPresented: Binding(
+                get: { pendingEnable != nil },
+                set: { if !$0 { pendingEnable = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Turn on") {
+                if let capability = pendingEnable {
+                    store.setCapabilityEnabled(capability.id, enabled: true)
+                }
+                pendingEnable = nil
+            }
+            Button("Cancel", role: .cancel) { pendingEnable = nil }
+        } message: {
+            if let capability = pendingEnable {
+                Text(enableDisclosure(capability))
+            }
+        }
+        .confirmationDialog(
+            pendingDisable.map { "Turn off \($0.title)?" } ?? "Turn off this source?",
+            isPresented: Binding(
+                get: { pendingDisable != nil },
+                set: { if !$0 { pendingDisable = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Turn off, keep history") {
+                if let capability = pendingDisable {
+                    store.setCapabilityEnabled(capability.id, enabled: false)
+                }
+                pendingDisable = nil
+            }
+            Button("Turn off and delete history", role: .destructive) {
+                if let capability = pendingDisable {
+                    store.setCapabilityEnabled(capability.id, enabled: false, deleteHistory: true)
+                }
+                pendingDisable = nil
+            }
+            Button("Cancel", role: .cancel) { pendingDisable = nil }
+        } message: {
+            Text("Future samples stop immediately. Delete history only removes rows this source wrote.")
+        }
     }
 
     private var selected: String? { selectedID }
@@ -61,7 +108,7 @@ struct CapabilitiesView: View {
                         .foregroundStyle(Theme.Color.secondary)
                 }
                 Spacer()
-                Toggle("Enabled", isOn: enabledBinding(capability.id))
+                Toggle("Enabled", isOn: enabledBinding(capability))
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .tint(Theme.Color.accent)
@@ -83,12 +130,22 @@ struct CapabilitiesView: View {
             Text(capability.title)
                 .font(Theme.Typography.section)
             labeled("Provides", capability.summary)
+            labeled("How it collects", capability.collectionMethod)
             labeled("Domains", domainLabel(capability.domains))
+            labeled("Stays on this Mac", capability.remainsLocal ? "Yes. Samples stay in the local store." : "No. A check sends a request off this Mac. The result can be stored locally afterward.")
+            labeled("Privacy class", privacyLabel(capability.privacyClass))
             labeled("Why this access", accessReason(capability.accessLevel))
-            labeled("How to enable", enableCopy(enabled: enabled, state: state, level: capability.accessLevel))
+            labeled("How to enable", enableCopy(enabled: enabled, state: state, capability: capability))
             Text(state)
                 .font(Theme.Typography.metadata)
                 .foregroundStyle(enabled ? Theme.Color.success : Theme.Color.tertiary)
+            if capability.id == ExternalDiagnosticsCollector.capabilityID, enabled {
+                Button("Run internet check") {
+                    Task { await store.runExternalDiagnostic() }
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.Color.accent)
+            }
         }
     }
 
@@ -103,10 +160,21 @@ struct CapabilitiesView: View {
         }
     }
 
-    private func enabledBinding(_ id: String) -> Binding<Bool> {
+    private func enabledBinding(_ capability: CapabilityDescriptor) -> Binding<Bool> {
         Binding(
-            get: { store.isCapabilityEnabled(id) },
-            set: { store.setCapabilityEnabled(id, enabled: $0) }
+            get: { store.isCapabilityEnabled(capability.id) },
+            set: { enabled in
+                if enabled == store.isCapabilityEnabled(capability.id) { return }
+                if enabled {
+                    if capability.defaultEnabled {
+                        store.setCapabilityEnabled(capability.id, enabled: true)
+                    } else {
+                        pendingEnable = capability
+                    }
+                } else {
+                    pendingDisable = capability
+                }
+            }
         )
     }
 
@@ -125,27 +193,46 @@ struct CapabilitiesView: View {
         case .privileged:
             "Needs extra authorization because the source is not available with standard process rights."
         case .external:
-            "Would leave this Mac. That class of source is not shipped."
+            "Leaves this Mac only when you run a check. Off by default."
         }
     }
 
-    private func enableCopy(enabled: Bool, state: String, level: AccessLevel) -> String {
+    private func enableCopy(enabled: Bool, state: String, capability: CapabilityDescriptor) -> String {
         if enabled {
+            if capability.accessLevel == .external {
+                return "This source is on. It does not check the internet until you run a check."
+            }
             return "This collector is on. Samples stay in the local store."
         }
         if state.lowercased().contains("denied") {
             return "Grant the required permission in System Settings, then turn this collector on."
         }
-        if level == .privileged {
+        if capability.accessLevel == .privileged {
             return "Authorize the extra right for this Mac, then turn the switch on."
         }
+        if capability.accessLevel == .external {
+            return "Turn the switch on, confirm the disclosure, then run a check when you want one."
+        }
         return "Turn the switch on to start collecting this source."
+    }
+
+    private func enableDisclosure(_ capability: CapabilityDescriptor) -> String {
+        "\(capability.summary) Method: \(capability.collectionMethod) Privacy class: \(privacyLabel(capability.privacyClass)). You can turn it off and delete its history afterward."
+    }
+
+    private func privacyLabel(_ privacy: PrivacyClass) -> String {
+        switch privacy {
+        case .operational: "Operational"
+        case .identifyingDeviceContext: "Identifying device context"
+        case .sensitiveActivityMetadata: "Sensitive activity metadata"
+        case .content: "Content"
+        }
     }
 
     private func dotColor(enabled: Bool, state: String) -> Color {
         if !enabled { return Theme.Color.disabled }
         if state.lowercased().contains("denied") { return Theme.Color.warning }
-        if state == "Collecting" { return Theme.Color.success }
+        if enabled { return Theme.Color.success }
         return Theme.Color.tertiary
     }
 

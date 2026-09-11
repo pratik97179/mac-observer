@@ -46,6 +46,12 @@ public struct MetricName: Sendable, Hashable, Codable, RawRepresentable {
     public static let powerTimeToEmptyMinutes = MetricName(valid: "power.time_to_empty_minutes")
     public static let powerTimeToFullMinutes = MetricName(valid: "power.time_to_full_minutes")
     public static let thermalState = MetricName(valid: "thermal.state")
+    public static let networkPublicAddress = MetricName(valid: "network.public_address")
+    public static let networkExternalRoundTripNanoseconds = MetricName(valid: "network.external_round_trip_nanoseconds")
+    public static let networkGatewayAddress = MetricName(valid: "network.gateway_address")
+    public static let networkPrimaryInterface = MetricName(valid: "network.primary_interface")
+    public static let networkDNSResolverAddress = MetricName(valid: "network.dns_resolver_address")
+    public static let networkDNSResolverCount = MetricName(valid: "network.dns_resolver_count")
 
     public static func isValid(_ rawValue: String) -> Bool {
         let parts = rawValue.split(separator: ".", omittingEmptySubsequences: false)
@@ -150,6 +156,8 @@ public enum MetricFormatter {
             "\(value.formatted(.number.precision(.fractionLength(1)))) W"
         case (.int(let value), .count):
             value.formatted(.number)
+        case (.int(let value), .nanoseconds):
+            "\(Int((Double(value) / 1_000_000).rounded())) ms"
         case (.state(let state), .enumeration):
             state
         default:
@@ -169,6 +177,8 @@ public enum MetricFormatter {
             "\(value.formatted(.number.precision(.fractionLength(1)))) W"
         case .count:
             Int64(value).formatted(.number)
+        case .nanoseconds:
+            "\(Int((value / 1_000_000).rounded())) ms"
         default:
             value.formatted(.number.precision(.fractionLength(2)))
         }

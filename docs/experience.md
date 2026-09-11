@@ -57,7 +57,7 @@ Process identity must include more than a display name or PID. A PID can be reus
 
 The timeline is a cross-domain investigation surface, not an unbounded log dump. Events reads stored rows for the selected range (1 hour, 24 hours, or 7 days), newest first, and can filter by domain. Entity and importance filters remain later work.
 
-Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, `capability.availability_changed`, and `explanation.generated`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
+Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, `capability.availability_changed`, `explanation.generated`, `network.external_lookup`, and `network.configuration_changed`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
 
 Events need a concise human summary, a source capability, a precise timestamp, and structured detail for the inspector. Avoid recording high-frequency resource samples as individual events.
 
@@ -77,7 +77,7 @@ An explanation must say “may be related” whenever the app cannot establish d
 
 ## Capabilities And Permissions
 
-Capabilities is a first-class screen. Each capability shows its state, the data it makes available, collection method, whether data remains local, and an enable/disable path. It distinguishes standard access, user-authorized capability, Apple-restricted system extension, and external lookup.
+Capabilities is a first-class screen. Each capability shows its state, the data it makes available, collection method, whether data remains local, privacy class, and an enable/disable path. It distinguishes standard access, user-authorized capability, Apple-restricted system extension, and external lookup. Optional sources start off. Enabling an external source requires an in-app disclosure. Disabling offers keep-history or delete-history.
 
 ## Writing And Visual Tone
 

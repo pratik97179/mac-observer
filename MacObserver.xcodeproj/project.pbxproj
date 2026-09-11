@@ -65,6 +65,8 @@
 		B31000000000000000000008 /* PowerCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000008 /* PowerCollector.swift */; };
 		B31000000000000000000009 /* StandardCollectors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000009 /* StandardCollectors.swift */; };
 		B31000000000000000000010 /* FanoutSink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000010 /* FanoutSink.swift */; };
+		B31000000000000000000012 /* ExternalDiagnosticsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000012 /* ExternalDiagnosticsCollector.swift */; };
+		B31000000000000000000013 /* NetworkPathSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31000000000000000000013 /* NetworkPathSource.swift */; };
 		B50000000000000000000001 /* TelemetryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000001 /* TelemetryStore.swift */; };
 		B50000000000000000000002 /* MemoryTelemetryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000002 /* MemoryTelemetryStore.swift */; };
 		B50000000000000000000003 /* SQLiteTelemetryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50000000000000000000003 /* SQLiteTelemetryStore.swift */; };
@@ -132,6 +134,8 @@
 		A31000000000000000000008 /* PowerCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerCollector.swift; sourceTree = "<group>"; };
 		A31000000000000000000009 /* StandardCollectors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardCollectors.swift; sourceTree = "<group>"; };
 		A31000000000000000000010 /* FanoutSink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanoutSink.swift; sourceTree = "<group>"; };
+		A31000000000000000000012 /* ExternalDiagnosticsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDiagnosticsCollector.swift; sourceTree = "<group>"; };
+		A31000000000000000000013 /* NetworkPathSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkPathSource.swift; sourceTree = "<group>"; };
 		A50000000000000000000001 /* TelemetryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryStore.swift; sourceTree = "<group>"; };
 		A50000000000000000000002 /* MemoryTelemetryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryTelemetryStore.swift; sourceTree = "<group>"; };
 		A50000000000000000000003 /* SQLiteTelemetryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteTelemetryStore.swift; sourceTree = "<group>"; };
@@ -343,6 +347,8 @@
 				A31000000000000000000008 /* PowerCollector.swift */,
 				A31000000000000000000009 /* StandardCollectors.swift */,
 				A31000000000000000000010 /* FanoutSink.swift */,
+				A31000000000000000000012 /* ExternalDiagnosticsCollector.swift */,
+				A31000000000000000000013 /* NetworkPathSource.swift */,
 			);
 			name = Collectors;
 			path = Sources/MacObserverCollectors;
@@ -546,6 +552,8 @@
 				B31000000000000000000008 /* PowerCollector.swift in Sources */,
 				B31000000000000000000009 /* StandardCollectors.swift in Sources */,
 				B31000000000000000000010 /* FanoutSink.swift in Sources */,
+				B31000000000000000000012 /* ExternalDiagnosticsCollector.swift in Sources */,
+				B31000000000000000000013 /* NetworkPathSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -642,6 +650,8 @@
 					"$(inherited)",
 					"-framework",
 					IOKit,
+					"-framework",
+					SystemConfiguration,
 					"-lsqlite3",
 				);
 				MARKETING_VERSION = 0.1.0;
@@ -674,6 +684,8 @@
 					"$(inherited)",
 					"-framework",
 					IOKit,
+					"-framework",
+					SystemConfiguration,
 					"-lsqlite3",
 				);
 				MARKETING_VERSION = 0.1.0;
@@ -730,6 +742,8 @@
 					"$(inherited)",
 					"-framework",
 					IOKit,
+					"-framework",
+					SystemConfiguration,
 					"-lsqlite3",
 				);
 				SWIFT_VERSION = 6.0;
@@ -751,6 +765,8 @@
 					"$(inherited)",
 					"-framework",
 					IOKit,
+					"-framework",
+					SystemConfiguration,
 					"-lsqlite3",
 				);
 				SWIFT_VERSION = 6.0;

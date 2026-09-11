@@ -14,6 +14,7 @@ Mac Observer observes sensitive facts about a person’s device use. The product
 - Every stored record has a retention class and privacy class.
 - A user can delete locally retained history from Settings without uninstalling the application.
 - Standard collectors can be turned off from Capabilities. Disabled collectors stop immediately and do not emit further samples.
+- Optional external checks start off. They require an in-app disclosure, do not run until the user asks, and can delete only that source's stored rows on revoke.
 
 ## Data Classes
 

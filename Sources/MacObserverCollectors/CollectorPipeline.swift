@@ -69,6 +69,16 @@ public actor CollectorPipeline {
         await buffer.snapshot()
     }
 
+    public func runExternalDiagnostic() async {
+        guard running.contains(ExternalDiagnosticsCollector.capabilityID) else { return }
+        for collector in collectors {
+            if let diagnostics = collector as? ExternalDiagnosticsCollector {
+                await diagnostics.probe()
+                return
+            }
+        }
+    }
+
     private func sendDisabled(id: String, sink: any TelemetrySink) async {
         await sink.send(.availability(capabilityID: id, .unavailable(reason: "Disabled in Capabilities")))
         await sink.send(.event(EventFactory.capabilityAvailabilityChanged(

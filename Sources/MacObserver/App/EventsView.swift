@@ -56,7 +56,7 @@ struct EventsView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
                     Text("Events")
                         .font(Theme.Typography.pageTitle)
-                    Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, collector enablement, and generated explanations.")
+                    Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, collector enablement, generated explanations, internet checks you run, and local path changes.")
                         .font(Theme.Typography.body)
                         .foregroundStyle(Theme.Color.secondary)
                         .frame(maxWidth: 720, alignment: .leading)
@@ -118,7 +118,7 @@ struct EventsView: View {
         if domainFilter != nil {
             return "No events in this domain for the selected range."
         }
-        return "No stored events in this range. Disable a collector in Capabilities, or wait for a memory or thermal change."
+        return "No stored events in this range. Disable a collector in Capabilities, wait for a memory or thermal change, or run an internet check after enabling it."
     }
 
     fileprivate static func grouped(_ events: [Event]) -> [EventListItem] {

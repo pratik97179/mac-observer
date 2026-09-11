@@ -8,6 +8,7 @@ public protocol TelemetryStore: TelemetryPersisting, Sendable {
     func events(matching query: EventQuery) async throws -> [Event]
     func applyRetention(_ policy: RetentionPolicy, now: Date) async throws
     func deleteAll() async throws
+    func deleteSource(_ source: String) async throws
 }
 
 public enum StoreError: Error, Equatable {

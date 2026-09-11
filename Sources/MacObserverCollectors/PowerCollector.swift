@@ -8,7 +8,8 @@ public actor PowerCollector: TelemetryCollector {
         title: "Power",
         accessLevel: .standard,
         domains: [.power],
-        summary: "Battery charge from IOPS. Watts only when voltage and current are present."
+        summary: "Battery charge from IOPS. Watts only when voltage and current are present.",
+        collectionMethod: "IOPSCopyPowerSourcesInfo and IOKit power source details."
     )
 
     private let clock: any Clock

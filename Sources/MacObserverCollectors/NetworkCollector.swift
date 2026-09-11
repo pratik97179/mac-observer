@@ -8,19 +8,36 @@ public actor NetworkCollector: TelemetryCollector {
         title: "Network Interfaces",
         accessLevel: .standard,
         domains: [.network],
-        summary: "Interface throughput from getifaddrs link counters. Not per-process."
+        summary: "Interface throughput from getifaddrs, plus local gateway and DNS from SystemConfiguration. Not per-process.",
+        collectionMethod: "getifaddrs link counters and SCDynamicStore State:/Network/Global IPv4, IPv6, and DNS. Stays on this Mac."
     )
 
     private let clock: any Clock
+    private let bootSession: BootSessionID
+    private let pathSource: any NetworkPathSource
+    private let interval: Duration
     private let loop = LoopingCollector()
     private var previous: [String: (rx: UInt64, tx: UInt64, at: Date)] = [:]
+    private var previousPathSignature: String?
 
-    public init(clock: any Clock = SystemClock()) {
+    public init(clock: any Clock = SystemClock(), bootSession: BootSessionID) {
+        self.init(clock: clock, bootSession: bootSession, pathSource: SystemConfigurationPathSource())
+    }
+
+    init(
+        clock: any Clock,
+        bootSession: BootSessionID,
+        pathSource: any NetworkPathSource,
+        interval: Duration = .seconds(2)
+    ) {
         self.clock = clock
+        self.bootSession = bootSession
+        self.pathSource = pathSource
+        self.interval = interval
     }
 
     public func start(sink: any TelemetrySink) async throws {
-        await loop.start {
+        await loop.start(interval: interval) {
             await self.publish(to: sink)
         }
     }
@@ -30,10 +47,19 @@ public actor NetworkCollector: TelemetryCollector {
     }
 
     private func publish(to sink: any TelemetrySink) async {
+        let hadCounters = await publishCounters(to: sink)
+        let hadPath = await publishPath(to: sink)
+        if hadCounters || hadPath {
+            await sink.send(.availability(capabilityID: capability.id, .available))
+        } else {
+            await sink.send(.availability(capabilityID: capability.id, .unavailable(reason: "network path unavailable")))
+        }
+    }
+
+    private func publishCounters(to sink: any TelemetrySink) async -> Bool {
         var ifap: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifap) == 0, let first = ifap else {
-            await sink.send(.availability(capabilityID: capability.id, .unavailable(reason: "getifaddrs failed")))
-            return
+            return false
         }
         defer { freeifaddrs(first) }
 
@@ -72,7 +98,52 @@ public actor NetworkCollector: TelemetryCollector {
             }
             previous[name] = (counters.rx, counters.tx, now)
         }
+        return !totals.isEmpty
+    }
 
-        await sink.send(.availability(capabilityID: capability.id, .available))
+    private func publishPath(to sink: any TelemetrySink) async -> Bool {
+        guard let path = pathSource.currentPath(), !path.isEmpty else { return false }
+        let system = Entity.system(bootSession: bootSession)
+        if let primary = path.primaryInterface {
+            await sink.send(.metric(MetricFactory.make(
+                clock: clock, domain: .network, name: .networkPrimaryInterface, entity: system,
+                value: .state(primary), unit: .enumeration, source: capability.id
+            )))
+        }
+        if let gateway = path.gateway {
+            await sink.send(.metric(MetricFactory.make(
+                clock: clock, domain: .network, name: .networkGatewayAddress, entity: system,
+                value: .state(gateway), unit: .enumeration, source: capability.id
+            )))
+        }
+        if let resolver = path.dnsServers.first {
+            await sink.send(.metric(MetricFactory.make(
+                clock: clock, domain: .network, name: .networkDNSResolverAddress, entity: system,
+                value: .state(resolver), unit: .enumeration, source: capability.id
+            )))
+        }
+        await sink.send(.metric(MetricFactory.make(
+            clock: clock, domain: .network, name: .networkDNSResolverCount, entity: system,
+            value: .int(Int64(path.dnsServers.count)), unit: .count, source: capability.id
+        )))
+
+        let signature = path.signature
+        if let previousPathSignature, previousPathSignature != signature {
+            await sink.send(.event(EventFactory.make(
+                clock: clock,
+                domain: .network,
+                type: .networkConfigurationChanged,
+                entity: system,
+                summary: "Local network path changed.",
+                source: capability.id,
+                metadata: [
+                    "primary": path.primaryInterface ?? "",
+                    "dns_count": "\(path.dnsServers.count)"
+                ],
+                privacyClass: .identifyingDeviceContext
+            )))
+        }
+        previousPathSignature = signature
+        return true
     }
 }

@@ -7,7 +7,8 @@ public actor ProcessCollector: TelemetryCollector {
         title: "Processes",
         accessLevel: .standard,
         domains: [.process, .cpu, .memory],
-        summary: "Process CPU and resident memory from proc_pidinfo. Identity is PID plus start time plus boot."
+        summary: "Process CPU and resident memory from proc_pidinfo. Identity is PID plus start time plus boot.",
+        collectionMethod: "proc_listallpids and proc_pidinfo. Not Endpoint Security."
     )
 
     private let clock: any Clock

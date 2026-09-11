@@ -335,6 +335,32 @@ public actor SQLiteTelemetryStore: TelemetryStore {
         try Self.exec(db, "COMMIT")
     }
 
+    public func deleteSource(_ source: String) async throws {
+        guard let db else { return }
+        try Self.exec(db, "BEGIN IMMEDIATE")
+        do {
+            try deleteRows(table: "metrics", source: source, db: db)
+            try deleteRows(table: "events", source: source, db: db)
+            try Self.exec(db, "COMMIT")
+        } catch {
+            sqlite3_exec(db, "ROLLBACK", nil, nil, nil)
+            throw error
+        }
+    }
+
+    private func deleteRows(table: String, source: String, db: OpaquePointer) throws {
+        let sql = "DELETE FROM \(table) WHERE source = ?"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
+            throw StoreError.sqlite(Self.message(db))
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_text(statement, 1, source, -1, SQLITE_TRANSIENT)
+        guard sqlite3_step(statement) == SQLITE_DONE else {
+            throw StoreError.sqlite(Self.message(db))
+        }
+    }
+
     private static func migrate(_ db: OpaquePointer) throws {
         try exec(db, "PRAGMA journal_mode = WAL")
         try exec(db, "PRAGMA foreign_keys = ON")

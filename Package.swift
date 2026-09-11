@@ -16,7 +16,8 @@ let package = Package(
             name: "MacObserverCollectors",
             dependencies: ["MacObserverDomain"],
             linkerSettings: [
-                .linkedFramework("IOKit")
+                .linkedFramework("IOKit"),
+                .linkedFramework("SystemConfiguration")
             ]
         ),
         .target(
@@ -34,7 +35,8 @@ let package = Package(
                 .copy("Resources/macbook.png")
             ],
             linkerSettings: [
-                .linkedFramework("IOKit")
+                .linkedFramework("IOKit"),
+                .linkedFramework("SystemConfiguration")
             ]
         ),
         .testTarget(

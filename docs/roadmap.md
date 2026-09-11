@@ -12,7 +12,7 @@ Current series (live dashboard first) is complete. Persistence series:
 2. Persist live collector output.
 3. Downsampling and inspection charts.
 
-Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Overview can explain memory pressure, thermal elevation, and sustained CPU from stored telemetry. Retention keeps 7 days of raw samples and 90 days of 15-minute downsampled history.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Overview can explain memory pressure, thermal elevation, and sustained CPU from stored telemetry. The Network profile shows local gateway and DNS from SystemConfiguration. Retention keeps 7 days of raw samples and 90 days of 15-minute downsampled history.
 
 ## Milestone 1: Application Foundation
 
@@ -104,6 +104,8 @@ Acceptance criteria:
 - Event volume and retention remain bounded in normal use.
 
 ## Milestone 6: Optional Capabilities
+
+**Status:** In progress locally. Capabilities lists each source with collection method, whether data stays local, privacy class, and an enable path. External Internet Check is off by default, requires an in-app disclosure, and does not request the network until the user runs a check. Turning a source off can keep or delete that source's history. Network Extension and Endpoint Security are not implemented; they still need Apple entitlements before any collector.
 
 Deliverables:
 

@@ -1,7 +1,9 @@
 import Foundation
+import MacObserverDomain
 
 struct CapabilityPreferences {
     static let disabledKey = "macobserver.disabledCapabilities"
+    static let enabledOptionalKey = "macobserver.enabledOptionalCapabilities"
 
     private let defaults: UserDefaults
 
@@ -9,26 +11,47 @@ struct CapabilityPreferences {
         self.defaults = defaults
     }
 
-    func isEnabled(_ id: String) -> Bool {
-        !disabledIDs().contains(id)
+    func isEnabled(_ capability: CapabilityDescriptor) -> Bool {
+        CapabilityPolicy.isEnabled(
+            capability,
+            disabledStandard: disabledStandardIDs(),
+            enabledOptional: enabledOptionalIDs()
+        )
     }
 
-    func setEnabled(_ id: String, enabled: Bool) {
-        var disabled = disabledIDs()
-        if enabled {
-            disabled.remove(id)
+    func setEnabled(_ capability: CapabilityDescriptor, enabled: Bool) {
+        if capability.defaultEnabled {
+            var disabled = disabledStandardIDs()
+            if enabled {
+                disabled.remove(capability.id)
+            } else {
+                disabled.insert(capability.id)
+            }
+            defaults.set(Array(disabled), forKey: Self.disabledKey)
         } else {
-            disabled.insert(id)
+            var enabledOptional = enabledOptionalIDs()
+            if enabled {
+                enabledOptional.insert(capability.id)
+            } else {
+                enabledOptional.remove(capability.id)
+            }
+            defaults.set(Array(enabledOptional), forKey: Self.enabledOptionalKey)
         }
-        defaults.set(Array(disabled), forKey: Self.disabledKey)
     }
 
-    func enabledIDs(from known: [String]) -> Set<String> {
-        let disabled = disabledIDs()
-        return Set(known.filter { !disabled.contains($0) })
+    func enabledIDs(from capabilities: [CapabilityDescriptor]) -> Set<String> {
+        CapabilityPolicy.enabledIDs(
+            capabilities: capabilities,
+            disabledStandard: disabledStandardIDs(),
+            enabledOptional: enabledOptionalIDs()
+        )
     }
 
-    private func disabledIDs() -> Set<String> {
+    private func disabledStandardIDs() -> Set<String> {
         Set(defaults.stringArray(forKey: Self.disabledKey) ?? [])
+    }
+
+    private func enabledOptionalIDs() -> Set<String> {
+        Set(defaults.stringArray(forKey: Self.enabledOptionalKey) ?? [])
     }
 }
