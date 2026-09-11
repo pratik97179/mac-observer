@@ -1,6 +1,6 @@
 import Foundation
 
-public struct TimeRange: Sendable, Hashable {
+public struct TimeRange: Sendable, Hashable, Codable {
     public let start: Date
     public let end: Date
 

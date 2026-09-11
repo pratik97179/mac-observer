@@ -17,7 +17,9 @@ final class OverviewStore {
     private(set) var historyMessage: String?
     private(set) var historyEvents: [Event] = []
     private(set) var eventWindow: HistoryWindow = .lastHour
+    private(set) var explanation: Explanation?
     let startedAt: Date
+    private var persistedExplanationIDs: Set<String> = []
     private var disabledCapabilityIDs: Set<String> = []
 
     init() {
@@ -65,6 +67,7 @@ final class OverviewStore {
                 let next = await pipeline.snapshot()
                 applySnapshot(next)
                 await refreshHistory()
+                await refreshExplanation()
             }
         }
     }
@@ -78,7 +81,10 @@ final class OverviewStore {
         do {
             try await store?.deleteAll()
             historyMessage = "Local history deleted. Live sampling continues."
+            explanation = nil
+            persistedExplanationIDs = []
             await refreshHistory()
+            await refreshExplanation()
         } catch {
             historyMessage = "Could not delete local history."
         }
@@ -155,6 +161,28 @@ final class OverviewStore {
         let next = await pipeline.snapshot()
         applySnapshot(next)
         await refreshHistory()
+        await refreshExplanation()
+    }
+
+    func refreshExplanation() async {
+        let now = Date()
+        let eventRange = TimeRange(
+            start: now.addingTimeInterval(-ExplanationRules.recentHorizon),
+            end: now
+        )
+        let events = await events(in: eventRange)
+        let triggerTime = events
+            .filter(ExplanationRules.isSupportedTrigger)
+            .map(\.time.wallTime)
+            .max()
+        let metricStart = min(
+            now.addingTimeInterval(-ExplanationRules.lookback),
+            triggerTime?.addingTimeInterval(-ExplanationRules.lookback) ?? now
+        )
+        let metrics = await metrics(in: TimeRange(start: metricStart, end: now))
+        let next = ExplanationRules.select(events: events, metrics: metrics, now: now)
+        explanation = next
+        await persistExplanationIfNeeded(next, now: now)
     }
 
     func run() async {
@@ -191,6 +219,7 @@ final class OverviewStore {
             ticks += 1
             if ticks.isMultiple(of: 5) {
                 await persisting?.flush()
+                await refreshExplanation()
             }
             if ticks.isMultiple(of: 300) {
                 try? await store?.applyRetention(.documented, now: Date())
@@ -205,5 +234,54 @@ final class OverviewStore {
     private func applySnapshot(_ next: LiveSnapshot) {
         guard !snapshot.hasSameTelemetry(as: next) else { return }
         snapshot = next
+    }
+
+    private func persistExplanationIfNeeded(_ explanation: Explanation?, now: Date) async {
+        guard let explanation, !persistedExplanationIDs.contains(explanation.id) else { return }
+        let alreadyStored = historyEvents.contains {
+            $0.type == .explanationGenerated && $0.metadata["explanation_id"] == explanation.id
+        }
+        if alreadyStored {
+            persistedExplanationIDs.insert(explanation.id)
+            return
+        }
+        persistedExplanationIDs.insert(explanation.id)
+        let matched = snapshot.metrics.first { $0.entity.identityKey == explanation.inspect.entityKey }
+        let system = snapshot.metrics.first { metric in
+            if case .system = metric.entity { return true }
+            return false
+        }
+        let entity = matched?.entity ?? system?.entity ?? .system(bootSession: BootSessionID("unknown"))
+        try? await store?.insert(events: [explanation.asEvent(now: now, entity: entity)])
+        await refreshHistory()
+    }
+
+    private func events(in range: TimeRange) async -> [Event] {
+        var rows: [Event] = []
+        if let store {
+            await persisting?.flush()
+            rows = (try? await store.events(matching: EventQuery(range: range, limit: 200))) ?? []
+        }
+        let live = snapshot.events.filter {
+            $0.time.wallTime >= range.start && $0.time.wallTime <= range.end
+        }
+        var seen = Set(rows.map(\.id))
+        return rows + live.filter { seen.insert($0.id).inserted }
+    }
+
+    private func metrics(in range: TimeRange) async -> [Metric] {
+        var rows: [Metric] = []
+        if let store {
+            await persisting?.flush()
+            rows = (try? await store.metrics(matching: MetricQuery(range: range))) ?? []
+        }
+        let live = snapshot.metrics.filter {
+            $0.time.wallTime >= range.start && $0.time.wallTime <= range.end
+        }
+        if rows.isEmpty {
+            return live
+        }
+        var seen = Set(rows.map(\.id))
+        return rows + live.filter { seen.insert($0.id).inserted }
     }
 }

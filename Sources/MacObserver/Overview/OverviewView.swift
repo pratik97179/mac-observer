@@ -37,6 +37,9 @@ struct OverviewView: View {
                 .instrumentContent()
             }
             .instrumentScreen()
+            .task {
+                await store.refreshExplanation()
+            }
             .onChange(of: onPulseFocus) { _, _ in
                 withAnimation(Motion.panel) {
                     proxy.scrollTo("timeline", anchor: .center)
@@ -413,22 +416,26 @@ struct OverviewView: View {
     }
 
     private var footer: some View {
-        HStack {
-            HStack(spacing: Theme.Space.compact) {
-                Image(systemName: "lightbulb")
-                    .foregroundStyle(Theme.Color.accent)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.health.state == .healthy ? "No issues detected" : model.health.detail)
-                        .font(Theme.Typography.section)
-                    Text(model.health.state == .healthy ? "Your system is running smoothly." : model.health.detail)
-                        .font(Theme.Typography.metadata)
-                        .foregroundStyle(Theme.Color.secondary)
+        HStack(alignment: .bottom) {
+            if let explanation = store.explanation {
+                explanationCard(explanation)
+            } else {
+                HStack(spacing: Theme.Space.compact) {
+                    Image(systemName: "lightbulb")
+                        .foregroundStyle(Theme.Color.accent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(model.health.state == .healthy ? "No issues detected" : model.health.detail)
+                            .font(Theme.Typography.section)
+                        Text(model.health.state == .healthy ? "Your system is running smoothly." : model.health.detail)
+                            .font(Theme.Typography.metadata)
+                            .foregroundStyle(Theme.Color.secondary)
+                    }
                 }
+                .padding(.horizontal, Theme.Space.component)
+                .padding(.vertical, Theme.Space.standard)
+                .glass(.resting, radius: Theme.Radius.secondary)
             }
-            .padding(.horizontal, Theme.Space.component)
-            .padding(.vertical, Theme.Space.standard)
-            .glass(.resting, radius: Theme.Radius.secondary)
-            Spacer()
+            Spacer(minLength: Theme.Space.standard)
             Text("Last updated · \(snapshot.capturedAt.wallTime.formatted(date: .omitted, time: .shortened))")
                 .font(Theme.Typography.metadata)
                 .foregroundStyle(Theme.Color.tertiary)
@@ -441,6 +448,53 @@ struct OverviewView: View {
             .buttonStyle(.plain)
             .glass(.recessed, radius: Theme.Radius.control)
         }
+    }
+
+    private func explanationCard(_ explanation: Explanation) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Space.compact) {
+            HStack(alignment: .firstTextBaseline, spacing: Theme.Space.compact) {
+                Image(systemName: "lightbulb")
+                    .foregroundStyle(Theme.Color.accent)
+                Text(explanation.headline)
+                    .font(Theme.Typography.section)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: Theme.Space.control)
+                NavigationLink(value: MetricInspectTarget(explanation.inspect)) {
+                    Text("Inspect")
+                        .font(Theme.Typography.metadata)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.Color.accent)
+            }
+            Text("Look-back \(Int(explanation.window.end.timeIntervalSince(explanation.window.start).rounded())) seconds")
+                .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Color.tertiary)
+            ForEach(explanation.claims) { claim in
+                HStack(alignment: .firstTextBaseline, spacing: Theme.Space.control) {
+                    Text(claim.relation == .evidence ? "Evidence" : "May be related")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(claim.relation == .evidence ? Theme.Color.accent : Theme.Color.tertiary)
+                        .frame(width: 88, alignment: .leading)
+                    Text(claim.summary)
+                        .font(Theme.Typography.metadata)
+                        .foregroundStyle(Theme.Color.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let inspect = claim.inspect {
+                        Spacer(minLength: Theme.Space.control)
+                        NavigationLink(value: MetricInspectTarget(inspect)) {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Theme.Color.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, Theme.Space.component)
+        .padding(.vertical, Theme.Space.standard)
+        .frame(maxWidth: 760, alignment: .leading)
+        .glass(.resting, radius: Theme.Radius.secondary)
     }
 
     private func labeledCard<Content: View>(title: String, symbol: String, @ViewBuilder content: () -> Content) -> some View {

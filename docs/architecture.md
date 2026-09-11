@@ -28,7 +28,7 @@ macOS APIs / optional system extensions / external diagnostics
 | Module | Responsibility | Must not do |
 | --- | --- | --- |
 | `App` | App lifecycle, dependency composition, navigation. | Call system APIs or contain collector-specific logic. |
-| `Domain` | Typed telemetry records, entity identities, health rules, and query types. | Depend on SwiftUI, SQLite, or specific macOS frameworks. |
+| `Domain` | Typed telemetry records, entity identities, health rules, explanation rules, and query types. | Depend on SwiftUI, SQLite, or specific macOS frameworks. |
 | `Collectors` | Obtain readings from one platform source and report availability. | Make presentation decisions or write directly to UI state. |
 | `Normalization` | Validate units, associate entities, assign source metadata, and deduplicate. | Invent a measurement when a source is unavailable. |
 | `Storage` | Persist and retrieve normalized data with retention. | Encode UI navigation state. |

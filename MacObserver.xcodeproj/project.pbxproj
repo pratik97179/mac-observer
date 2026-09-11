@@ -37,6 +37,9 @@
 		B20000000000000000000007 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Health.swift */; };
 		B20000000000000000000008 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Query.swift */; };
 		B20000000000000000000009 /* SeriesBucketing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* SeriesBucketing.swift */; };
+		B20000000000000000000014 /* Explanation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* Explanation.swift */; };
+		B20000000000000000000015 /* InvestigationInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* InvestigationInterval.swift */; };
+		B20000000000000000000016 /* MetricDownsampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* MetricDownsampler.swift */; };
 		B10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000009 /* Assets.xcassets */; };
 		B20000000000000000000001 /* Observation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* Observation.swift */; };
 		B20000000000000000000002 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* Entity.swift */; };
@@ -108,6 +111,9 @@
 		A20000000000000000000006 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
 		A20000000000000000000008 /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		A20000000000000000000009 /* SeriesBucketing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeriesBucketing.swift; sourceTree = "<group>"; };
+		A20000000000000000000010 /* Explanation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explanation.swift; sourceTree = "<group>"; };
+		A20000000000000000000013 /* InvestigationInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestigationInterval.swift; sourceTree = "<group>"; };
+		A20000000000000000000014 /* MetricDownsampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricDownsampler.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* libMacObserverDomain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMacObserverDomain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A30000000000000000000001 /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		A30000000000000000000002 /* TelemetryCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryCollector.swift; sourceTree = "<group>"; };
@@ -310,6 +316,9 @@
 				A20000000000000000000006 /* Health.swift */,
 				A20000000000000000000008 /* Query.swift */,
 				A20000000000000000000009 /* SeriesBucketing.swift */,
+				A20000000000000000000010 /* Explanation.swift */,
+				A20000000000000000000013 /* InvestigationInterval.swift */,
+				A20000000000000000000014 /* MetricDownsampler.swift */,
 			);
 			name = Domain;
 			path = Sources/MacObserverDomain;
@@ -511,6 +520,9 @@
 				B20000000000000000000007 /* Health.swift in Sources */,
 				B20000000000000000000008 /* Query.swift in Sources */,
 				B20000000000000000000009 /* SeriesBucketing.swift in Sources */,
+				B20000000000000000000014 /* Explanation.swift in Sources */,
+				B20000000000000000000015 /* InvestigationInterval.swift in Sources */,
+				B20000000000000000000016 /* MetricDownsampler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -195,6 +195,7 @@ struct EventContractTests {
         #expect(EventType(rawValue: "memory.pressure_changed") != nil)
         #expect(EventType(rawValue: "thermal.state_changed") != nil)
         #expect(EventType(rawValue: "capability.availability_changed") != nil)
+        #expect(EventType(rawValue: "explanation.generated") != nil)
         #expect(EventType(rawValue: "launched") == nil)
     }
 }

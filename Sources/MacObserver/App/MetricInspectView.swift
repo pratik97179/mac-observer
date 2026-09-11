@@ -19,6 +19,22 @@ struct MetricInspectTarget: Hashable, Identifiable {
             entityKey: metric.entity.identityKey
         )
     }
+
+    init(title: String, metricName: MetricName, domain: TelemetryDomain, entityKey: String?) {
+        self.title = title
+        self.metricName = metricName
+        self.domain = domain
+        self.entityKey = entityKey
+    }
+
+    init(_ inspect: ExplanationInspect) {
+        self.init(
+            title: inspect.title,
+            metricName: inspect.metricName,
+            domain: inspect.domain,
+            entityKey: inspect.entityKey
+        )
+    }
 }
 
 struct MetricInspectView: View {

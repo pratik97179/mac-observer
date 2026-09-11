@@ -51,6 +51,7 @@ Events are not free-form logs. New event types require an owner, a documented pr
 | `memory.pressure_changed` | `standard.cpu_memory` | Memory pressure state differs from the previous sample. The first sample is not an event. |
 | `thermal.state_changed` | `standard.cpu_memory` | ProcessInfo thermal state differs from the previous sample. The first sample is not an event. |
 | `capability.availability_changed` | Collector pipeline | A standard collector is disabled or re-enabled in Capabilities. Disabled collectors at launch also emit this. |
+| `explanation.generated` | Query / explanation rules | A deterministic explanation was produced for a supported state. One event per explanation id. |
 
 ## Entity Identity
 
@@ -102,3 +103,15 @@ Unbounded dimensions make a local time-series store unusable. Domain names, URLs
 ## Health And Explanation Inputs
 
 Health rules consume typed metrics and events, never display strings. A rule must document its threshold, look-back window, suppression conditions, and the evidence it can cite. The rule result is itself an event so it can be inspected and audited.
+
+Shipped explanation rules:
+
+| Rule | Trigger | Look-back | Evidence | Correlation |
+| --- | --- | --- | --- | --- |
+| `memory.pressure` | `memory.pressure_changed` to `warning`, `urgent`, or `critical`. Recoveries to `normal` are suppressed. | 90 seconds | Pressure state transition | Swap growth above 32 MB; process resident growth above 50 MB |
+| `thermal.state` | `thermal.state_changed` to `fair`, `serious`, or `critical`. Return to `nominal` is suppressed. | 90 seconds | Thermal state transition | Host CPU at or above 80%; process CPU at or above 10%; disk I/O averaging 40 MB/s |
+| `cpu.sustained` | Host `cpu.utilization_ratio` stays at or above 0.80 for at least 45 seconds inside a 60-second window, with at least three samples. Uses 0.95 when that floor is met. | 60 seconds | Host CPU versus the 80% / 95% health thresholds | Top process CPU; disk I/O as above |
+
+Process and disk claims are labeled correlation. They always include “may be related”. The query layer (`ExplanationRules.select`) owns the join. The UI renders the result and Inspect targets; it does not invent contributors from unrelated arrays.
+
+`explanation.generated` is written once per explanation id (`trigger event UUID`, or a 15-minute bucket for sustained CPU) so volume stays bounded. Disk pressure is not a first-class trigger until a dedicated event exists.

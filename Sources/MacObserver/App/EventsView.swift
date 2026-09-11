@@ -56,7 +56,7 @@ struct EventsView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
                     Text("Events")
                         .font(Theme.Typography.pageTitle)
-                    Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, and collector enablement.")
+                    Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, collector enablement, and generated explanations.")
                         .font(Theme.Typography.body)
                         .foregroundStyle(Theme.Color.secondary)
                         .frame(maxWidth: 720, alignment: .leading)

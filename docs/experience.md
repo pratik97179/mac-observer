@@ -57,7 +57,7 @@ Process identity must include more than a display name or PID. A PID can be reus
 
 The timeline is a cross-domain investigation surface, not an unbounded log dump. Events reads stored rows for the selected range (1 hour, 24 hours, or 7 days), newest first, and can filter by domain. Entity and importance filters remain later work.
 
-Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, and `capability.availability_changed`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
+Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, `capability.availability_changed`, and `explanation.generated`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
 
 Events need a concise human summary, a source capability, a precise timestamp, and structured detail for the inspector. Avoid recording high-frequency resource samples as individual events.
 
@@ -73,7 +73,7 @@ An explanation is a deterministic correlation generated after a supported state 
 
 For example: “Memory pressure became high at 11:42. Swap grew by 1.4 GB over 90 seconds. Docker and Chrome increased resident memory by 1.2 GB and 820 MB.”
 
-An explanation must say “may be related” whenever the app cannot establish direct ownership or causality.
+An explanation must say “may be related” whenever the app cannot establish direct ownership or causality. Overview shows the latest matching card. Inspect opens stored history for the cited metric or process.
 
 ## Capabilities And Permissions
 

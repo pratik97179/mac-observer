@@ -12,7 +12,7 @@ Current series (live dashboard first) is complete. Persistence series:
 2. Persist live collector output.
 3. Downsampling and inspection charts.
 
-Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Retention keeps 7 days of raw samples and 90 days of 15-minute downsampled history.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Overview can explain memory pressure, thermal elevation, and sustained CPU from stored telemetry. Retention keeps 7 days of raw samples and 90 days of 15-minute downsampled history.
 
 ## Milestone 1: Application Foundation
 
@@ -88,6 +88,8 @@ Acceptance criteria:
 - Search result targets carry sufficient context to open a useful view.
 
 ## Milestone 5: Events And Deterministic Explanations
+
+**Status:** Complete locally. Events already filter by domain and range. Overview shows an explanation card after memory pressure, thermal elevation, or sustained CPU. Claims cite measurements, mark process and disk rows as correlation with “may be related”, and Inspect opens the same query-backed history views. Each explanation is stored once as `explanation.generated`.
 
 Deliverables:
 
