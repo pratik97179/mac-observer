@@ -113,6 +113,23 @@ struct ProcessGlyph: View {
     }
 }
 
+struct EntityColumnHeader: View {
+    let columns: [String]
+
+    var body: some View {
+        HStack(spacing: Theme.Space.standard) {
+            ForEach(Array(columns.enumerated()), id: \.offset) { index, title in
+                Text(title)
+                    .font(Theme.Typography.micro)
+                    .foregroundStyle(Theme.Color.tertiary)
+                    .frame(maxWidth: index == 0 ? .infinity : 120, alignment: index == 0 ? .leading : .trailing)
+            }
+        }
+        .padding(.bottom, Theme.Space.micro)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
 struct EntityRow: View {
     let cells: [String]
 

@@ -18,7 +18,7 @@ struct SettingsView: View {
 
                 settingsGroup(title: "Retention") {
                     Text("Raw metrics stay for 7 days, then roll into 15-minute averages kept for 90 days. Events older than 30 days are removed.")
-                    Text("Policy is applied at launch and about every five minutes while the app runs.")
+                    Text("This policy is documented here. It is not editable in the app. It is applied at launch and about every five minutes while the app runs.")
                         .foregroundStyle(Theme.Color.tertiary)
                 }
 
@@ -43,8 +43,17 @@ struct SettingsView: View {
                 }
 
                 settingsGroup(title: "Appearance") {
-                    Text("Dark cockpit. Color is reserved for health and selection.")
+                    Text("The cockpit is always dark. Color is reserved for health and selection.")
                 }
+
+                #if DEBUG
+                settingsGroup(title: "Design system") {
+                    NavigationLink("Open preview") {
+                        DesignSystemPreview()
+                    }
+                    .foregroundStyle(Theme.Color.accent)
+                }
+                #endif
             }
             .font(Theme.Typography.body)
             .foregroundStyle(Theme.Color.secondary)

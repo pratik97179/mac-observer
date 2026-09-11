@@ -2,7 +2,7 @@ import SwiftUI
 
 enum Theme {
     enum Color {
-        static let canvas = SwiftUI.Color(red: 0.028, green: 0.031, blue: 0.045)
+        static let canvas = SwiftUI.Color(red: 8 / 255, green: 10 / 255, blue: 14 / 255)
         static let canvasRaised = SwiftUI.Color(red: 0.045, green: 0.050, blue: 0.068)
         static let canvasElevated = canvasRaised
         static let surfaceResting = SwiftUI.Color(red: 0.102, green: 0.112, blue: 0.145)
@@ -34,53 +34,57 @@ enum Theme {
     }
 
     enum Typography {
-        static let display = Font.system(size: 32, weight: .semibold)
-        static let pageTitle = Font.system(size: 26, weight: .semibold)
-        static let hero = Font.system(size: 42, weight: .semibold).monospacedDigit()
-        static let largeMetric = Font.system(size: 28, weight: .medium).monospacedDigit()
-        static let section = Font.system(size: 15, weight: .semibold)
-        static let body = Font.system(size: 14)
-        static let secondary = Font.system(size: 13)
-        static let metadata = Font.system(size: 11, weight: .medium)
-        static let micro = Font.system(size: 10, weight: .medium)
+        static var display: Font { DesignMetricsStore.current.type.display }
+        static var pageTitle: Font { DesignMetricsStore.current.type.pageTitle }
+        static var heroTitle: Font { DesignMetricsStore.current.type.heroTitle }
+        static var hero: Font { DesignMetricsStore.current.type.hero }
+        static var largeMetric: Font { DesignMetricsStore.current.type.largeMetric }
+        static var section: Font { DesignMetricsStore.current.type.section }
+        static var body: Font { DesignMetricsStore.current.type.body }
+        static var secondary: Font { DesignMetricsStore.current.type.secondary }
+        static var metadata: Font { DesignMetricsStore.current.type.metadata }
+        static var micro: Font { DesignMetricsStore.current.type.micro }
     }
 
     enum Space {
-        static let micro: CGFloat = 4
-        static let icon: CGFloat = 6
-        static let compact: CGFloat = 8
-        static let control: CGFloat = 12
-        static let standard: CGFloat = 16
-        static let component: CGFloat = 20
-        static let surface: CGFloat = 24
-        static let section: CGFloat = 28
-        static let large: CGFloat = 32
-        static let major: CGFloat = 40
-        static let breath: CGFloat = 48
-        static let hero: CGFloat = 64
-        static let contentX: CGFloat = 52
-        static let contentTop: CGFloat = 28
-        static let contentBottom: CGFloat = 56
-        static let scrollGutter: CGFloat = 18
-        static let cardGap: CGFloat = 24
+        private static var metrics: DesignMetrics { DesignMetricsStore.current }
+        private static var spacing: SpacingScale { metrics.spacing }
+
+        static var micro: CGFloat { spacing.xs * 0.8 }
+        static var icon: CGFloat { spacing.xs }
+        static var compact: CGFloat { spacing.sm }
+        static var control: CGFloat { spacing.md }
+        static var standard: CGFloat { spacing.md }
+        static var component: CGFloat { spacing.lg }
+        static var surface: CGFloat { spacing.lg }
+        static var section: CGFloat { spacing.xl }
+        static var large: CGFloat { spacing.xl }
+        static var major: CGFloat { spacing.xxl }
+        static var breath: CGFloat { spacing.xxxl }
+        static var hero: CGFloat { spacing.xxxxl }
+        static var contentX: CGFloat { metrics.horizontalInset }
+        static var contentTop: CGFloat { metrics.topInset }
+        static var contentBottom: CGFloat { metrics.bottomInset }
+        static var scrollGutter: CGFloat { 0 }
+        static var cardGap: CGFloat { spacing.lg }
         static let sidebarTop: CGFloat = 52
-        static let sidebarWidth: CGFloat = 240
+        static var sidebarWidth: CGFloat { metrics.sidebarWidth }
         static let itemHeight: CGFloat = 36
         static let search: CGFloat = 40
-        static let pulseWidth: CGFloat = 240
+        static var pulseWidth: CGFloat { 240 * metrics.scale }
         static let pulseHeight: CGFloat = 36
-        static let metricLabel: CGFloat = 8
-        static let metricViz: CGFloat = 10
-        static let metricMeta: CGFloat = 8
-        static let column: CGFloat = 28
-        static let xs: CGFloat = 6
-        static let sm: CGFloat = 10
-        static let md: CGFloat = 16
-        static let lg: CGFloat = 24
-        static let xl: CGFloat = 32
-        static let screen: CGFloat = 28
-        static let clusterX: CGFloat = 28
-        static let clusterY: CGFloat = 24
+        static var metricLabel: CGFloat { spacing.sm }
+        static var metricViz: CGFloat { spacing.sm }
+        static var metricMeta: CGFloat { spacing.sm }
+        static var column: CGFloat { spacing.xl }
+        static var xs: CGFloat { spacing.xs }
+        static var sm: CGFloat { spacing.sm }
+        static var md: CGFloat { spacing.md }
+        static var lg: CGFloat { spacing.lg }
+        static var xl: CGFloat { spacing.xl }
+        static var screen: CGFloat { spacing.xl }
+        static var clusterX: CGFloat { spacing.xl }
+        static var clusterY: CGFloat { spacing.lg }
     }
 
     enum Radius {
@@ -171,6 +175,21 @@ enum Theme {
         static let crossfade = 0.22
         static let surface = 0.24
         static let navigation = 0.28
+    }
+
+    enum Sidebar {
+        static var materialTint: SwiftUI.Color { SwiftUI.Color.white.opacity(0.07) }
+        static let materialOpacity = 0.18
+        static let edgeOpacity = 0.08
+        static let islandShadow = 0.16
+        static let islandShadowRadius: CGFloat = 28
+        static let islandShadowY: CGFloat = 8
+        static let selectedFill = 0.06
+        static let hoverFill = 0.035
+        static let focusOutline = 0.22
+        static var itemSpacing: CGFloat { Theme.Space.control }
+        static let iconSize: CGFloat = 18
+        static let iconSlot: CGFloat = 18
     }
 
     enum Chart {
@@ -309,59 +328,33 @@ extension View {
 
     func instrumentCanvas() -> some View {
         foregroundStyle(Theme.Color.text)
-            .background {
-                ZStack {
-                    Theme.Color.canvas
-                    RadialGradient(
-                        colors: [Theme.Color.accent.opacity(0.05), .clear],
-                        center: .topLeading,
-                        startRadius: 20,
-                        endRadius: 720
-                    )
-                }
-                .ignoresSafeArea()
-            }
     }
 
     func instrumentScreen() -> some View {
         scrollClipDisabled()
+            .scrollContentBackground(.hidden)
+            .background(.clear)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .overlay(alignment: .top) {
-                LinearGradient(
-                    stops: [
-                        .init(color: Theme.Color.canvas, location: 0),
-                        .init(color: Theme.Color.canvas.opacity(0.72), location: 0.28),
-                        .init(color: Theme.Color.canvas.opacity(0), location: 1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 28)
-                .allowsHitTesting(false)
-            }
-            .overlay(alignment: .bottom) {
-                LinearGradient(
-                    stops: [
-                        .init(color: Theme.Color.canvas.opacity(0), location: 0),
-                        .init(color: Theme.Color.canvas.opacity(0.72), location: 0.55),
-                        .init(color: Theme.Color.canvas, location: 1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 56)
-                .allowsHitTesting(false)
-            }
     }
 
     func instrumentContent() -> some View {
-        padding(.leading, Theme.Space.contentX)
-            .padding(.trailing, Theme.Space.contentX + Theme.Space.scrollGutter)
-            .padding(.top, Theme.Space.contentTop)
-            .padding(.bottom, Theme.Space.contentBottom)
+        modifier(InstrumentContentModifier())
     }
 
     func cardCell() -> some View {
-        frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct InstrumentContentModifier: ViewModifier {
+    @Environment(\.designMetrics) private var metrics
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, metrics.horizontalInset)
+            .padding(.top, metrics.spacing.md)
+            .padding(.bottom, metrics.bottomInset)
+            .frame(maxWidth: metrics.contentMaxWidth, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
     }
 }

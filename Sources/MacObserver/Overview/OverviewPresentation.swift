@@ -131,7 +131,7 @@ struct OverviewModel {
         readings.append(OverviewReading(
             name: "CPU",
             value: displayValue(cpu, availability: cpuAvailability),
-            detail: cpu == nil ? "Waiting for telemetry" : "P/E cores unavailable",
+            detail: cpu == nil ? "Waiting for telemetry" : "Host utilization",
             symbol: "cpu",
             tint: AppTheme.Color.accent,
             kind: kind(cpu, availability: cpuAvailability),
@@ -166,7 +166,7 @@ struct OverviewModel {
         readings.append(OverviewReading(
             name: "GPU",
             value: "",
-            detail: "Telemetry unavailable",
+            detail: "No public GPU telemetry in this build.",
             symbol: "cpu.fill",
             tint: Theme.Color.accent,
             kind: .unavailable
@@ -174,7 +174,7 @@ struct OverviewModel {
         readings.append(OverviewReading(
             name: "Thermal",
             value: thermal.map { MetricFormatter.displayString(for: $0).capitalized } ?? displayValue(thermal, availability: cpuAvailability),
-            detail: battery.map { "Battery \(MetricFormatter.displayString(for: $0))" } ?? "ProcessInfo thermal state",
+            detail: "ProcessInfo thermal state",
             symbol: "thermometer.medium",
             tint: Theme.Color.accent,
             kind: kind(thermal, availability: cpuAvailability),

@@ -7,11 +7,7 @@ import MacObserverDomain
 
 enum OverviewVisualFill {
     static func chipName() -> String {
-        sysctl("machdep.cpu.brand_string") ?? "Apple Silicon"
-    }
-
-    static func gpuLabel() -> String {
-        "\(chipName()) (Integrated)"
+        sysctl("machdep.cpu.brand_string") ?? "Unknown processor"
     }
 
     static func osSubtitle(memory: String?) -> String {
@@ -21,7 +17,7 @@ enum OverviewVisualFill {
             .replacingOccurrences(of: "Build ", with: "")
             .replacingOccurrences(of: ")", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        var parts = ["Apple Silicon"]
+        var parts = [chipName()]
         if let memory { parts.append(memory) }
         if let build, !build.isEmpty {
             parts.append("macOS \(os.majorVersion).\(os.minorVersion) (Build \(build))")
@@ -31,56 +27,15 @@ enum OverviewVisualFill {
         return parts.joined(separator: " · ")
     }
 
-    static func gpuRatio(cpu: Double) -> Double {
-        min(0.42, max(0.04, cpu * 0.48 + 0.02))
-    }
-
-    static func gpuSeries(_ cpu: [Double]) -> [Double] {
-        cpu.map(gpuRatio(cpu:))
-    }
-
-    static func pCoreRatio(cpu: Double) -> Double {
-        cpu * 0.75
-    }
-
-    static func eCoreRatio(cpu: Double) -> Double {
-        cpu * 0.25
-    }
-
-    static func thermalCelsius(state: String?) -> Int {
-        switch state?.lowercased() {
-        case "fair": 88
-        case "serious": 96
-        case "critical": 105
-        default: 79
-        }
-    }
-
     static func thermalTitle(state: String?) -> String {
         switch state?.lowercased() {
-        case "fair": "Elevated"
+        case "fair": "Fair"
         case "serious": "Serious"
         case "critical": "Critical"
         case "nominal", "normal": "Nominal"
-        default: "Nominal"
+        case nil: "Waiting"
+        default: state?.capitalized ?? "Waiting"
         }
-    }
-
-    static func storageCategories(used: Double) -> [(String, Double, Color)] {
-        let applications = used * 0.70
-        let system = used * 0.18
-        let other = max(0, used - applications - system)
-        return [
-            ("Applications", applications, Theme.Color.storage),
-            ("System", system, Theme.Color.secondary),
-            ("Other", other, Theme.Color.tertiary)
-        ]
-    }
-
-    static func connectionCount(rx: Double, tx: Double, interfaces: Int) -> Int {
-        let traffic = rx + tx
-        let fromTraffic = Int(min(40, traffic / 120_000))
-        return max(interfaces, 3 + fromTraffic + max(interfaces - 1, 0) * 2)
     }
 
     static func pulseLabel(cpu: Double) -> String {
@@ -108,15 +63,142 @@ enum OverviewVisualFill {
 }
 
 enum AppImage {
-    static func macBookHero() -> Image {
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var cachedHero: NSImage?
+
+    static var macBookHeroAspect: CGFloat {
+        let size = preparedMacBook()?.size ?? CGSize(width: 3, height: 2)
+        guard size.height > 1 else { return 1.5 }
+        return size.width / size.height
+    }
+
+    static func macBookHero() -> Image? {
+        guard let image = preparedMacBook() else { return nil }
+        return Image(nsImage: image)
+    }
+
+    private static func preparedMacBook() -> NSImage? {
+        lock.lock()
+        defer { lock.unlock() }
+        if let cachedHero { return cachedHero }
+        guard let source = loadMacBookSource() else { return nil }
+        let prepared = blendMachineVisual(source) ?? source
+        cachedHero = prepared
+        return prepared
+    }
+
+    private static func loadMacBookSource() -> NSImage? {
+        if let image = NSImage(named: "MacBookHero"), image.size.width > 8 {
+            return image
+        }
         #if SWIFT_PACKAGE
         if let url = Bundle.module.url(forResource: "macbook", withExtension: "png"),
            let image = NSImage(contentsOf: url) {
+            return image
+        }
+        #endif
+        if let url = Bundle.main.url(forResource: "macbook", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            return image
+        }
+        return nil
+    }
+
+    private static func blendMachineVisual(_ image: NSImage) -> NSImage? {
+        guard let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+        let width = cg.width
+        let height = cg.height
+        let bytesPerRow = width * 4
+        var pixels = [UInt8](repeating: 0, count: height * bytesPerRow)
+        guard let context = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+        context.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        let centerX = Double(width) * 0.5
+        let centerY = Double(height) * 0.55
+        let radiusX = Double(width) * 0.50
+        let radiusY = Double(height) * 0.50
+        var minX = width
+        var minY = height
+        var maxX = 0
+        var maxY = 0
+
+        for y in 0..<height {
+            for x in 0..<width {
+                let index = (y * width + x) * 4
+                let alphaByte = Double(pixels[index + 3])
+                if alphaByte == 0 { continue }
+                let red = min(1, Double(pixels[index]) / alphaByte)
+                let green = min(1, Double(pixels[index + 1]) / alphaByte)
+                let blue = min(1, Double(pixels[index + 2]) / alphaByte)
+                let alpha = alphaByte / 255
+                let luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+                let chroma = max(red, green, blue) - min(red, green, blue)
+                let dx = (Double(x) - centerX) / radiusX
+                let dy = (Double(y) - centerY) / radiusY
+                let distance = sqrt(dx * dx + dy * dy)
+                let keep = luma > 0.20 || chroma > 0.16
+                let fade = keep ? 0.0 : Self.smoothstep(0.28, 0.82, distance)
+                let nextAlpha = alpha * (1 - fade)
+                if nextAlpha < 0.02 {
+                    pixels[index] = 0
+                    pixels[index + 1] = 0
+                    pixels[index + 2] = 0
+                    pixels[index + 3] = 0
+                    continue
+                }
+                let scale = nextAlpha / alpha
+                pixels[index] = UInt8((Double(pixels[index]) * scale).rounded())
+                pixels[index + 1] = UInt8((Double(pixels[index + 1]) * scale).rounded())
+                pixels[index + 2] = UInt8((Double(pixels[index + 2]) * scale).rounded())
+                pixels[index + 3] = UInt8((nextAlpha * 255).rounded())
+                if x < minX { minX = x }
+                if y < minY { minY = y }
+                if x > maxX { maxX = x }
+                if y > maxY { maxY = y }
+            }
+        }
+
+        guard minX <= maxX, minY <= maxY, let full = context.makeImage() else { return nil }
+        let pad = 12
+        minX = max(0, minX - pad)
+        minY = max(0, minY - pad)
+        maxX = min(width - 1, maxX + pad)
+        maxY = min(height - 1, maxY + pad)
+        let crop = CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+        guard let cropped = full.cropping(to: crop) else { return nil }
+        return NSImage(
+            cgImage: cropped,
+            size: NSSize(width: CGFloat(cropped.width) / 2, height: CGFloat(cropped.height) / 2)
+        )
+    }
+
+    private static func smoothstep(_ edge0: Double, _ edge1: Double, _ value: Double) -> Double {
+        let t = max(0, min(1, (value - edge0) / (edge1 - edge0)))
+        return t * t * (3 - 2 * t)
+    }
+
+    static func environmentBackdrop() -> Image {
+        if let image = NSImage(named: "EnvironmentBackdrop") {
             return Image(nsImage: image)
         }
-        return Image(systemName: "laptopcomputer")
-        #else
-        Image("MacBookHero")
+        #if SWIFT_PACKAGE
+        if let url = Bundle.module.url(forResource: "bg", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            return Image(nsImage: image)
+        }
         #endif
+        if let url = Bundle.main.url(forResource: "bg", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            return Image(nsImage: image)
+        }
+        return Image("EnvironmentBackdrop")
     }
 }

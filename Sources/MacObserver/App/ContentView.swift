@@ -9,42 +9,67 @@ struct ContentView: View {
     @State private var selectedProcess: OverviewProcessRow?
 
     var body: some View {
-        ZStack {
-            HStack(spacing: 0) {
-                AppSidebar(selection: $selectedProfile, monitoringSince: store.startedAt) { profile in
-                    withAnimation(Motion.panel) {
-                        selectedProfile = profile
-                        path = NavigationPath()
-                        selectedProcess = nil
+        DesignMetricsReader {
+            ZStack {
+                AppBackground(state: AtmosphereState.from(snapshot: store.snapshot))
+                WindowChromeClearer()
+                    .frame(width: 0, height: 0)
+                    .allowsHitTesting(false)
+
+                HStack(spacing: 0) {
+                    AppSidebar(
+                        selection: $selectedProfile,
+                        monitoringSince: store.startedAt,
+                        monitorState: SidebarMonitorState.from(snapshot: store.snapshot)
+                    ) { profile in
+                        withAnimation(Motion.panel) {
+                            selectedProfile = profile
+                            path = NavigationPath()
+                            selectedProcess = nil
+                            showPalette = false
+                        }
                     }
-                }
-                VStack(spacing: 0) {
-                    AppToolbar(
-                        onSearch: { showPalette = true },
-                        onRefresh: { Task { await store.refreshNow() } }
-                    )
-                    NavigationStack(path: $path) {
-                        detail
-                            .navigationDestination(for: MetricInspectTarget.self) { target in
-                                MetricInspectView(store: store, target: target)
+
+                    ContentViewport {
+                        VStack(spacing: 0) {
+                            if selectedProfile != .overview {
+                                AppToolbar(
+                                    contextTitle: selectedProfile.rawValue,
+                                    onSearch: { showPalette = true },
+                                    onRefresh: { Task { await store.refreshNow() } }
+                                )
                             }
+                            NavigationStack(path: $path) {
+                                detail
+                                    .navigationDestination(for: MetricInspectTarget.self) { target in
+                                        MetricInspectView(store: store, target: target)
+                                    }
+                            }
+                            .scrollContentBackground(.hidden)
+                            .background(.clear)
+                            .toolbarBackground(.hidden, for: .windowToolbar)
+                            .animation(nil, value: store.snapshot)
+                        }
                     }
-                    .background(Theme.Color.canvas)
-                    .animation(nil, value: store.snapshot)
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+
+                if showPalette {
+                    CommandPalette(
+                        store: store,
+                        selection: $selectedProfile,
+                        path: $path,
+                        selectedProcess: $selectedProcess,
+                        isPresented: $showPalette
+                    )
+                }
             }
             .preferredColorScheme(.dark)
-            .instrumentCanvas()
-
-            if showPalette {
-                CommandPalette(
-                    store: store,
-                    selection: $selectedProfile,
-                    path: $path,
-                    isPresented: $showPalette
-                )
-            }
+            .foregroundStyle(Theme.Color.text)
+            .background(.clear)
+            .containerBackground(.clear, for: .window)
+            .ignoresSafeArea()
         }
         .animation(Motion.panel, value: showPalette)
         .sheet(item: $selectedProcess) { process in
@@ -71,7 +96,7 @@ struct ContentView: View {
                     onSearch: { showPalette = true },
                     onOpenCapabilities: { selectedProfile = .capabilities },
                     onOpenProcess: { selectedProcess = $0 },
-                    onOpenPerformance: { selectedProfile = .performance },
+                    onOpenProfile: { selectedProfile = $0 },
                     onRefresh: { Task { await store.refreshNow() } }
                 )
             case .performance, .network, .processes, .storage, .power:

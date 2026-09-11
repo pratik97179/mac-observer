@@ -21,12 +21,12 @@ enum Profile: String, Identifiable, Hashable {
 
     var symbol: String {
         switch self {
-        case .overview: "waveform.path.ecg"
-        case .performance: "chart.xyaxis.line"
-        case .network: "globe"
-        case .processes: "person.2"
-        case .storage: "internaldrive"
-        case .power: "bolt.fill"
+        case .overview: "square.grid.2x2"
+        case .performance: "waveform.path.ecg"
+        case .network: "cube"
+        case .processes: "square.stack"
+        case .storage: "square.3.layers.3d"
+        case .power: "bolt"
         case .events: "clock"
         case .capabilities: "slider.horizontal.3"
         case .settings: "gearshape"
@@ -52,7 +52,7 @@ enum Profile: String, Identifiable, Hashable {
         case .capabilities:
             "Each data source, its access level, and how to turn it off."
         case .settings:
-            "Retention and local history. Appearance follows the system."
+            "Documented retention and local history. The cockpit is always dark."
         }
     }
 }

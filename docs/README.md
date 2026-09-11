@@ -20,7 +20,7 @@ This directory is the durable product and engineering reference. Treat it as the
 
 ## Current State
 
-The repository Overview and resource profiles are bound to live collectors. Capabilities lists those sources and can turn them off. Optional Internet Check starts off and only leaves this Mac when you run a check. Network shows local gateway and DNS from SystemConfiguration. Settings shows retention and can delete the local SQLite history. Events queries that store by time range. Metric tiles open a history chart from the same store. Clicking a chart point loads events in that interval. Overview can show a deterministic explanation after memory pressure, thermal change, or sustained CPU. Metrics older than 7 days are stored as 15-minute downsampled points for 90 days.
+The repository is in a polish series after M1–M5. Overview and resource profiles bind to live collectors and must not invent numbers. Capabilities lists those sources and can turn them off. Optional Internet Check starts off and only leaves this Mac when you run a check. Network shows local gateway and DNS from SystemConfiguration. Settings shows a documented retention policy and can delete the local SQLite history. Events queries that store by time range. Metric tiles open a history chart from the same store. Clicking a chart point loads events in that interval. Overview can show a deterministic explanation after memory pressure, thermal change, or sustained CPU. Metrics older than 7 days are stored as 15-minute downsampled points for 90 days. M6 privileged Network Extension / Endpoint Security remains blocked on Apple entitlements. Security and Privacy profiles stay parked.
 
 ## Product In One Sentence
 

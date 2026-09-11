@@ -6,6 +6,17 @@ Ship in small GitHub pushes. Each checkpoint is reviewable on its own. Do not wa
 
 The agent implements one checkpoint, then stops. It does not commit or push. The maintainer commits and pushes when ready.
 
+## Polish series
+
+**Status:** Complete locally. Privileged Network Extension and Endpoint Security remain blocked on entitlements.
+
+Pause new collectors and privileged work. Make Overview, search, inspect, and profiles match what is actually collected.
+
+1. Honest Overview: no synthetic GPU, thermal °C, storage category split, connection count, or P/E split. Battery, pressure, health copy, and freshness match typed metrics.
+2. Controls that do what they say: System Activity is recent live samples; Command-K opens a process sheet; Performance inspect links work; Settings copy matches a forced dark cockpit and a documented, non-editable retention policy.
+3. Profiles and inspect: Performance memory breakdown, Network and Processes column headers, inspect loading and human titles, Capabilities selects the first source by default, Network does not pin a packet-loss error on a healthy path.
+4. This roadmap: polish is current; M6 privileged work stays blocked on entitlements; Security and Privacy profiles stay parked until there is real data.
+
 Current series (live dashboard first) is complete. Persistence series:
 
 1. SQLite store, queries, and retention.
@@ -121,6 +132,7 @@ Acceptance criteria:
 
 ## Not Scheduled Yet
 
+- Security and Privacy sidebar profiles until there is real collector data.
 - Remote sync or fleet management.
 - AI-generated recommendations.
 - Payload-level traffic inspection.

@@ -5,6 +5,7 @@ struct CommandPalette: View {
     let store: OverviewStore
     @Binding var selection: Profile
     @Binding var path: NavigationPath
+    @Binding var selectedProcess: OverviewProcessRow?
     @Binding var isPresented: Bool
     @State private var query = ""
     @FocusState private var focused: Bool
@@ -25,6 +26,13 @@ struct CommandPalette: View {
                     .font(Theme.Typography.body)
                     .padding(Theme.Space.standard)
                     .focused($focused)
+                    .focusEffectDisabled()
+                    .overlay {
+                        if focused {
+                            RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                                .strokeBorder(Theme.Color.accent.opacity(Theme.Sidebar.focusOutline), lineWidth: 1)
+                        }
+                    }
 
                 Rectangle()
                     .fill(Theme.Color.divider)
@@ -76,6 +84,9 @@ struct CommandPalette: View {
         .onAppear {
             focused = true
         }
+        .onDisappear {
+            focused = false
+        }
         .onExitCommand {
             isPresented = false
         }
@@ -86,8 +97,9 @@ struct CommandPalette: View {
         switch item.kind {
         case .screen(let profile):
             selection = profile
-        case .process:
+        case .process(let process):
             selection = .processes
+            selectedProcess = process
         case .metric(let target):
             selection = profile(for: target)
             path.append(target)
@@ -114,7 +126,7 @@ struct CommandPalette: View {
 struct PaletteItem: Identifiable {
     enum Kind {
         case screen(Profile)
-        case process
+        case process(OverviewProcessRow)
         case metric(MetricInspectTarget)
         case settings
         case event
@@ -153,7 +165,7 @@ enum PaletteCatalog {
                 type: "Process",
                 secondary: "CPU \(process.cpu)",
                 symbol: "cpu",
-                kind: .process
+                kind: .process(process)
             ))
         }
 

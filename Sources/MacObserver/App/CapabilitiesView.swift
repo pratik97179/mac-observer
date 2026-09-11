@@ -40,6 +40,11 @@ struct CapabilitiesView: View {
             .instrumentContent()
         }
         .instrumentScreen()
+        .onAppear {
+            if selectedID == nil {
+                selectedID = store.capabilities.first?.id
+            }
+        }
         .confirmationDialog(
             pendingEnable.map { "Turn on \($0.title)?" } ?? "Turn on this source?",
             isPresented: Binding(

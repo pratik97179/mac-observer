@@ -45,6 +45,7 @@ struct MetricInspectView: View {
     @State private var events: [Event] = []
     @State private var focus: InspectPlotPoint?
     @State private var focusedEvents: [Event] = []
+    @State private var loading = true
 
     private var current: Metric? { series.last }
     private var plot: [InspectPlotPoint] {
@@ -68,12 +69,9 @@ struct MetricInspectView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
                     Text(target.title)
                         .font(Theme.Typography.pageTitle)
-                    Text(current.map(MetricFormatter.displayString) ?? " ")
+                    Text(heroValue)
                         .font(Theme.Typography.hero)
-                        .readoutTransition(current.map(MetricFormatter.displayString) ?? "")
-                    Text(target.metricName.rawValue)
-                        .font(Theme.Typography.metadata)
-                        .foregroundStyle(Theme.Color.secondary)
+                        .readoutTransition(heroValue)
                     if let lastAge, lastAge > 15 {
                         StaleState(age: Int(lastAge))
                     }
@@ -96,6 +94,13 @@ struct MetricInspectView: View {
                         .padding(Theme.Space.standard)
                         .glass(.elevated, radius: Theme.Radius.secondary)
                         .transition(Motion.fadeUp)
+                } else if loading {
+                    Text("Loading history")
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
+                        .padding(Theme.Space.standard)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .glass(.elevated, radius: Theme.Radius.secondary)
                 } else {
                     EmptyState(
                         title: "History unavailable",
@@ -123,6 +128,11 @@ struct MetricInspectView: View {
             focus = nil
             focusedEvents = []
         }
+    }
+
+    private var heroValue: String {
+        if loading { return "Loading" }
+        return current.map(MetricFormatter.displayString) ?? "No samples in this range"
     }
 
     private var chartCaption: String {
@@ -196,10 +206,12 @@ struct MetricInspectView: View {
     }
 
     private func reload() async {
+        loading = true
         let nextSeries = await store.metricSeries(for: target, window: window)
         let nextEvents = await store.relatedEvents(for: target, window: window)
         series = nextSeries
         events = nextEvents
+        loading = false
     }
 
     private func reloadFocusedEvents() async {

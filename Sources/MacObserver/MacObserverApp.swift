@@ -13,12 +13,19 @@ struct MacObserverApp: App {
             ContentView(store: store)
                 .frame(minWidth: 1_050, minHeight: 700)
                 .preferredColorScheme(.dark)
+                .containerBackground(.clear, for: .window)
                 .task {
                     await store.run()
                 }
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1_280, height: 820)
+        #if DEBUG
+        .commands {
+            BackgroundDebugCommands()
+            SidebarMaterialDebugCommands()
+        }
+        #endif
     }
 }
 

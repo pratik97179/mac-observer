@@ -32,7 +32,8 @@ let package = Package(
             dependencies: ["MacObserverDomain", "MacObserverCollectors", "MacObserverStorage"],
             exclude: ["Assets.xcassets"],
             resources: [
-                .copy("Resources/macbook.png")
+                .copy("Resources/macbook.png"),
+                .copy("Resources/bg.png")
             ],
             linkerSettings: [
                 .linkedFramework("IOKit"),

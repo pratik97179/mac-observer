@@ -35,7 +35,6 @@ struct LiveProfileView: View {
                     EmptyView()
                 }
             }
-            .frame(maxWidth: 1_080, alignment: .leading)
             .instrumentContent()
         }
         .instrumentScreen()
@@ -80,6 +79,19 @@ struct LiveProfileView: View {
             }
             .padding(Theme.Space.component)
             .glass(.elevated, radius: Theme.Radius.secondary)
+
+            if !model.rows.isEmpty {
+                VStack(alignment: .leading, spacing: Theme.Space.micro) {
+                    Text("Memory")
+                        .font(Theme.Typography.section)
+                    EntityColumnHeader(columns: model.columns)
+                    ForEach(model.rows) { row in
+                        EntityRow(cells: row.cells)
+                    }
+                }
+                .padding(Theme.Space.component)
+                .glass(.elevated, radius: Theme.Radius.secondary)
+            }
         }
     }
 
@@ -111,6 +123,11 @@ struct LiveProfileView: View {
                 Text(memoryCompositionCopy)
             } else {
                 Text(reading.detail)
+            }
+        }
+        .overlay {
+            if let inspect = reading.inspect {
+                NavigationLink(value: inspect) { Color.clear }.buttonStyle(.plain)
             }
         }
     }
@@ -169,7 +186,6 @@ struct LiveProfileView: View {
                 }
                 localPath
                 internetCheck
-                UnavailableState(title: "Packet loss is not collected.")
             }
             .padding(Theme.Space.surface)
             .glass(.elevated, radius: Theme.Radius.secondary)
@@ -180,6 +196,7 @@ struct LiveProfileView: View {
                 if model.rows.isEmpty {
                     EmptyState(title: "No interfaces", message: "Interface counters appear after the network collector publishes a sample.")
                 } else {
+                    EntityColumnHeader(columns: model.columns)
                     ForEach(model.rows) { row in
                         EntityRow(cells: row.cells)
                     }
@@ -313,6 +330,7 @@ struct LiveProfileView: View {
             if processes.isEmpty {
                 EmptyState(title: "No notable activity", message: "The system is currently quiet.")
             } else {
+                EntityColumnHeader(columns: model.columns.isEmpty ? ["Process", "CPU", "Memory", "Network"] : model.columns)
                 ForEach(processes) { process in
                     Button {
                         onOpenProcess(process)

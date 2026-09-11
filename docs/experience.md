@@ -8,7 +8,7 @@ Shipped now:
 
 - Overview, Performance, Network, Processes, Storage, Power: live readings from the same snapshot
 - Capabilities: standard collectors, live state, and an enable/disable path
-- Settings: retention policy, history path, and delete local history
+- Settings: documented retention policy (not editable), history path, and delete local history. The cockpit is always dark.
 - Events: local SQLite history with 1 hour, 24 hour, and 7 day ranges, filterable by domain
 
 Later, when supported data exists:
@@ -24,10 +24,11 @@ The default screen answers only: **Is my Mac okay, and what is currently consumi
 
 It contains:
 
-- Machine identity and one health state: Healthy, Attention, or Investigate. First paint before any sample is shown as Sampling, not Attention.
-- A compact resource summary: CPU, memory, network, storage I/O, power, thermal state, and battery when available. Tiles and the activity table keep a reserved skeleton; pending values are "—" until a sample arrives. Layout does not reflow when those strings change.
-- A short ranked activity list. The columns must correspond to the currently relevant types of activity, not every possible metric. Unused rows stay as placeholders so the table height is stable.
-- A visible data freshness indicator when a collector is stale or unavailable.
+- Machine identity and one health state: Healthy, Attention, or Investigate. First paint before any sample is shown as Collecting, not Attention. The badge is the state; the sentence next to it is the detail, not a second copy of the same phrase.
+- A compact resource summary from typed metrics only: host CPU, memory used/total, ProcessInfo thermal state, volume used/available/capacity, interface RX/TX, and battery when the charge metric exists. GPU is a reserved unavailable tile. There is no GPU from CPU, no thermal °C, no storage category split, no connection count, and no P/E core split. Memory pressure stays pending until that metric exists; it never defaults to Normal. Battery without a charge reading is No battery, not 0% discharging.
+- System Activity is recent live samples from this session, not a 1 hour or 24 hour stored range.
+- A short ranked activity list. Unused rows stay as placeholders so the table height is stable. Placeholders do not invent process names.
+- The same freshness badge profiles use (`FreshnessBadge` / stale age).
 
 It does not contain timelines, connection lists, dense tables, or permissions prompts by default.
 
