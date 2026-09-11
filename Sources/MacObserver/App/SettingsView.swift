@@ -17,7 +17,7 @@ struct SettingsView: View {
                 }
 
                 settingsGroup(title: "Retention") {
-                    Text("Metrics older than 7 days are removed. Events older than 30 days are removed. Downsampled long-term history is not shipped yet.")
+                    Text("Raw metrics stay for 7 days, then roll into 15-minute averages kept for 90 days. Events older than 30 days are removed.")
                     Text("Policy is applied at launch and about every five minutes while the app runs.")
                         .foregroundStyle(Theme.Color.tertiary)
                 }

@@ -30,4 +30,4 @@ Domain and collector tests:
 ./scripts/dev-test.sh
 ```
 
-Overview, Performance, Network, Processes, Storage, and Power show live readings. Click a metric tile with a chevron to open stored history. Capabilities lists each standard collector and can turn it off. Settings can delete local history. Events lists discrete stored changes for the last hour, 24 hours, or 7 days. Live observations are also saved locally in SQLite under Application Support.
+Overview, Performance, Network, Processes, Storage, and Power show live readings. Click a metric tile with a chevron to open stored history. Capabilities lists each standard collector and can turn it off. Settings can delete local history. Events lists discrete stored changes for the last hour, 24 hours, or 7 days. Live observations are saved locally in SQLite under Application Support. Raw metrics stay 7 days; older points are kept as 15-minute averages for 90 days.

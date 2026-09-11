@@ -44,9 +44,8 @@ public actor MemoryTelemetryStore: TelemetryStore {
     }
 
     public func applyRetention(_ policy: RetentionPolicy, now: Date) async throws {
-        let metricCutoff = now.addingTimeInterval(-policy.recentMetrics)
+        metrics = MetricDownsampler.retainedMetrics(metrics, policy: policy, now: now)
         let eventCutoff = now.addingTimeInterval(-policy.events)
-        metrics.removeAll { $0.time.wallTime < metricCutoff }
         events.removeAll { $0.time.wallTime < eventCutoff }
     }
 

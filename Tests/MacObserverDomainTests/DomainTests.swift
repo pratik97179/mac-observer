@@ -120,6 +120,75 @@ struct SeriesBucketingTests {
     }
 }
 
+struct MetricDownsampleTests {
+    @Test func agingNumericSamplesRollIntoMinMaxAverageAndCount() {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        let samples = [0.0, 10.0, 20.0, 80.0].enumerated().map { index, seconds in
+            Metric(
+                time: ObservationTime(wallTime: Date(timeIntervalSince1970: seconds)),
+                domain: .cpu,
+                name: .cpuUtilizationRatio,
+                entity: system,
+                value: .ratio(Double(index + 1) / 10),
+                unit: .ratio,
+                source: "test",
+                quality: .direct
+            )
+        }
+        let kept = MetricDownsampler.retainedMetrics(
+            samples,
+            policy: RetentionPolicy(
+                recentMetrics: 50,
+                events: 50,
+                longTermMetrics: 500,
+                downsampleBucket: 60
+            ),
+            now: Date(timeIntervalSince1970: 100)
+        )
+        #expect(kept.count == 2)
+        #expect(kept[0].retentionClass == .longTerm)
+        #expect(kept[0].quality == .derived)
+        if case .ratio(let value) = kept[0].value {
+            #expect(abs(value - 0.2) < 0.0001)
+        } else {
+            Issue.record("expected average ratio")
+        }
+        #expect(Double(kept[0].dimensions["downsample.min"] ?? "") == 0.1)
+        #expect(Double(kept[0].dimensions["downsample.max"] ?? "") == 0.3)
+        #expect(kept[0].dimensions["downsample.count"] == "3")
+        if case .ratio(let value) = kept[1].value {
+            #expect(value == 0.4)
+        } else {
+            Issue.record("expected recent raw sample")
+        }
+        #expect(kept[1].retentionClass == .live)
+    }
+
+    @Test func stateSamplesKeepTheLastValueInTheBucket() {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        let samples = ["nominal", "fair"].enumerated().map { index, state in
+            Metric(
+                time: ObservationTime(wallTime: Date(timeIntervalSince1970: Double(index * 10))),
+                domain: .thermal,
+                name: .thermalState,
+                entity: system,
+                value: .state(state),
+                unit: .enumeration,
+                source: "test",
+                quality: .direct
+            )
+        }
+        let rolled = MetricDownsampler.collapse(samples, bucketSeconds: 60)
+        #expect(rolled.count == 1)
+        if case .state(let value) = rolled[0].value {
+            #expect(value == "fair")
+        } else {
+            Issue.record("expected last thermal state")
+        }
+        #expect(rolled[0].derivation?.method == "last_60s")
+    }
+}
+
 struct EventContractTests {
     @Test func eventTypesFollowTheSameNameRulesAsMetrics() {
         #expect(EventType(rawValue: "process.launched") != nil)

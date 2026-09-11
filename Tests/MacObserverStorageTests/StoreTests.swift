@@ -83,6 +83,44 @@ struct TelemetryStoreTests {
         #expect(memory.map(\.summary) == ["one", "three"])
     }
 
+    @Test func retentionDownsamplesAgingMetricsAndDropsAncientRows() async throws {
+        try await assertDownsample(MemoryTelemetryStore())
+        try await assertDownsample(SQLiteTelemetryStore.inMemory())
+    }
+
+    private func assertDownsample(_ store: some TelemetryStore) async throws {
+        let system = Entity.system(bootSession: BootSessionID("boot-1"))
+        try await store.insert(metrics: [
+            cpu(entity: system, at: 0, ratio: 0.1),
+            cpu(entity: system, at: 10, ratio: 0.3),
+            cpu(entity: system, at: 80, ratio: 0.9)
+        ])
+        try await store.applyRetention(
+            RetentionPolicy(
+                recentMetrics: 50,
+                events: 50,
+                longTermMetrics: 500,
+                downsampleBucket: 60
+            ),
+            now: Date(timeIntervalSince1970: 100)
+        )
+        let range = TimeRange(start: Date(timeIntervalSince1970: 0), end: Date(timeIntervalSince1970: 200))
+        let remaining = try await store.metrics(matching: MetricQuery(range: range, name: .cpuUtilizationRatio))
+        #expect(remaining.count == 2)
+        #expect(remaining[0].retentionClass == .longTerm)
+        if case .ratio(let value) = remaining[0].value {
+            #expect(abs(value - 0.2) < 0.0001)
+        } else {
+            Issue.record("expected downsampled average")
+        }
+        #expect(remaining[0].dimensions["downsample.count"] == "2")
+        if case .ratio(let value) = remaining[1].value {
+            #expect(value == 0.9)
+        } else {
+            Issue.record("expected recent sample")
+        }
+    }
+
     @Test func metricQueriesKeepLastSamplePerTimeBucket() async throws {
         try await assertMetricBuckets(MemoryTelemetryStore())
         try await assertMetricBuckets(SQLiteTelemetryStore.inMemory())

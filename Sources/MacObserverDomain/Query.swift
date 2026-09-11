@@ -61,15 +61,26 @@ public protocol TelemetryPersisting: Sendable {
 
 public struct RetentionPolicy: Sendable, Hashable {
     public var recentMetrics: TimeInterval
+    public var longTermMetrics: TimeInterval
+    public var downsampleBucket: TimeInterval
     public var events: TimeInterval
 
     public static let documented = RetentionPolicy(
         recentMetrics: 7 * 24 * 60 * 60,
-        events: 30 * 24 * 60 * 60
+        events: 30 * 24 * 60 * 60,
+        longTermMetrics: 90 * 24 * 60 * 60,
+        downsampleBucket: 15 * 60
     )
 
-    public init(recentMetrics: TimeInterval, events: TimeInterval) {
+    public init(
+        recentMetrics: TimeInterval,
+        events: TimeInterval,
+        longTermMetrics: TimeInterval? = nil,
+        downsampleBucket: TimeInterval = 15 * 60
+    ) {
         self.recentMetrics = recentMetrics
         self.events = events
+        self.longTermMetrics = longTermMetrics ?? recentMetrics
+        self.downsampleBucket = downsampleBucket
     }
 }

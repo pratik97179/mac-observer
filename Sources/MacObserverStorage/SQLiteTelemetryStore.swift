@@ -232,16 +232,84 @@ public actor SQLiteTelemetryStore: TelemetryStore {
 
     public func applyRetention(_ policy: RetentionPolicy, now: Date) async throws {
         guard let db else { return }
-        let metricCutoff = now.addingTimeInterval(-policy.recentMetrics).timeIntervalSince1970
+        let recentCutoff = now.addingTimeInterval(-policy.recentMetrics).timeIntervalSince1970
+        let longTermCutoff = now.addingTimeInterval(-policy.longTermMetrics).timeIntervalSince1970
         let eventCutoff = now.addingTimeInterval(-policy.events).timeIntervalSince1970
+        let aging = try loadAgingRawMetrics(recentCutoff: recentCutoff, longTermCutoff: longTermCutoff)
+        let rolled = MetricDownsampler.collapse(aging, bucketSeconds: policy.downsampleBucket)
+
         try Self.exec(db, "BEGIN IMMEDIATE")
         do {
-            try deleteOlderThan(table: "metrics", cutoff: metricCutoff)
+            if !rolled.isEmpty {
+                try insertMetricsInTransaction(rolled)
+            }
+            try deleteRawOlderThan(recentCutoff)
+            try deleteOlderThan(table: "metrics", cutoff: longTermCutoff)
             try deleteOlderThan(table: "events", cutoff: eventCutoff)
             try Self.exec(db, "COMMIT")
         } catch {
             sqlite3_exec(db, "ROLLBACK", nil, nil, nil)
             throw error
+        }
+    }
+
+    private func loadAgingRawMetrics(recentCutoff: Double, longTermCutoff: Double) throws -> [Metric] {
+        guard let db else { return [] }
+        let sql = """
+            SELECT entity_json, value_json, dimensions_json, derivation_json,
+                   id, wall_time, monotonic_ns, domain, name, unit, source, quality, retention_class
+            FROM metrics
+            WHERE wall_time < ? AND wall_time >= ? AND retention_class != 'longTerm'
+            ORDER BY wall_time ASC, monotonic_ns ASC
+            """
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
+            throw StoreError.sqlite(Self.message(db))
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_double(statement, 1, recentCutoff)
+        sqlite3_bind_double(statement, 2, longTermCutoff)
+        var rows: [Metric] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            rows.append(try decodeMetric(statement))
+        }
+        return rows
+    }
+
+    private func insertMetricsInTransaction(_ metrics: [Metric]) throws {
+        guard let db, !metrics.isEmpty else { return }
+        let sql = """
+            INSERT OR REPLACE INTO metrics (
+                id, wall_time, monotonic_ns, domain, name, entity_key, entity_json,
+                value_json, unit, dimensions_json, source, quality, retention_class, derivation_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
+            throw StoreError.sqlite(Self.message(db))
+        }
+        defer { sqlite3_finalize(statement) }
+        for metric in metrics {
+            sqlite3_reset(statement)
+            sqlite3_clear_bindings(statement)
+            try bindMetric(statement, metric)
+            guard sqlite3_step(statement) == SQLITE_DONE else {
+                throw StoreError.sqlite(Self.message(db))
+            }
+        }
+    }
+
+    private func deleteRawOlderThan(_ cutoff: Double) throws {
+        guard let db else { return }
+        let sql = "DELETE FROM metrics WHERE wall_time < ? AND retention_class != 'longTerm'"
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
+            throw StoreError.sqlite(Self.message(db))
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_double(statement, 1, cutoff)
+        guard sqlite3_step(statement) == SQLITE_DONE else {
+            throw StoreError.sqlite(Self.message(db))
         }
     }
 

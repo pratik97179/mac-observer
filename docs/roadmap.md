@@ -10,9 +10,9 @@ Current series (live dashboard first) is complete. Persistence series:
 
 1. SQLite store, queries, and retention.
 2. Persist live collector output.
-3. Downsampling and inspection charts later.
+3. Downsampling and inspection charts.
 
-Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Persistent downsampling is not shipped yet.
+Resource sidebar profiles now share the live snapshot. Capabilities can disable a standard collector. Settings can delete local history. Events queries SQLite for 1 hour, 24 hours, or 7 days. Metric tiles open a query-backed history chart. Retention keeps 7 days of raw samples and 90 days of 15-minute downsampled history.
 
 ## Milestone 1: Application Foundation
 
@@ -56,7 +56,7 @@ Acceptance criteria:
 
 ## Milestone 3: Telemetry Domain Persistence
 
-**Status:** In progress. Live collectors persist to SQLite. Events can query stored history by time range. Metric inspection charts query stored samples and bucket them for drawing. Persistent downsampling is not shipped yet.
+**Status:** Complete locally. Live collectors persist to SQLite. Events can query stored history by time range. Metric inspection charts query stored samples and bucket them for drawing. Retention downsamples metrics older than 7 days into 15-minute long-term points kept for 90 days.
 
 Deliverables:
 
