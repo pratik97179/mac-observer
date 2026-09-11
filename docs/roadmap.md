@@ -100,7 +100,7 @@ Acceptance criteria:
 
 ## Milestone 5: Events And Deterministic Explanations
 
-**Status:** Complete locally. Events already filter by domain and range. Overview shows an explanation card after memory pressure, thermal elevation, or sustained CPU. Claims cite measurements, mark process and disk rows as correlation with “may be related”, and Inspect opens the same query-backed history views. Each explanation is stored once as `explanation.generated`.
+**Status:** Complete locally. Events already filter by domain, entity identity, and range. Overview shows an explanation card after memory pressure, thermal elevation, or sustained CPU. Claims cite measurements, mark process and disk rows as correlation with “may be related”, and Inspect opens the same query-backed history views. Each explanation is stored once as `explanation.generated`.
 
 Deliverables:
 

@@ -97,4 +97,23 @@ public enum Entity: Sendable, Hashable, Codable {
             "capability:\(id)"
         }
     }
+
+    public var displayTitle: String {
+        switch self {
+        case .system:
+            "This Mac"
+        case .processInstance(let process):
+            process.attributes.displayName ?? "PID \(process.pid)"
+        case .app(let bundleIdentifier):
+            bundleIdentifier
+        case .networkInterface(let name, _):
+            name
+        case .volume(let uuid):
+            uuid
+        case .device(let stableID):
+            stableID
+        case .capability(let id):
+            id
+        }
+    }
 }

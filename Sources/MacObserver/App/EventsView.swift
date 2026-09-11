@@ -36,10 +36,14 @@ private enum EventListItem: Identifiable {
 struct EventsView: View {
     let store: OverviewStore
     @State private var domainFilter: TelemetryDomain?
+    @State private var entityKeyFilter: String?
 
     private var events: [Event] {
-        guard let domainFilter else { return store.historyEvents }
-        return store.historyEvents.filter { $0.domain == domainFilter }
+        store.historyEvents.filter { event in
+            if let domainFilter, event.domain != domainFilter { return false }
+            if let entityKeyFilter, event.entity.identityKey != entityKeyFilter { return false }
+            return true
+        }
     }
 
     private var items: [EventListItem] {
@@ -48,6 +52,17 @@ struct EventsView: View {
 
     private var domains: [TelemetryDomain] {
         Array(Set(store.historyEvents.map(\.domain))).sorted { $0.rawValue < $1.rawValue }
+    }
+
+    private var entityOptions: [(key: String, title: String)] {
+        var seen = Set<String>()
+        var options: [(key: String, title: String)] = []
+        for event in store.historyEvents {
+            let key = event.entity.identityKey
+            guard seen.insert(key).inserted else { continue }
+            options.append((key, event.entity.displayTitle))
+        }
+        return options.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
 
     var body: some View {
@@ -72,6 +87,15 @@ struct EventsView: View {
                     }
                     .pickerStyle(.menu)
                     .tint(Theme.Color.accent)
+                    Picker("Entity", selection: $entityKeyFilter) {
+                        Text("All entities").tag(Optional<String>.none)
+                        ForEach(entityOptions, id: \.key) { option in
+                            Text(option.title).tag(Optional(option.key))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(Theme.Color.accent)
+                    .help("Filter by the entity that owns the event. Identity is the stored key, not the display name.")
                 }
                 .padding(Theme.Space.standard)
                 .glass(.recessed, radius: Theme.Radius.control)
@@ -99,9 +123,15 @@ struct EventsView: View {
             }
             .frame(maxWidth: 1_080, alignment: .leading)
             .animation(Motion.panel, value: domainFilter)
+            .animation(Motion.panel, value: entityKeyFilter)
             .instrumentContent()
         }
         .instrumentScreen()
+        .onChange(of: store.historyEvents) { _, _ in
+            if let entityKeyFilter, !entityOptions.contains(where: { $0.key == entityKeyFilter }) {
+                self.entityKeyFilter = nil
+            }
+        }
         .task {
             await store.refreshHistory()
         }
@@ -115,6 +145,12 @@ struct EventsView: View {
     }
 
     private var emptyCopy: String {
+        if entityKeyFilter != nil && domainFilter != nil {
+            return "No events for this entity in this domain for the selected range."
+        }
+        if entityKeyFilter != nil {
+            return "No events for this entity in the selected range."
+        }
         if domainFilter != nil {
             return "No events in this domain for the selected range."
         }

@@ -15,8 +15,9 @@ struct OverviewCockpit: View {
     private var snapshot: LiveSnapshot { store.snapshot }
 
     var body: some View {
-        let innerHeight = max(availableSize.height - metrics.spacing.md - metrics.bottomInset, 1)
-        let innerWidth = min(max(availableSize.width - metrics.horizontalInset * 2, 1), metrics.contentMaxWidth)
+        let cockpitPadding: CGFloat = 12
+        let innerHeight = max(availableSize.height - cockpitPadding * 2, 1)
+        let innerWidth = min(max(availableSize.width - cockpitPadding * 2, 1), metrics.contentMaxWidth)
         let compactHeight = innerHeight < 780
         let compactWidth = metrics.regime == .compact || innerWidth < 820
         OverviewCompositionLayout(spacing: metrics.spacing, compactHeight: compactHeight) {
@@ -36,8 +37,9 @@ struct OverviewCockpit: View {
                 compact: compactHeight
             )
             .overviewBand(.activity)
-            OverviewBottomRegion(
+            OverviewBottomSection(
                 snapshot: snapshot,
+                staleAge: staleAge,
                 compact: compactHeight,
                 compactWidth: compactWidth,
                 onOpenProcess: onOpenProcess,
@@ -45,9 +47,7 @@ struct OverviewCockpit: View {
             )
             .overviewBand(.bottom)
         }
-        .padding(.top, metrics.spacing.md)
-        .padding(.bottom, metrics.bottomInset)
-        .padding(.horizontal, metrics.horizontalInset)
+        .padding(cockpitPadding)
         .frame(width: availableSize.width, height: availableSize.height, alignment: .top)
         .animation(.easeInOut(duration: 0.28), value: compactWidth)
         .animation(.easeInOut(duration: 0.28), value: compactHeight)
@@ -184,7 +184,6 @@ private extension View {
 }
 
 private struct OverviewHeroLayout: Layout {
-    var compact: Bool
     var spacing: SpacingScale
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -205,107 +204,66 @@ private struct OverviewHeroLayout: Layout {
             let pulse = item(.pulse)
         else { return }
 
-        func fit(_ view: LayoutSubview, in box: CGSize) -> CGSize {
-            let proposed = view.sizeThatFits(.init(width: box.width, height: box.height))
-            return CGSize(
-                width: min(max(proposed.width, 1), max(box.width, 1)),
-                height: min(max(proposed.height, 1), max(box.height, 1))
-            )
-        }
-
         let identityWidth = min(max(bounds.width * 0.72, 160), bounds.width)
         let identitySize = identity.sizeThatFits(.init(width: identityWidth, height: nil))
         let identityH = min(identitySize.height, bounds.height * 0.30)
-        identity.place(
-            at: CGPoint(x: bounds.midX - min(identitySize.width, identityWidth) / 2, y: bounds.minY),
-            proposal: .init(width: identityWidth, height: identityH)
-        )
-
         let pulseWidth = min(max(bounds.width * 0.36, 180), bounds.width * 0.48)
         let pulseSize = pulse.sizeThatFits(.init(width: pulseWidth, height: nil))
-        let pulseY = bounds.maxY - pulseSize.height
+        let machineSize = machine.sizeThatFits(.unspecified)
+
+        // Center column is a real vertical stack: identity → machine → pulse.
+        // Pulse is never bottom-pinned into the identity/machine area.
+        let identityY = bounds.minY
+        let machineY = identityY + identityH + spacing.sm
+        let pulseY = min(
+            machineY + machineSize.height + spacing.md,
+            bounds.maxY - pulseSize.height
+        )
+
+        identity.place(
+            at: CGPoint(x: bounds.midX - min(identitySize.width, identityWidth) / 2, y: identityY),
+            proposal: .init(width: identityWidth, height: identityH)
+        )
+        machine.place(
+            at: CGPoint(x: bounds.midX - machineSize.width / 2, y: machineY),
+            proposal: .init(width: machineSize.width, height: machineSize.height)
+        )
         pulse.place(
             at: CGPoint(x: bounds.midX - pulseSize.width / 2, y: pulseY),
             proposal: .init(width: pulseSize.width, height: pulseSize.height)
         )
 
-        let clearance = max(spacing.md, bounds.width * 0.02)
-        let stageTop = bounds.minY + identityH + spacing.sm
-        let stageBottom = pulseY - spacing.md
-        let stageHeight = max(stageBottom - stageTop, 1)
         let cpuSize = cpu.sizeThatFits(.unspecified)
         let memorySize = memory.sizeThatFits(.unspecified)
         let gpuSize = gpu.sizeThatFits(.unspecified)
         let thermalSize = thermal.sizeThatFits(.unspecified)
-        let leftRail = min(max(max(cpuSize.width, gpuSize.width), 88), bounds.width * 0.26)
-        let rightRail = min(max(max(memorySize.width, thermalSize.width), 96), bounds.width * 0.30)
-        let pairGap = spacing.xs
-        let widthFits = bounds.width >= leftRail + rightRail + 140 + clearance * 2
-        let heightFits = stageHeight >= max(
-            cpuSize.height + gpuSize.height + pairGap,
-            memorySize.height + thermalSize.height + pairGap
-        )
-        let stacked = compact || !widthFits || !heightFits
+        let cpuLeading: CGFloat = 72
+        let gpuLeading: CGFloat = 46.8
+        let memoryTrailing: CGFloat = 72
+        let thermalTrailing: CGFloat = 46.8
+        let columnGap = spacing.md
 
-        if stacked {
-            let row1 = max(cpuSize.height, memorySize.height)
-            let row2 = max(gpuSize.height, thermalSize.height)
-            let telemetryHeight = row1 + spacing.sm + row2
-            let machineBudget = max(stageHeight - telemetryHeight - spacing.sm, 72)
-            let machineSize = fit(
-                machine,
-                in: CGSize(
-                    width: min(bounds.width * 0.64, machineBudget * AppImage.macBookHeroAspect),
-                    height: machineBudget
-                )
-            )
-            let telemetryY = stageTop + machineSize.height + spacing.sm
-            cpu.place(at: CGPoint(x: bounds.minX, y: telemetryY), proposal: .unspecified)
-            memory.place(
-                at: CGPoint(x: bounds.maxX - memorySize.width, y: telemetryY),
-                proposal: .unspecified
-            )
-            gpu.place(
-                at: CGPoint(x: bounds.minX, y: telemetryY + row1 + spacing.sm),
-                proposal: .unspecified
-            )
-            thermal.place(
-                at: CGPoint(x: bounds.maxX - thermalSize.width, y: telemetryY + row1 + spacing.sm),
-                proposal: .unspecified
-            )
-            machine.place(
-                at: CGPoint(x: bounds.midX - machineSize.width / 2, y: stageTop),
-                proposal: .init(width: machineSize.width, height: machineSize.height)
-            )
-            return
-        }
+        // Two fixed columns beside the machine:
+        // Left: CPU → GPU
+        // Right: Memory → Thermal
+        let cpuX = bounds.minX + cpuLeading
+        let gpuX = bounds.minX + gpuLeading
+        let memoryX = bounds.maxX - memorySize.width - memoryTrailing
+        let thermalX = bounds.maxX - thermalSize.width - thermalTrailing
 
-        let centerWidth = max(bounds.width - leftRail - rightRail - clearance * 2, 120)
-        let machineSize = fit(machine, in: CGSize(width: centerWidth, height: stageHeight))
-        let machineX = bounds.midX - machineSize.width / 2
-        let machineY = stageTop + max((stageHeight - machineSize.height) * 0.10, 0)
-        let cpuX = max(bounds.minX, machineX - clearance - cpuSize.width)
-        let memoryX = min(bounds.maxX - memorySize.width, machineX + machineSize.width + clearance)
-        var cpuY = machineY
-        var gpuY = machineY + machineSize.height - gpuSize.height
-        if gpuY < cpuY + cpuSize.height + pairGap {
-            cpuY = stageTop
-            gpuY = stageTop + stageHeight - gpuSize.height
-        }
-        var thermalY = machineY + machineSize.height - thermalSize.height
-        var memoryY = machineY
-        if thermalY < memoryY + memorySize.height + pairGap {
-            memoryY = stageTop
-            thermalY = stageTop + stageHeight - thermalSize.height
-        }
+        let leftColumnHeight = cpuSize.height + columnGap + gpuSize.height
+        let rightColumnHeight = memorySize.height + columnGap + thermalSize.height
+        let columnTop = machineY + max((machineSize.height - max(leftColumnHeight, rightColumnHeight)) * 0.5, 0)
+
+        let cpuY = columnTop
+        let gpuY = cpuY + cpuSize.height + columnGap
+        let memoryY = columnTop
+        let thermalY = memoryY + memorySize.height + columnGap
+
         cpu.place(at: CGPoint(x: cpuX, y: cpuY), proposal: .unspecified)
+        gpu.place(at: CGPoint(x: gpuX, y: gpuY), proposal: .unspecified)
         memory.place(at: CGPoint(x: memoryX, y: memoryY), proposal: .unspecified)
-        gpu.place(at: CGPoint(x: cpuX, y: gpuY), proposal: .unspecified)
-        thermal.place(at: CGPoint(x: memoryX, y: thermalY), proposal: .unspecified)
-        machine.place(
-            at: CGPoint(x: machineX, y: machineY),
-            proposal: .init(width: machineSize.width, height: machineSize.height)
-        )
+        thermal.place(at: CGPoint(x: thermalX, y: thermalY), proposal: .unspecified)
     }
 }
 
@@ -318,7 +276,7 @@ struct OverviewHero: View {
     @Environment(\.designMetrics) private var metrics
 
     var body: some View {
-        OverviewHeroLayout(compact: compactWidth, spacing: metrics.spacing) {
+        OverviewHeroLayout(spacing: metrics.spacing) {
             MachineIdentity(model: model, compact: compactHeight)
                 .overviewHeroSlot(.identity)
             MachineVisual(deviceName: model.machineName)
@@ -348,6 +306,7 @@ struct OverviewHero: View {
             .overviewHeroSlot(.pulse)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 
     private var cpuRatio: Double {
@@ -363,7 +322,7 @@ struct MachineIdentity: View {
     var body: some View {
         VStack(spacing: metrics.spacing.xs) {
             Text(model.machineName)
-                .font(metrics.type.heroTitle)
+                .font(.system(size: 28 * metrics.scale, weight: .regular))
                 .foregroundStyle(Theme.Color.text)
                 .multilineTextAlignment(.center)
                 .lineLimit(1)
@@ -373,6 +332,7 @@ struct MachineIdentity: View {
                 .foregroundStyle(Theme.Color.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
+                .tracking(0.4)
             HealthState(model: model, compact: compact)
         }
         .multilineTextAlignment(.center)
@@ -447,18 +407,21 @@ struct HealthState: View {
 struct MachineVisual: View {
     var deviceName: String
 
+    /// Fixed display width: 6 inches at 72pt/inch (2× previous 3-inch size).
+    private static let maxWidth: CGFloat = 432
+
     var body: some View {
         Group {
             if let image = AppImage.macBookHero() {
                 image
                     .resizable()
                     .scaledToFit()
-                    .aspectRatio(AppImage.macBookHeroAspect, contentMode: .fit)
+                    .frame(width: Self.maxWidth)
                     .shadow(color: Color.black.opacity(0.10), radius: 8, y: 5)
                     .accessibilityLabel(deviceName)
             } else {
                 Color.clear
-                    .aspectRatio(AppImage.macBookHeroAspect, contentMode: .fit)
+                    .frame(width: Self.maxWidth, height: Self.maxWidth * 2 / 3)
                     .overlay {
                         VStack(spacing: Theme.Space.xs) {
                             Text(fallbackName)
@@ -473,6 +436,8 @@ struct MachineVisual: View {
                     .accessibilityLabel("Device visual unavailable")
             }
         }
+        .frame(width: Self.maxWidth)
+        .fixedSize()
     }
 
     private var fallbackName: String {
@@ -494,22 +459,22 @@ struct CPUObject: View {
         let series = snapshot.series(named: .cpuUtilizationRatio)
         let hasValue = series.last != nil || OverviewMetrics.has(snapshot, .cpuUtilizationRatio)
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("CPU")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-                Text(hasValue ? OverviewMetrics.percent(series.last?.value ?? OverviewMetrics.ratio(snapshot, .cpuUtilizationRatio) ?? 0) : "—")
-                    .font(Theme.Typography.largeMetric)
-                    .foregroundStyle(hasValue ? Theme.Color.text : Theme.Color.tertiary)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Sparkline(values: series.map(\.value), height: 22, tint: Theme.Color.accent, showsEmptyCaption: false)
-                    .frame(width: 96, height: 22)
-                Text(hasValue ? "Host utilization" : (collecting ? "Collecting telemetry" : "Collecting telemetry"))
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-                    .lineLimit(1)
+            HStack(alignment: .center, spacing: Theme.Space.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("CPU")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.Color.text)
+                    Text(hasValue ? OverviewMetrics.percent(series.last?.value ?? OverviewMetrics.ratio(snapshot, .cpuUtilizationRatio) ?? 0) : "—")
+                        .font(.system(size: 13, weight: .medium).monospacedDigit())
+                        .foregroundStyle(hasValue ? Theme.Color.secondary : Theme.Color.tertiary)
+                        .lineLimit(1)
+                    Text(hasValue ? "Host utilization" : "Collecting telemetry")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(Theme.Color.tertiary)
+                        .lineLimit(1)
+                }
+                Sparkline(values: series.map(\.value), height: 28, tint: Theme.Color.accent, showsEmptyCaption: false)
+                    .frame(width: 72, height: 28)
             }
         }
         .buttonStyle(.plain)
@@ -531,42 +496,44 @@ struct MemoryObject: View {
         let hasValue = total > 0
         let ratio = hasValue ? used / total : 0
         let pressure = OverviewMetrics.state(snapshot, .memoryPressureState)
-        let swap = OverviewMetrics.numeric(snapshot, .memorySwapUsedBytes)
         let series = snapshot.series(named: .memoryUsedBytes)
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("Memory")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-                Text(hasValue ? "\(OverviewMetrics.bytes(used)) / \(OverviewMetrics.bytes(total))" : "—")
-                    .font(Theme.Typography.largeMetric)
-                    .foregroundStyle(hasValue ? Theme.Color.text : Theme.Color.tertiary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.65)
-                    .monospacedDigit()
-                if hasValue {
-                    MetricBar(ratio: ratio, tint: Theme.Color.accent, height: 5)
-                        .frame(width: 120)
-                    Text(OverviewMetrics.percent(ratio))
-                        .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Color.secondary)
-                        .monospacedDigit()
-                    Sparkline(values: series.map(\.value), height: 16, tint: Theme.Color.accent.opacity(0.78), showsEmptyCaption: false)
-                        .frame(width: 120, height: 16)
-                    if !compact {
-                        Text("Pressure: \(pressure?.capitalized ?? "—")")
-                            .font(Theme.Typography.micro)
-                            .foregroundStyle(Theme.Color.tertiary)
-                        if swap > 0 {
-                            Text("Swap \(OverviewMetrics.bytes(swap))")
+            HStack(alignment: .center, spacing: Theme.Space.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Memory")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.Color.text)
+                    Text(hasValue ? "\(OverviewMetrics.bytes(used)) / \(OverviewMetrics.bytes(total))" : "—")
+                        .font(.system(size: 13, weight: .medium).monospacedDigit())
+                        .foregroundStyle(hasValue ? Theme.Color.secondary : Theme.Color.tertiary)
+                        .lineLimit(1)
+                    if hasValue {
+                        if !compact {
+                            Text("Pressure: \(pressure?.capitalized ?? "—")")
                                 .font(Theme.Typography.micro)
                                 .foregroundStyle(Theme.Color.tertiary)
+                                .lineLimit(1)
+                        } else {
+                            Text(OverviewMetrics.percent(ratio))
+                                .font(Theme.Typography.micro)
+                                .foregroundStyle(Theme.Color.tertiary)
+                                .monospacedDigit()
                         }
+                    } else {
+                        Text("Collecting telemetry")
+                            .font(Theme.Typography.micro)
+                            .foregroundStyle(Theme.Color.tertiary)
+                    }
+                }
+                if hasValue {
+                    VStack(spacing: 4) {
+                        MetricBar(ratio: ratio, tint: Theme.Color.accent, height: 5)
+                            .frame(width: 72)
+                        Sparkline(values: series.map(\.value), height: 20, tint: Theme.Color.accent.opacity(0.78), showsEmptyCaption: false)
+                            .frame(width: 72, height: 20)
                     }
                 } else {
-                    Text(collecting ? "Collecting telemetry" : "Collecting telemetry")
-                        .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Color.tertiary)
+                    Color.clear.frame(width: 72, height: 28)
                 }
             }
         }
@@ -583,18 +550,20 @@ struct GPUObject: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("GPU")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-                Text("Not collected")
-                    .font(Theme.Typography.largeMetric)
-                    .foregroundStyle(Theme.Color.tertiary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Text("Unavailable")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
+            HStack(alignment: .center, spacing: Theme.Space.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("GPU")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.Color.text)
+                    Text("Not collected")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(Theme.Color.tertiary)
+                        .lineLimit(1)
+                    Text("Unavailable")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(Theme.Color.tertiary)
+                }
+                Color.clear.frame(width: 72, height: 28)
             }
         }
         .buttonStyle(.plain)
@@ -621,29 +590,31 @@ struct ThermalObject: View {
             }
         }()
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("Thermal")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-                HStack(spacing: Theme.Space.compact) {
-                    Circle()
-                        .fill(tone(state))
-                        .frame(width: 7, height: 7)
-                    Text(state == nil ? "—" : title)
-                        .font(Theme.Typography.largeMetric)
-                        .foregroundStyle(state == nil ? Theme.Color.tertiary : Theme.Color.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+            HStack(alignment: .center, spacing: Theme.Space.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Thermal")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.Color.text)
+                    HStack(spacing: Theme.Space.compact) {
+                        Circle()
+                            .fill(tone(state))
+                            .frame(width: 7, height: 7)
+                        Text(state == nil ? "—" : title)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(state == nil ? Theme.Color.tertiary : Theme.Color.secondary)
+                            .lineLimit(1)
+                    }
+                    if state == nil {
+                        Text("Collecting telemetry")
+                            .font(Theme.Typography.micro)
+                            .foregroundStyle(Theme.Color.tertiary)
+                    } else if !compact {
+                        Text(title)
+                            .font(Theme.Typography.micro)
+                            .foregroundStyle(Theme.Color.tertiary)
+                    }
                 }
-                if state == nil {
-                    Text("Collecting telemetry")
-                        .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Color.tertiary)
-                } else if !compact {
-                    Text(title)
-                        .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Color.tertiary)
-                }
+                Color.clear.frame(width: 72, height: 28)
             }
         }
         .buttonStyle(.plain)
@@ -708,17 +679,6 @@ struct SystemActivityRegion: View {
         let traces = OverviewActivityTrace.all(from: snapshot)
         let collecting = traces.allSatisfy { $0.points.count < 2 && !$0.unavailable }
         VStack(alignment: .leading, spacing: compact ? metrics.spacing.xs : metrics.spacing.sm) {
-            Text("System Activity")
-                .font(Theme.Typography.section)
-            if !compact {
-                Text(staleAge.map { "Updated \(Int($0))s ago" } ?? "Recent live samples from this session")
-                    .font(Theme.Typography.metadata)
-                    .foregroundStyle(Theme.Color.tertiary)
-            } else if let staleAge {
-                Text("Updated \(Int(staleAge))s ago")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
-            }
             HStack(spacing: Theme.Space.standard) {
                 ForEach(traces) { trace in
                     HStack(spacing: 6) {
@@ -1017,8 +977,9 @@ struct OverviewActivityChart: View {
     }
 }
 
-struct OverviewBottomRegion: View {
+struct OverviewBottomSection: View {
     let snapshot: LiveSnapshot
+    var staleAge: TimeInterval? = nil
     var compact: Bool = false
     var compactWidth: Bool = false
     var onOpenProcess: (OverviewProcessRow) -> Void
@@ -1026,17 +987,34 @@ struct OverviewBottomRegion: View {
     @Environment(\.designMetrics) private var metrics
 
     var body: some View {
-        OverviewBottomLayout(compact: compactWidth, spacing: metrics.spacing.lg) {
-            TopProcesses(snapshot: snapshot, limit: compact ? 4 : 5, onOpenProcess: onOpenProcess)
-            SystemResources(snapshot: snapshot, compact: compact, onOpenProfile: onOpenProfile)
+        OverviewBottomLayout(
+            compact: compactWidth || compact,
+            groupSpacing: metrics.spacing.xl,
+            processWeight: 0.65,
+            resourceWeight: 0.35
+        ) {
+            TopProcesses(
+                snapshot: snapshot,
+                staleAge: staleAge,
+                limit: compact ? 4 : 5,
+                showMemory: !compact && !compactWidth,
+                onOpenProcess: onOpenProcess
+            )
+            SystemResources(
+                snapshot: snapshot,
+                compact: compact,
+                onOpenProfile: onOpenProfile
+            )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
 private struct OverviewBottomLayout: Layout {
     var compact: Bool
-    var spacing: CGFloat
+    var groupSpacing: CGFloat
+    var processWeight: CGFloat
+    var resourceWeight: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
@@ -1046,21 +1024,29 @@ private struct OverviewBottomLayout: Layout {
         guard subviews.count == 2 else { return }
         let processes = subviews[0]
         let resources = subviews[1]
-        if compact && bounds.width < 700 {
-            let processSize = processes.sizeThatFits(.init(width: bounds.width, height: bounds.height * 0.58))
+        let stack = compact && bounds.width < 720
+        if stack {
+            let processFit = processes.sizeThatFits(.init(width: bounds.width, height: nil))
+            let processH = min(max(processFit.height, 1), bounds.height * 0.58)
             processes.place(
                 at: bounds.origin,
-                proposal: .init(width: bounds.width, height: processSize.height)
+                proposal: .init(width: bounds.width, height: processH)
             )
+            let resourceTop = bounds.minY + processH + groupSpacing
             resources.place(
-                at: CGPoint(x: bounds.minX, y: bounds.minY + processSize.height + spacing),
-                proposal: .init(width: bounds.width, height: max(bounds.maxY - bounds.minY - processSize.height - spacing, 1))
+                at: CGPoint(x: bounds.minX, y: resourceTop),
+                proposal: .init(width: bounds.width, height: max(bounds.maxY - resourceTop, 1))
             )
             return
         }
-        let resourceSize = resources.sizeThatFits(.init(width: bounds.width * 0.40, height: bounds.height))
-        let resourceW = min(max(resourceSize.width, bounds.width * 0.35), bounds.width * 0.40)
-        let processW = min(bounds.width * 0.65, max(bounds.width - resourceW - spacing, bounds.width * 0.55))
+
+        let weightSum = max(processWeight + resourceWeight, 0.001)
+        let available = max(bounds.width - groupSpacing, 1)
+        var processW = available * (processWeight / weightSum)
+        var resourceW = available - processW
+        let resourcePreferred = resources.sizeThatFits(.init(width: available * 0.40, height: bounds.height))
+        resourceW = min(max(resourcePreferred.width, available * 0.33), available * 0.38)
+        processW = max(available - resourceW, available * 0.62)
         processes.place(
             at: CGPoint(x: bounds.minX, y: bounds.minY),
             proposal: .init(width: processW, height: bounds.height)
@@ -1074,20 +1060,38 @@ private struct OverviewBottomLayout: Layout {
 
 struct TopProcesses: View {
     let snapshot: LiveSnapshot
+    var staleAge: TimeInterval? = nil
     var limit: Int = 5
+    var showMemory: Bool = true
     var onOpenProcess: (OverviewProcessRow) -> Void
+    @Environment(\.designMetrics) private var metrics
 
     var body: some View {
         let unavailable = isUnavailable
-        let processes = OverviewModel.processRows(from: snapshot, limit: limit, pad: false)
-            .filter { $0.pid != 0 && $0.cpuRatio > 0.004 }
-        VStack(alignment: .leading, spacing: Theme.Space.sm) {
-            Text("Top Processes")
-                .font(Theme.Typography.section)
+        let collecting = isCollecting
+        let processes = displayedProcesses
+        let peak = max(processes.map(\.cpuRatio).max() ?? 0, 0.01)
+        VStack(alignment: .leading, spacing: metrics.spacing.sm) {
+            HStack(alignment: .firstTextBaseline, spacing: Theme.Space.compact) {
+                Text("Top Processes")
+                    .font(Theme.Typography.section)
+                    .foregroundStyle(Theme.Color.text)
+                if let staleAge {
+                    Text("Updated \(Int(staleAge))s ago")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(Theme.Color.tertiary)
+                }
+            }
             if unavailable {
                 Text("Process telemetry unavailable")
                     .font(Theme.Typography.metadata)
                     .foregroundStyle(Theme.Color.tertiary)
+            } else if collecting {
+                VStack(alignment: .leading, spacing: Theme.Space.xs) {
+                    ForEach(0..<limit, id: \.self) { _ in
+                        ProcessRowSkeleton(showMemory: showMemory)
+                    }
+                }
             } else if processes.isEmpty {
                 Text("No notable activity")
                     .font(Theme.Typography.metadata)
@@ -1098,15 +1102,33 @@ struct TopProcesses: View {
                         Button {
                             onOpenProcess(process)
                         } label: {
-                            OverviewProcessRowView(process: process)
+                            OverviewProcessRowView(
+                                process: process,
+                                relativeRatio: process.cpuRatio / peak,
+                                showMemory: showMemory
+                            )
                         }
                         .buttonStyle(.plain)
-                        .help(ProcessDisplay.name(pid: process.pid, fallback: process.name))
+                        .help(processHelp(process))
                     }
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var displayedProcesses: [OverviewProcessRow] {
+        OverviewModel.processRows(from: snapshot, limit: limit * 2, pad: false)
+            .filter { $0.pid != 0 && $0.cpuRatio > 0.004 }
+            .sorted { lhs, rhs in
+                if abs(lhs.cpuRatio - rhs.cpuRatio) > 0.0005 {
+                    return lhs.cpuRatio > rhs.cpuRatio
+                }
+                if lhs.name != rhs.name { return lhs.name < rhs.name }
+                return lhs.pid < rhs.pid
+            }
+            .prefix(limit)
+            .map { $0 }
     }
 
     private var isUnavailable: Bool {
@@ -1115,38 +1137,93 @@ struct TopProcesses: View {
         default: false
         }
     }
+
+    private var isCollecting: Bool {
+        guard !isUnavailable else { return false }
+        return !snapshot.metrics.contains { metric in
+            guard metric.name == .cpuUtilizationRatio else { return false }
+            if case .processInstance = metric.entity { return true }
+            return false
+        }
+    }
+
+    private func processHelp(_ process: OverviewProcessRow) -> String {
+        var parts = [
+            ProcessDisplay.name(pid: process.pid, fallback: process.name),
+            "PID \(process.pid)",
+            "CPU \(process.cpu)"
+        ]
+        if !process.memory.isEmpty {
+            parts.append("Memory \(process.memory)")
+        }
+        return parts.joined(separator: " · ")
+    }
 }
 
 struct OverviewProcessRowView: View {
     let process: OverviewProcessRow
+    var relativeRatio: Double
+    var showMemory: Bool = true
 
     var body: some View {
         HStack(spacing: Theme.Space.control) {
-            ProcessGlyph(pid: process.pid, name: process.name)
+            ProcessGlyph(pid: process.pid, name: process.name, size: 18)
             Text(ProcessDisplay.name(pid: process.pid, fallback: process.name))
                 .font(Theme.Typography.secondary)
+                .foregroundStyle(Theme.Color.text)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .frame(minWidth: 72, maxWidth: 140, alignment: .leading)
-                .layoutPriority(1)
-            MetricBar(ratio: process.cpuRatio, tint: Theme.Color.accent, height: 5)
+                .frame(minWidth: 64, maxWidth: 128, alignment: .leading)
+            MetricBar(ratio: relativeRatio, tint: Theme.Color.accent, height: 5)
                 .frame(maxWidth: .infinity)
+                .animation(.easeInOut(duration: 0.18), value: relativeRatio)
             Text(process.cpu)
                 .font(Theme.Typography.secondary)
                 .monospacedDigit()
                 .foregroundStyle(Theme.Color.secondary)
+                .frame(minWidth: 36, alignment: .trailing)
                 .fixedSize()
-            if !process.memory.isEmpty {
+            if showMemory, !process.memory.isEmpty {
                 Text(process.memory)
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Color.tertiary)
                     .lineLimit(1)
+                    .frame(minWidth: 44, alignment: .trailing)
                     .fixedSize()
             }
         }
-        .padding(.vertical, 4)
+        .frame(height: 28, alignment: .center)
         .contentShape(Rectangle())
         .accessibilityLabel("\(process.name), CPU \(process.cpu)")
+    }
+}
+
+private struct ProcessRowSkeleton: View {
+    var showMemory: Bool
+
+    var body: some View {
+        HStack(spacing: Theme.Space.control) {
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .fill(Theme.Color.track)
+                .frame(width: 18, height: 18)
+            Capsule()
+                .fill(Theme.Color.track)
+                .frame(width: 92, height: 8)
+            Capsule()
+                .fill(Theme.Color.track)
+                .frame(maxWidth: .infinity)
+                .frame(height: 5)
+            Capsule()
+                .fill(Theme.Color.track)
+                .frame(width: 28, height: 8)
+            if showMemory {
+                Capsule()
+                    .fill(Theme.Color.track)
+                    .frame(width: 36, height: 8)
+            }
+        }
+        .frame(height: 28, alignment: .center)
+        .accessibilityHidden(true)
     }
 }
 
@@ -1157,25 +1234,75 @@ struct SystemResources: View {
     @Environment(\.designMetrics) private var metrics
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.sm) {
+        VStack(alignment: .leading, spacing: metrics.spacing.sm) {
             Text("System Resources")
                 .font(Theme.Typography.section)
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: metrics.spacing.lg) {
-                    StorageSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.storage) })
-                    NetworkSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.network) })
-                    BatterySummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.power) })
-                }
-                VStack(alignment: .leading, spacing: metrics.spacing.md) {
-                    HStack(alignment: .top, spacing: metrics.spacing.lg) {
-                        StorageSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.storage) })
-                        NetworkSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.network) })
-                    }
-                    BatterySummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.power) })
-                }
+                .foregroundStyle(Theme.Color.text)
+            SystemResourceLayout(spacing: metrics.spacing.md) {
+                StorageSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.storage) })
+                NetworkSummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.network) })
+                BatterySummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.power) })
             }
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct SystemResourceLayout: Layout {
+    var spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard !subviews.isEmpty else {
+            return CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
+        }
+        let width = proposal.width ?? 0
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let rowWidth = sizes.map(\.width).reduce(0, +) + spacing * CGFloat(max(subviews.count - 1, 0))
+        if width <= 0 || rowWidth <= width {
+            let height = sizes.map(\.height).max() ?? 0
+            return CGSize(width: width > 0 ? width : rowWidth, height: height)
+        }
+        let first = sizes.prefix(2)
+        let firstWidth = first.map(\.width).reduce(0, +) + (first.count > 1 ? spacing : 0)
+        let firstHeight = first.map(\.height).max() ?? 0
+        let batteryHeight = sizes.last?.height ?? 0
+        return CGSize(width: width, height: firstHeight + spacing + batteryHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard !subviews.isEmpty else { return }
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let rowWidth = sizes.map(\.width).reduce(0, +) + spacing * CGFloat(max(subviews.count - 1, 0))
+        if rowWidth <= bounds.width {
+            var x = bounds.minX
+            for index in subviews.indices {
+                let size = sizes[index]
+                subviews[index].place(
+                    at: CGPoint(x: x, y: bounds.minY),
+                    proposal: .init(width: size.width, height: size.height)
+                )
+                x += size.width + spacing
+            }
+            return
+        }
+        var x = bounds.minX
+        let pair = min(2, subviews.count)
+        let pairHeight = sizes.prefix(pair).map(\.height).max() ?? 0
+        for index in 0..<pair {
+            let size = sizes[index]
+            subviews[index].place(
+                at: CGPoint(x: x, y: bounds.minY),
+                proposal: .init(width: size.width, height: size.height)
+            )
+            x += size.width + spacing
+        }
+        if subviews.count > 2 {
+            let size = sizes[2]
+            subviews[2].place(
+                at: CGPoint(x: bounds.minX, y: bounds.minY + pairHeight + spacing),
+                proposal: .init(width: size.width, height: size.height)
+            )
+        }
     }
 }
 
@@ -1189,30 +1316,36 @@ struct StorageSummary: View {
         let available = OverviewMetrics.numeric(snapshot, .storageAvailableBytes)
         let used = max(0, capacity - available)
         let ratio = capacity > 0 ? used / capacity : 0
-        let unavailable = capacity <= 0
+        let freeRatio = capacity > 0 ? available / capacity : 1
+        let unavailable = capacity <= 0 || OverviewMetrics.isUnavailable(snapshot, "standard.storage")
+        let tint: Color = {
+            if freeRatio < 0.05 { return Theme.Color.critical }
+            if freeRatio < 0.15 { return Theme.Color.warning }
+            return Theme.Color.accent
+        }()
         Button(action: action) {
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
                 Text("Storage")
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Color.tertiary)
                 if unavailable {
-                    Text("Storage data unavailable")
+                    Text("Unavailable")
                         .font(Theme.Typography.secondary)
                         .foregroundStyle(Theme.Color.tertiary)
-                        .lineLimit(2)
                 } else {
                     Text("\(OverviewMetrics.bytes(available)) free")
                         .font(Theme.Typography.section)
-                        .foregroundStyle(Theme.Color.text)
+                        .foregroundStyle(freeRatio < 0.15 ? tint : Theme.Color.text)
                     if !compact {
                         Text("of \(OverviewMetrics.bytes(capacity))")
                             .font(Theme.Typography.micro)
                             .foregroundStyle(Theme.Color.tertiary)
                     }
-                    MetricBar(ratio: ratio, tint: Theme.Color.accent, height: 4)
+                    MetricBar(ratio: ratio, tint: tint, height: 4)
                         .frame(width: 88)
                 }
             }
+            .frame(minWidth: 88, alignment: .leading)
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
@@ -1226,20 +1359,34 @@ struct NetworkSummary: View {
     var action: () -> Void
 
     var body: some View {
-        let disconnected = OverviewMetrics.isUnavailable(snapshot, "standard.network")
-        let rxMetrics = snapshot.metrics.filter { $0.name == .networkRxBytesPerSecond }
-        let txMetrics = snapshot.metrics.filter { $0.name == .networkTxBytesPerSecond }
-        let rx = rxMetrics.reduce(0.0) { $0 + OverviewMetrics.numericValue($1) }
-        let tx = txMetrics.reduce(0.0) { $0 + OverviewMetrics.numericValue($1) }
+        let unavailable = OverviewMetrics.isUnavailable(snapshot, "standard.network")
+        let rx = snapshot.metrics
+            .filter { $0.name == .networkRxBytesPerSecond }
+            .reduce(0.0) { $0 + OverviewMetrics.numericValue($1) }
+        let tx = snapshot.metrics
+            .filter { $0.name == .networkTxBytesPerSecond }
+            .reduce(0.0) { $0 + OverviewMetrics.numericValue($1) }
+        let hasSamples = snapshot.metrics.contains {
+            $0.name == .networkRxBytesPerSecond || $0.name == .networkTxBytesPerSecond
+        }
         Button(action: action) {
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
                 Text("Network")
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Color.tertiary)
-                if disconnected {
-                    Text("Disconnected")
-                        .font(Theme.Typography.section)
-                        .foregroundStyle(Theme.Color.warning)
+                if unavailable {
+                    Text("Unavailable")
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.tertiary)
+                } else if !hasSamples {
+                    Text("↓ —")
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.tertiary)
+                        .monospacedDigit()
+                    Text("↑ —")
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.tertiary)
+                        .monospacedDigit()
                 } else {
                     Text("↓ \(OverviewMetrics.rate(rx))")
                         .font(Theme.Typography.secondary)
@@ -1251,6 +1398,7 @@ struct NetworkSummary: View {
                         .monospacedDigit()
                 }
             }
+            .frame(minWidth: 84, alignment: .leading)
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
@@ -1265,9 +1413,10 @@ struct BatterySummary: View {
 
     var body: some View {
         let ratio = OverviewMetrics.ratio(snapshot, .powerBatteryChargeRatio)
-        let charging = OverviewMetrics.stateFlag(snapshot, .powerBatteryCharging)
+        let charging = OverviewMetrics.stateFlag(snapshot, .powerBatteryCharging) == true
         let empty = OverviewMetrics.intValue(snapshot, .powerTimeToEmptyMinutes)
         let full = OverviewMetrics.intValue(snapshot, .powerTimeToFullMinutes)
+        let fullyCharged = (ratio ?? 0) >= 0.995
         Button(action: action) {
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
                 Text("Battery")
@@ -1280,25 +1429,40 @@ struct BatterySummary: View {
                         .monospacedDigit()
                     MetricBar(ratio: ratio, tint: Theme.Color.accent, height: 4)
                         .frame(width: 72)
-                    if !compact, let copy = OverviewVisualFill.remainingCopy(
-                        minutes: charging == true ? full : empty,
-                        charging: charging == true
-                    ) {
-                        Text(copy)
-                            .font(Theme.Typography.micro)
-                            .foregroundStyle(Theme.Color.tertiary)
-                            .lineLimit(1)
-                    } else if charging == true {
+                    if !compact {
+                        if fullyCharged {
+                            Text("Fully charged")
+                                .font(Theme.Typography.micro)
+                                .foregroundStyle(Theme.Color.tertiary)
+                        } else if charging {
+                            if let copy = OverviewVisualFill.remainingCopy(minutes: full, charging: true) {
+                                Text(copy)
+                                    .font(Theme.Typography.micro)
+                                    .foregroundStyle(Theme.Color.tertiary)
+                                    .lineLimit(1)
+                            } else {
+                                Text("Charging")
+                                    .font(Theme.Typography.micro)
+                                    .foregroundStyle(Theme.Color.tertiary)
+                            }
+                        } else if let copy = OverviewVisualFill.remainingCopy(minutes: empty, charging: false) {
+                            Text(copy)
+                                .font(Theme.Typography.micro)
+                                .foregroundStyle(Theme.Color.tertiary)
+                                .lineLimit(1)
+                        }
+                    } else if charging && !fullyCharged {
                         Text("Charging")
                             .font(Theme.Typography.micro)
                             .foregroundStyle(Theme.Color.tertiary)
                     }
                 } else {
                     Text("Unavailable")
-                        .font(Theme.Typography.section)
+                        .font(Theme.Typography.secondary)
                         .foregroundStyle(Theme.Color.tertiary)
                 }
             }
+            .frame(minWidth: 72, alignment: .leading)
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())

@@ -46,6 +46,21 @@ struct EntityIdentityTests {
 
         #expect(first != afterReboot)
     }
+
+    @Test func displayTitleUsesStableIdentityNotAPrettyLabel() {
+        let process = Entity.processInstance(
+            ProcessInstanceIdentity(
+                pid: 442,
+                startNanoseconds: 100,
+                bootSession: BootSessionID("boot-1"),
+                attributes: ProcessAttributes(displayName: "Chrome")
+            )
+        )
+        #expect(process.displayTitle == "Chrome")
+        #expect(process.identityKey == "process:boot-1:442:100")
+        #expect(Entity.system(bootSession: BootSessionID("boot-1")).displayTitle == "This Mac")
+        #expect(Entity.capability(id: "power").displayTitle == "power")
+    }
 }
 
 struct MetricContractTests {

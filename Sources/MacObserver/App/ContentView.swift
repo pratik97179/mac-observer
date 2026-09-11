@@ -11,7 +11,7 @@ struct ContentView: View {
     var body: some View {
         DesignMetricsReader {
             ZStack {
-                AppBackground(state: AtmosphereState.from(snapshot: store.snapshot))
+                AppBackground()
                 WindowChromeClearer()
                     .frame(width: 0, height: 0)
                     .allowsHitTesting(false)

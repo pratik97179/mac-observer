@@ -13,7 +13,6 @@ struct DesignSystemPreview: View {
                 typeTokens
                 surfaces
                 statusTones
-                atmosphere
                 backgroundSizes
                 motion
             }
@@ -97,16 +96,6 @@ struct DesignSystemPreview: View {
         }
     }
 
-    private var atmosphere: some View {
-        tokenGroup("Atmosphere") {
-            HStack(spacing: metrics.spacing.md) {
-                atmosphereSwatch(.calm)
-                atmosphereSwatch(.active)
-                atmosphereSwatch(.critical)
-            }
-        }
-    }
-
     private var backgroundSizes: some View {
         tokenGroup("Background sizes") {
             HStack(alignment: .bottom, spacing: metrics.spacing.md) {
@@ -120,7 +109,7 @@ struct DesignSystemPreview: View {
 
     private var motion: some View {
         tokenGroup("Reduced Motion") {
-            Text(reduceMotion || Motion.reduceMotion ? "Background drift is frozen." : "Background drift is a 16s illumination cycle.")
+            Text(reduceMotion || Motion.reduceMotion ? "Reduce Motion is on." : "Reduce Motion is off.")
                 .foregroundStyle(Theme.Color.secondary)
         }
     }
@@ -169,26 +158,11 @@ struct DesignSystemPreview: View {
             .glass(level, radius: metrics.radius.secondary)
     }
 
-    private func atmosphereSwatch(_ state: AtmosphereState) -> some View {
-        ZStack {
-            AppBackground(state: state)
-            Text(label(state))
-                .font(metrics.type.metadata)
-                .foregroundStyle(Theme.Color.text)
-        }
-        .frame(width: 160, height: 90)
-        .clipShape(RoundedRectangle(cornerRadius: metrics.radius.secondary, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: metrics.radius.secondary, style: .continuous)
-                .strokeBorder(Theme.Color.hairline, lineWidth: 1)
-        }
-    }
-
     private func sizePreview(width: CGFloat, height: CGFloat) -> some View {
         let scale = 180 / width
         return VStack(spacing: metrics.spacing.xs) {
             ZStack {
-                AppBackground(state: .calm)
+                AppBackground()
                 HStack(alignment: .top, spacing: 0) {
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
                         .fill(Color.black.opacity(0.28))
@@ -215,14 +189,6 @@ struct DesignSystemPreview: View {
         case .wide: "Wide"
         case .standard: "Standard"
         case .compact: "Compact"
-        }
-    }
-
-    private func label(_ state: AtmosphereState) -> String {
-        switch state {
-        case .calm: "Calm"
-        case .active: "Active"
-        case .critical: "Critical"
         }
     }
 }

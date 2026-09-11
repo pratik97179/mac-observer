@@ -22,7 +22,6 @@ struct MacObserverApp: App {
         .defaultSize(width: 1_280, height: 820)
         #if DEBUG
         .commands {
-            BackgroundDebugCommands()
             SidebarMaterialDebugCommands()
         }
         #endif

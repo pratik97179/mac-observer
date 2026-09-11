@@ -56,7 +56,7 @@ Process identity must include more than a display name or PID. A PID can be reus
 
 ## Events Timeline
 
-The timeline is a cross-domain investigation surface, not an unbounded log dump. Events reads stored rows for the selected range (1 hour, 24 hours, or 7 days), newest first, and can filter by domain. Entity and importance filters remain later work.
+The timeline is a cross-domain investigation surface, not an unbounded log dump. Events reads stored rows for the selected range (1 hour, 24 hours, or 7 days), newest first, and can filter by domain and by the owning entity identity. Importance filters remain later work.
 
 Shipped event types: `memory.pressure_changed`, `thermal.state_changed`, `capability.availability_changed`, `explanation.generated`, `network.external_lookup`, and `network.configuration_changed`. Process lifecycle and I/O bursts are not emitted yet. The live buffer still caps in-memory events at 200; the Events screen queries SQLite instead.
 

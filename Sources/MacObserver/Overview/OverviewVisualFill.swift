@@ -12,19 +12,10 @@ enum OverviewVisualFill {
 
     static func osSubtitle(memory: String?) -> String {
         let os = ProcessInfo.processInfo.operatingSystemVersion
-        let raw = ProcessInfo.processInfo.operatingSystemVersionString
-        let build = raw.split(separator: "(").last?
-            .replacingOccurrences(of: "Build ", with: "")
-            .replacingOccurrences(of: ")", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
         var parts = [chipName()]
         if let memory { parts.append(memory) }
-        if let build, !build.isEmpty {
-            parts.append("macOS \(os.majorVersion).\(os.minorVersion) (Build \(build))")
-        } else {
-            parts.append("macOS \(os.majorVersion).\(os.minorVersion)")
-        }
-        return parts.joined(separator: " · ")
+        parts.append("macOS \(os.majorVersion).\(os.minorVersion)")
+        return parts.joined(separator: "  ·  ")
     }
 
     static func thermalTitle(state: String?) -> String {
@@ -65,12 +56,6 @@ enum OverviewVisualFill {
 enum AppImage {
     private static let lock = NSLock()
     nonisolated(unsafe) private static var cachedHero: NSImage?
-
-    static var macBookHeroAspect: CGFloat {
-        let size = preparedMacBook()?.size ?? CGSize(width: 3, height: 2)
-        guard size.height > 1 else { return 1.5 }
-        return size.width / size.height
-    }
 
     static func macBookHero() -> Image? {
         guard let image = preparedMacBook() else { return nil }
