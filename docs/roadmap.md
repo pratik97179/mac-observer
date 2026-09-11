@@ -72,6 +72,8 @@ Acceptance criteria:
 
 ## Milestone 4: Contextual Inspection
 
+**Status:** Complete locally. Metric inspect charts are query-backed. Clicking a chart point re-queries events in that interval and keeps the selected 1 hour / 24 hour / 7 day range. Process inspect can open CPU or memory history for that instance. Command-K already navigates to those targets.
+
 Deliverables:
 
 - Metric detail views with breakdown and chart.

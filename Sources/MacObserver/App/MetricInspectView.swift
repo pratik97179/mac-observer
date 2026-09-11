@@ -27,6 +27,8 @@ struct MetricInspectView: View {
     @State private var window: HistoryWindow = .lastHour
     @State private var series: [Metric] = []
     @State private var events: [Event] = []
+    @State private var focus: InspectPlotPoint?
+    @State private var focusedEvents: [Event] = []
 
     private var current: Metric? { series.last }
     private var plot: [InspectPlotPoint] {
@@ -38,6 +40,10 @@ struct MetricInspectView: View {
 
     private var lastAge: TimeInterval? {
         current.map { Date().timeIntervalSince($0.time.wallTime) }
+    }
+
+    private var visibleEvents: [Event] {
+        focus == nil ? events : focusedEvents
     }
 
     var body: some View {
@@ -60,10 +66,15 @@ struct MetricInspectView: View {
                 TimeRangeSelector(window: $window)
 
                 if !plot.isEmpty {
-                    TelemetryChart(plot: plot)
-                        .padding(Theme.Space.standard)
-                        .glass(.recessed, radius: Theme.Radius.secondary)
-                        .transition(Motion.fadeUp)
+                    VStack(alignment: .leading, spacing: Theme.Space.control) {
+                        TelemetryChart(plot: plot, selected: focus?.time, onSelect: select)
+                        Text(chartCaption)
+                            .font(Theme.Typography.metadata)
+                            .foregroundStyle(Theme.Color.tertiary)
+                    }
+                    .padding(Theme.Space.standard)
+                    .glass(.recessed, radius: Theme.Radius.secondary)
+                    .transition(Motion.fadeUp)
                 } else if !series.isEmpty {
                     stateList
                         .padding(Theme.Space.standard)
@@ -79,12 +90,10 @@ struct MetricInspectView: View {
                     .transition(Motion.fadeUp)
                 }
 
-                if !events.isEmpty {
-                    related
-                        .padding(Theme.Space.standard)
-                        .glass(.elevated, radius: Theme.Radius.secondary)
-                        .transition(Motion.fadeUp)
-                }
+                related
+                    .padding(Theme.Space.standard)
+                    .glass(.elevated, radius: Theme.Radius.secondary)
+                    .transition(Motion.fadeUp)
             }
             .frame(maxWidth: 1_080, alignment: .leading)
             .animation(Motion.panel, value: window)
@@ -93,6 +102,19 @@ struct MetricInspectView: View {
         }
         .instrumentScreen()
         .task(id: window) { await reload() }
+        .task(id: focus?.time) { await reloadFocusedEvents() }
+        .onChange(of: window) { _, _ in
+            focus = nil
+            focusedEvents = []
+        }
+    }
+
+    private var chartCaption: String {
+        if let focus {
+            let value = MetricFormatter.displayString(value: focus.value, unit: focus.unit)
+            return "\(focus.time.formatted(date: .omitted, time: .shortened)) · \(value). Related events are limited to this interval."
+        }
+        return "Click a point to see events in that interval. The selected range stays \(window.rawValue)."
     }
 
     private var stateList: some View {
@@ -116,11 +138,29 @@ struct MetricInspectView: View {
 
     private var related: some View {
         VStack(alignment: .leading, spacing: Theme.Space.compact) {
-            Text("Related events")
-                .font(Theme.Typography.section)
-                .foregroundStyle(Theme.Color.tertiary)
-            ForEach(events.reversed()) { event in
-                EventRow(event: event, showsCalendarDate: window.showsCalendarDate)
+            HStack {
+                Text(focus == nil ? "Related events" : "Events in this interval")
+                    .font(Theme.Typography.section)
+                    .foregroundStyle(Theme.Color.tertiary)
+                Spacer()
+                if focus != nil {
+                    Button("Show all") {
+                        focus = nil
+                        focusedEvents = []
+                    }
+                    .buttonStyle(.plain)
+                    .font(Theme.Typography.metadata)
+                    .foregroundStyle(Theme.Color.accent)
+                }
+            }
+            if visibleEvents.isEmpty {
+                Text(focus == nil ? "No stored events in this range." : "No events in this interval.")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
+            } else {
+                ForEach(visibleEvents.reversed()) { event in
+                    EventRow(event: event, showsCalendarDate: window.showsCalendarDate)
+                }
             }
         }
     }
@@ -132,13 +172,26 @@ struct MetricInspectView: View {
         return .dateTime.hour().minute().second()
     }
 
+    private func select(_ point: InspectPlotPoint?) {
+        focus = point
+        if point == nil {
+            focusedEvents = []
+        }
+    }
+
     private func reload() async {
         let nextSeries = await store.metricSeries(for: target, window: window)
         let nextEvents = await store.relatedEvents(for: target, window: window)
-        withAnimation(Motion.crossfade) {
-            series = nextSeries
-            events = nextEvents
-        }
+        series = nextSeries
+        events = nextEvents
+    }
+
+    private func reloadFocusedEvents() async {
+        guard let focus else { return }
+        let parent = InvestigationInterval.range(for: window.duration)
+        let bucket = InvestigationInterval.bucketSeconds(windowDuration: window.duration)
+        let range = InvestigationInterval.around(focus.time, bucketSeconds: bucket, in: parent)
+        focusedEvents = await store.relatedEvents(for: target, range: range)
     }
 
     private func numeric(_ metric: Metric) -> Double? {

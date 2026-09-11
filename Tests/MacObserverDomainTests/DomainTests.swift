@@ -236,3 +236,33 @@ struct HealthRulesTests {
         #expect(result.state == .healthy)
     }
 }
+
+struct InvestigationIntervalTests {
+    @Test func aroundAPointStaysInsideTheParentWindow() {
+        let range = TimeRange(
+            start: Date(timeIntervalSince1970: 100),
+            end: Date(timeIntervalSince1970: 200)
+        )
+        let focused = InvestigationInterval.around(
+            Date(timeIntervalSince1970: 150),
+            bucketSeconds: 10,
+            in: range
+        )
+        #expect(focused.start == Date(timeIntervalSince1970: 140))
+        #expect(focused.end == Date(timeIntervalSince1970: 160))
+    }
+
+    @Test func aroundAPointNearTheStartDoesNotLeaveTheWindow() {
+        let range = TimeRange(
+            start: Date(timeIntervalSince1970: 100),
+            end: Date(timeIntervalSince1970: 200)
+        )
+        let focused = InvestigationInterval.around(
+            Date(timeIntervalSince1970: 102),
+            bucketSeconds: 10,
+            in: range
+        )
+        #expect(focused.start == Date(timeIntervalSince1970: 100))
+        #expect(focused.end == Date(timeIntervalSince1970: 112))
+    }
+}

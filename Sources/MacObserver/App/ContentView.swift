@@ -50,7 +50,11 @@ struct ContentView: View {
         .sheet(item: $selectedProcess) { process in
             ProcessDetailView(
                 store: store,
-                process: process
+                process: process,
+                onInspect: { target in
+                    selectedProcess = nil
+                    path.append(target)
+                }
             )
             .frame(minWidth: 520, minHeight: 420)
         }

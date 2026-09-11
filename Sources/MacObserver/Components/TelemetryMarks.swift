@@ -266,28 +266,37 @@ struct SystemTimeline: View {
 struct TelemetryChart: View {
     let plot: [InspectPlotPoint]
     var height: CGFloat = 260
+    var selected: Date?
+    var onSelect: (InspectPlotPoint?) -> Void = { _ in }
 
     var body: some View {
-        Chart(plot) { point in
-            AreaMark(
-                x: .value("Time", point.time),
-                y: .value("Value", point.value)
-            )
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [Theme.Chart.fillTop, Theme.Chart.fillBottom],
-                    startPoint: .top,
-                    endPoint: .bottom
+        Chart {
+            ForEach(plot) { point in
+                AreaMark(
+                    x: .value("Time", point.time),
+                    y: .value("Value", point.value)
                 )
-            )
-            .interpolationMethod(.catmullRom)
-            LineMark(
-                x: .value("Time", point.time),
-                y: .value("Value", point.value)
-            )
-            .foregroundStyle(Theme.Color.accent)
-            .interpolationMethod(.catmullRom)
-            .lineStyle(StrokeStyle(lineWidth: Theme.Chart.stroke))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Theme.Chart.fillTop, Theme.Chart.fillBottom],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .interpolationMethod(.catmullRom)
+                LineMark(
+                    x: .value("Time", point.time),
+                    y: .value("Value", point.value)
+                )
+                .foregroundStyle(Theme.Color.accent)
+                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: Theme.Chart.stroke))
+            }
+            if let selected {
+                RuleMark(x: .value("Focus", selected))
+                    .foregroundStyle(Theme.Color.secondary.opacity(0.7))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+            }
         }
         .chartLegend(.hidden)
         .chartYAxis(.hidden)
@@ -298,8 +307,37 @@ struct TelemetryChart: View {
                     .font(Theme.Typography.metadata)
             }
         }
+        .chartOverlay { proxy in
+            GeometryReader { geo in
+                Rectangle()
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
+                    .onTapGesture { location in
+                        let x = resolvedX(location.x, proxy: proxy, geometry: geo)
+                        guard let date: Date = proxy.value(atX: x) else { return }
+                        if let match = nearest(to: date) {
+                            if selected == match.time {
+                                onSelect(nil)
+                            } else {
+                                onSelect(match)
+                            }
+                        }
+                    }
+            }
+        }
         .frame(height: height)
         .accessibilityLabel("Telemetry chart")
+    }
+
+    private func resolvedX(_ tapX: CGFloat, proxy: ChartProxy, geometry: GeometryProxy) -> CGFloat {
+        if let frame = proxy.plotFrame {
+            return tapX - geometry[frame].origin.x
+        }
+        return tapX
+    }
+
+    private func nearest(to date: Date) -> InspectPlotPoint? {
+        plot.min(by: { abs($0.time.timeIntervalSince(date)) < abs($1.time.timeIntervalSince(date)) })
     }
 }
 

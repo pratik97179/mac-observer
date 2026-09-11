@@ -111,52 +111,43 @@ final class OverviewStore {
     }
 
     func metricSeries(for target: MetricInspectTarget, window: HistoryWindow) async -> [Metric] {
-        await queryWindow(window) { range, bucket in
-            if let store {
-                return (try? await store.metrics(matching: MetricQuery(
-                    range: range,
-                    entityKey: target.entityKey,
-                    name: target.metricName,
-                    bucketSeconds: bucket
-                ))) ?? []
-            }
-            return snapshot.metrics.filter {
-                $0.name == target.metricName
-                    && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
-                    && $0.time.wallTime >= range.start
-                    && $0.time.wallTime <= range.end
-            }
+        let span = InvestigationInterval.range(for: window.duration)
+        let bucket = InvestigationInterval.bucketSeconds(windowDuration: window.duration)
+        await persisting?.flush()
+        if let store {
+            return (try? await store.metrics(matching: MetricQuery(
+                range: span,
+                entityKey: target.entityKey,
+                name: target.metricName,
+                bucketSeconds: bucket
+            ))) ?? []
+        }
+        return snapshot.metrics.filter {
+            $0.name == target.metricName
+                && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
+                && $0.time.wallTime >= span.start
+                && $0.time.wallTime <= span.end
         }
     }
 
     func relatedEvents(for target: MetricInspectTarget, window: HistoryWindow) async -> [Event] {
-        await queryWindow(window) { range, _ in
-            if let store {
-                return (try? await store.events(matching: EventQuery(
-                    range: range,
-                    domain: target.domain,
-                    limit: 20
-                ))) ?? []
-            }
-            return snapshot.events.filter {
-                $0.domain == target.domain
-                    && $0.time.wallTime >= range.start
-                    && $0.time.wallTime <= range.end
-            }
-        }
+        await relatedEvents(for: target, range: InvestigationInterval.range(for: window.duration))
     }
 
-    private func queryWindow<T>(
-        _ window: HistoryWindow,
-        load: (TimeRange, TimeInterval) async -> [T]
-    ) async -> [T] {
-        let end = Date()
-        let start = end.addingTimeInterval(-window.duration)
+    func relatedEvents(for target: MetricInspectTarget, range: TimeRange) async -> [Event] {
         await persisting?.flush()
-        return await load(
-            TimeRange(start: start, end: end),
-            max(window.duration / 240, 2)
-        )
+        if let store {
+            return (try? await store.events(matching: EventQuery(
+                range: range,
+                domain: target.domain,
+                limit: 20
+            ))) ?? []
+        }
+        return snapshot.events.filter {
+            $0.domain == target.domain
+                && $0.time.wallTime >= range.start
+                && $0.time.wallTime <= range.end
+        }
     }
 
     func refreshNow() async {
