@@ -24,9 +24,9 @@ The default screen answers only: **Is my Mac okay, and what is currently consumi
 
 It contains:
 
-- Machine identity and one health state: Healthy, Attention, or Investigate.
-- A compact resource summary: CPU, memory, network, storage I/O, power, thermal state, and battery when available.
-- A short ranked activity list. The columns must correspond to the currently relevant types of activity, not every possible metric.
+- Machine identity and one health state: Healthy, Attention, or Investigate. First paint before any sample is shown as Sampling, not Attention.
+- A compact resource summary: CPU, memory, network, storage I/O, power, thermal state, and battery when available. Tiles and the activity table keep a reserved skeleton; pending values are "—" until a sample arrives. Layout does not reflow when those strings change.
+- A short ranked activity list. The columns must correspond to the currently relevant types of activity, not every possible metric. Unused rows stay as placeholders so the table height is stable.
 - A visible data freshness indicator when a collector is stale or unavailable.
 
 It does not contain timelines, connection lists, dense tables, or permissions prompts by default.
@@ -81,4 +81,4 @@ Capabilities is a first-class screen. Each capability shows its state, the data 
 
 ## Writing And Visual Tone
 
-Use direct, calm language. Prefer “Memory pressure is normal” to “Optimization complete.” Use units consistently, preserve significant precision only when it changes a decision, and make uncertainty legible. The interface should feel like a focused instrument panel, not a marketing page or security scare screen.
+Use direct, calm language. Prefer “Memory pressure is normal” to “Optimization complete.” Use units consistently, preserve significant precision only when it changes a decision, and make uncertainty legible. The interface should feel like a focused instrument panel, not a marketing page or security scare screen. Motion is quiet: ease in and out, short fades, no bounce.

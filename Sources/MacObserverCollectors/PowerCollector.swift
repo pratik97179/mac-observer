@@ -69,6 +69,26 @@ public actor PowerCollector: TelemetryCollector {
                 )))
                 emittedWatts = true
             }
+
+            let charging = (description[kIOPSIsChargingKey] as? Bool) ?? false
+            await sink.send(.metric(MetricFactory.make(
+                clock: clock, domain: .power, name: .powerBatteryCharging, entity: system,
+                value: .state(charging ? "charging" : "discharging"),
+                unit: .enumeration, source: capability.id
+            )))
+
+            if let empty = Self.number(description[kIOPSTimeToEmptyKey]), empty > 0 {
+                await sink.send(.metric(MetricFactory.make(
+                    clock: clock, domain: .power, name: .powerTimeToEmptyMinutes, entity: system,
+                    value: .int(Int64(empty.rounded())), unit: .count, source: capability.id
+                )))
+            }
+            if let full = Self.number(description[kIOPSTimeToFullChargeKey]), full > 0 {
+                await sink.send(.metric(MetricFactory.make(
+                    clock: clock, domain: .power, name: .powerTimeToFullMinutes, entity: system,
+                    value: .int(Int64(full.rounded())), unit: .count, source: capability.id
+                )))
+            }
         }
 
         if emittedCharge {

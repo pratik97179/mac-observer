@@ -3,66 +3,104 @@ import MacObserverDomain
 
 struct CapabilitiesView: View {
     @Bindable var store: OverviewStore
+    @State private var selectedID: String?
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                header
-                ForEach(store.capabilities) { capability in
-                    capabilityCard(capability)
+            VStack(alignment: .leading, spacing: Theme.Space.section) {
+                VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    Text("Capabilities")
+                        .font(Theme.Typography.pageTitle)
+                    Text("Standard collectors stay on this Mac. Turning one off stops future samples from that source.")
+                        .font(Theme.Typography.body)
+                        .foregroundStyle(Theme.Color.secondary)
+                        .frame(maxWidth: 640, alignment: .leading)
+                }
+
+                VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    ForEach(store.capabilities) { capability in
+                        capabilityRow(capability)
+                    }
+                }
+                .padding(Theme.Space.standard)
+                    .glass(.elevated, radius: Theme.Radius.secondary)
+
+                if let selected, let capability = store.capabilities.first(where: { $0.id == selected }) {
+                    detail(capability)
+                        .padding(Theme.Space.standard)
+                        .glass(.elevated, radius: Theme.Radius.secondary)
+                        .transition(Motion.fadeUp)
                 }
             }
-            .padding(32)
             .frame(maxWidth: 880, alignment: .leading)
+            .animation(Motion.state, value: selectedID)
+            .instrumentContent()
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .navigationTitle("Capabilities")
+        .instrumentScreen()
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text("Capabilities")
-                .font(.system(size: 28, weight: .semibold))
-            Text("Standard collectors stay on this Mac. Turning one off stops future samples from that source.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 640, alignment: .leading)
-        }
-    }
+    private var selected: String? { selectedID }
 
-    private func capabilityCard(_ capability: CapabilityDescriptor) -> some View {
+    private func capabilityRow(_ capability: CapabilityDescriptor) -> some View {
         let enabled = store.isCapabilityEnabled(capability.id)
         let state = store.capabilityState(capability.id)
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 4) {
+        let selected = selectedID == capability.id
+        return Button {
+            selectedID = capability.id
+        } label: {
+            HStack(alignment: .center, spacing: Theme.Space.control) {
+                Circle()
+                    .fill(dotColor(enabled: enabled, state: state))
+                    .frame(width: 7, height: 7)
+                VStack(alignment: .leading, spacing: Theme.Space.micro) {
                     Text(capability.title)
-                        .font(.headline)
+                        .font(Theme.Typography.section)
+                        .foregroundStyle(Theme.Color.text)
                     Text(accessLabel(capability.accessLevel))
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
+                        .font(Theme.Typography.metadata)
+                        .foregroundStyle(Theme.Color.secondary)
                 }
                 Spacer()
                 Toggle("Enabled", isOn: enabledBinding(capability.id))
                     .labelsHidden()
                     .toggleStyle(.switch)
+                    .tint(Theme.Color.accent)
             }
-
-            Text(capability.summary)
-                .font(.body)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 16) {
-                Label(state, systemImage: enabled ? "checkmark.circle" : "pause.circle")
-                Label("Local only", systemImage: "internaldrive")
-                Label(domainLabel(capability.domains), systemImage: "square.grid.2x2")
+            .padding(Theme.Space.control)
+            .background {
+                RoundedRectangle(cornerRadius: Theme.Radius.item, style: .continuous)
+                    .fill(selected ? Theme.Color.accent.opacity(0.10) : Color.clear)
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func detail(_ capability: CapabilityDescriptor) -> some View {
+        let enabled = store.isCapabilityEnabled(capability.id)
+        let state = store.capabilityState(capability.id)
+        return VStack(alignment: .leading, spacing: Theme.Space.standard) {
+            Text(capability.title)
+                .font(Theme.Typography.section)
+            labeled("Provides", capability.summary)
+            labeled("Domains", domainLabel(capability.domains))
+            labeled("Why this access", accessReason(capability.accessLevel))
+            labeled("How to enable", enableCopy(enabled: enabled, state: state, level: capability.accessLevel))
+            Text(state)
+                .font(Theme.Typography.metadata)
+                .foregroundStyle(enabled ? Theme.Color.success : Theme.Color.tertiary)
+        }
+    }
+
+    private func labeled(_ title: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Space.micro) {
+            Text(title.uppercased())
+                .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Color.tertiary)
+            Text(value)
+                .font(Theme.Typography.body)
+                .foregroundStyle(Theme.Color.secondary)
+        }
     }
 
     private func enabledBinding(_ id: String) -> Binding<Bool> {
@@ -78,6 +116,37 @@ struct CapabilitiesView: View {
         case .privileged: "Privileged. Requires extra authorization."
         case .external: "External network request"
         }
+    }
+
+    private func accessReason(_ level: AccessLevel) -> String {
+        switch level {
+        case .standard:
+            "Reads host counters that macOS already exposes to a local process."
+        case .privileged:
+            "Needs extra authorization because the source is not available with standard process rights."
+        case .external:
+            "Would leave this Mac. That class of source is not shipped."
+        }
+    }
+
+    private func enableCopy(enabled: Bool, state: String, level: AccessLevel) -> String {
+        if enabled {
+            return "This collector is on. Samples stay in the local store."
+        }
+        if state.lowercased().contains("denied") {
+            return "Grant the required permission in System Settings, then turn this collector on."
+        }
+        if level == .privileged {
+            return "Authorize the extra right for this Mac, then turn the switch on."
+        }
+        return "Turn the switch on to start collecting this source."
+    }
+
+    private func dotColor(enabled: Bool, state: String) -> Color {
+        if !enabled { return Theme.Color.disabled }
+        if state.lowercased().contains("denied") { return Theme.Color.warning }
+        if state == "Collecting" { return Theme.Color.success }
+        return Theme.Color.tertiary
     }
 
     private func domainLabel(_ domains: [TelemetryDomain]) -> String {

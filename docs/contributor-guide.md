@@ -55,6 +55,6 @@ Develop against Command Line Tools. On this Mac the compiler is Swift 6.4. It bu
 
 Because the kernel is newer than that SDK, collectors may only call Darwin APIs that take an explicit buffer size. Process CPU and RSS use `proc_pidinfo`. Do not call `proc_pid_rusage`.
 
-Run the app with `./scripts/dev-run.sh`. That produces `.build/MacObserver.app`. Do not `open` the product under `swift build --show-bin-path`; Launch Services treats that file as a command-line tool.
+Run the app with `./scripts/dev-run.sh`. That produces `.build/MacObserver.app`. Do not `open` the product under `swift build --show-bin-path`; Launch Services treats that file as a command-line tool. Do not use `swift run`; it invokes `actool` for asset catalogs, and Command Line Tools cannot run `actool`.
 
 `scripts/dev-test.sh` runs `swift test` with the Testing macros plugin this Command Line Tools install keeps under `usr/lib/swift/host/plugins/testing`.

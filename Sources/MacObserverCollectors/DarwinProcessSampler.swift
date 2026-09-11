@@ -61,7 +61,7 @@ enum DarwinProcessSampler {
                     pid: pid,
                     startSeconds: UInt64(bsd.pbi_start_tvsec),
                     startMicroseconds: UInt64(bsd.pbi_start_tvusec),
-                    displayName: processName(pid),
+                    displayName: processName(from: bsd, pid: pid),
                     cpuNanoseconds: task.pti_total_user &+ task.pti_total_system,
                     residentBytes: UInt64(task.pti_resident_size)
                 )
@@ -83,10 +83,23 @@ enum DarwinProcessSampler {
         return Array(pids.prefix(Int(needed) / MemoryLayout<Int32>.size))
     }
 
-    private static func processName(_ pid: Int32) -> String {
+    private static func processName(from bsd: proc_bsdinfo, pid: Int32) -> String {
+        let longName = cString(bsd.pbi_name)
+        if !longName.isEmpty { return longName }
+        let comm = cString(bsd.pbi_comm)
+        if !comm.isEmpty { return comm }
         var name = [CChar](repeating: 0, count: Int(MAXCOMLEN) + 1)
         proc_name(pid, &name, UInt32(name.count))
         let end = name.firstIndex(of: 0) ?? name.endIndex
         return String(decoding: name[..<end].map { UInt8(bitPattern: $0) }, as: UTF8.self)
+    }
+
+    private static func cString<T>(_ tuple: T) -> String {
+        withUnsafeBytes(of: tuple) { raw in
+            let bytes = raw.bindMemory(to: UInt8.self)
+            let end = bytes.firstIndex(of: 0) ?? bytes.endIndex
+            return String(decoding: bytes[..<end], as: UTF8.self)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
     }
 }

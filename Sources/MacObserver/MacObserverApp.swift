@@ -11,13 +11,14 @@ struct MacObserverApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(store: store)
-                .frame(minWidth: 960, minHeight: 640)
+                .frame(minWidth: 1_050, minHeight: 700)
+                .preferredColorScheme(.dark)
                 .task {
                     await store.run()
                 }
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1_120, height: 740)
+        .defaultSize(width: 1_280, height: 820)
     }
 }
 

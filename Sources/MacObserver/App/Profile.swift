@@ -12,7 +12,7 @@ enum Profile: String, Identifiable, Hashable {
     var id: Self { self }
 
     static let views: [Profile] = [
-        .overview, .performance, .network, .processes, .storage, .power, .events
+        .overview, .performance, .processes, .network, .storage, .power, .events
     ]
 
     static let system: [Profile] = [
@@ -21,14 +21,14 @@ enum Profile: String, Identifiable, Hashable {
 
     var symbol: String {
         switch self {
-        case .overview: "rectangle.grid.2x2"
-        case .performance: "waveform.path.ecg"
-        case .network: "network"
-        case .processes: "square.stack.3d.up"
+        case .overview: "waveform.path.ecg"
+        case .performance: "chart.xyaxis.line"
+        case .network: "globe"
+        case .processes: "person.2"
         case .storage: "internaldrive"
-        case .power: "bolt"
-        case .events: "clock.arrow.circlepath"
-        case .capabilities: "checkmark.shield"
+        case .power: "bolt.fill"
+        case .events: "clock"
+        case .capabilities: "slider.horizontal.3"
         case .settings: "gearshape"
         }
     }

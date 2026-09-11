@@ -21,6 +21,18 @@ enum HistoryWindow: String, CaseIterable, Identifiable {
     }
 }
 
+private enum EventListItem: Identifiable {
+    case single(Event)
+    case group([Event])
+
+    var id: String {
+        switch self {
+        case .single(let event): event.id.uuidString
+        case .group(let events): events.map(\.id.uuidString).joined(separator: ":")
+        }
+    }
+}
+
 struct EventsView: View {
     let store: OverviewStore
     @State private var domainFilter: TelemetryDomain?
@@ -30,56 +42,68 @@ struct EventsView: View {
         return store.historyEvents.filter { $0.domain == domainFilter }
     }
 
+    private var items: [EventListItem] {
+        Self.grouped(events)
+    }
+
     private var domains: [TelemetryDomain] {
         Array(Set(store.historyEvents.map(\.domain))).sorted { $0.rawValue < $1.rawValue }
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                header
-                filters
-                if events.isEmpty {
-                    empty
+            VStack(alignment: .leading, spacing: Theme.Space.section) {
+                VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    Text("Events")
+                        .font(Theme.Typography.pageTitle)
+                    Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, and collector enablement.")
+                        .font(Theme.Typography.body)
+                        .foregroundStyle(Theme.Color.secondary)
+                        .frame(maxWidth: 720, alignment: .leading)
+                }
+
+                FilterBar {
+                    TimeRangeSelector(window: windowBinding)
+                    Picker("Domain", selection: $domainFilter) {
+                        Text("All domains").tag(Optional<TelemetryDomain>.none)
+                        ForEach(domains, id: \.self) { domain in
+                            Text(domain.rawValue).tag(Optional(domain))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(Theme.Color.accent)
+                }
+                .padding(Theme.Space.standard)
+                .glass(.recessed, radius: Theme.Radius.control)
+
+                if items.isEmpty {
+                    EmptyState(title: "No events", message: emptyCopy)
+                        .padding(Theme.Space.standard)
+                        .glass(.elevated, radius: Theme.Radius.secondary)
+                        .transition(Motion.fadeUp)
                 } else {
-                    list
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(items) { item in
+                            switch item {
+                            case .single(let event):
+                                EventRow(event: event, showsCalendarDate: store.eventWindow.showsCalendarDate)
+                            case .group(let grouped):
+                                EventGroup(events: grouped, showsCalendarDate: store.eventWindow.showsCalendarDate)
+                            }
+                        }
+                    }
+                    .padding(Theme.Space.standard)
+                    .glass(.elevated, radius: Theme.Radius.secondary)
+                    .transition(Motion.fadeUp)
                 }
             }
-            .padding(32)
             .frame(maxWidth: 1_080, alignment: .leading)
+            .animation(Motion.panel, value: domainFilter)
+            .instrumentContent()
         }
-        .background(Color(nsColor: .windowBackgroundColor))
-        .navigationTitle("Events")
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text("Events")
-                .font(.system(size: 28, weight: .semibold))
-            Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, and collector enablement.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 720, alignment: .leading)
-        }
-    }
-
-    private var filters: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Picker("Range", selection: windowBinding) {
-                ForEach(HistoryWindow.allCases) { window in
-                    Text(window.rawValue).tag(window)
-                }
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 420)
-
-            Picker("Domain", selection: $domainFilter) {
-                Text("All domains").tag(Optional<TelemetryDomain>.none)
-                ForEach(domains, id: \.self) { domain in
-                    Text(domain.rawValue).tag(Optional(domain))
-                }
-            }
-            .pickerStyle(.menu)
+        .instrumentScreen()
+        .task {
+            await store.refreshHistory()
         }
     }
 
@@ -90,15 +114,6 @@ struct EventsView: View {
         )
     }
 
-    private var empty: some View {
-        Text(emptyCopy)
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 8))
-    }
-
     private var emptyCopy: String {
         if domainFilter != nil {
             return "No events in this domain for the selected range."
@@ -106,44 +121,29 @@ struct EventsView: View {
         return "No stored events in this range. Disable a collector in Capabilities, or wait for a memory or thermal change."
     }
 
-    private var list: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            ForEach(events) { event in
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text(event.time.wallTime, format: timeFormat)
-                            .font(.body.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .frame(width: store.eventWindow.showsCalendarDate ? 148 : 88, alignment: .leading)
-                        Text(event.summary)
-                            .font(.body)
-                        Spacer()
-                    }
-                    HStack(spacing: 10) {
-                        Text(event.type.rawValue)
-                        Text(event.domain.rawValue)
-                        Text(event.source)
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    if !event.metadata.isEmpty {
-                        Text(event.metadata.sorted(by: { $0.key < $1.key }).map { "\($0.key)=\($0.value)" }.joined(separator: "  "))
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.tertiary)
-                    }
+    fileprivate static func grouped(_ events: [Event]) -> [EventListItem] {
+        let ordered = events.sorted { $0.time.wallTime > $1.time.wallTime }
+        var items: [EventListItem] = []
+        var index = 0
+        while index < ordered.count {
+            var bucket = [ordered[index]]
+            var cursor = index + 1
+            while cursor < ordered.count {
+                let delta = abs(ordered[cursor].time.wallTime.timeIntervalSince(bucket[0].time.wallTime))
+                if delta <= 3 {
+                    bucket.append(ordered[cursor])
+                    cursor += 1
+                } else {
+                    break
                 }
-                .padding(14)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.background.secondary)
             }
+            if bucket.count >= 4 {
+                items.append(.group(bucket))
+            } else {
+                items.append(contentsOf: bucket.map { .single($0) })
+            }
+            index = cursor
         }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private var timeFormat: Date.FormatStyle {
-        if store.eventWindow.showsCalendarDate {
-            return .dateTime.month(.abbreviated).day().hour().minute().second()
-        }
-        return .dateTime.hour().minute().second()
+        return items
     }
 }

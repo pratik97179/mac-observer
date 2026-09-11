@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import MacObserverDomain
 import MacObserverCollectors
 import MacObserverStorage
@@ -16,9 +17,11 @@ final class OverviewStore {
     private(set) var historyMessage: String?
     private(set) var historyEvents: [Event] = []
     private(set) var eventWindow: HistoryWindow = .lastHour
+    let startedAt: Date
     private var disabledCapabilityIDs: Set<String> = []
 
     init() {
+        startedAt = Date()
         snapshot = LiveSnapshot(
             metrics: [],
             events: [],
@@ -59,7 +62,8 @@ final class OverviewStore {
         Task {
             try? await pipeline?.setEnabled(id, enabled: enabled)
             if let pipeline {
-                snapshot = await pipeline.snapshot()
+                let next = await pipeline.snapshot()
+                applySnapshot(next)
                 await refreshHistory()
             }
         }
@@ -155,6 +159,13 @@ final class OverviewStore {
         )
     }
 
+    func refreshNow() async {
+        guard let pipeline else { return }
+        let next = await pipeline.snapshot()
+        applySnapshot(next)
+        await refreshHistory()
+    }
+
     func run() async {
         let extraSinks: [any TelemetrySink]
         if let path = try? SQLiteTelemetryStore.applicationSupportPath(),
@@ -184,8 +195,8 @@ final class OverviewStore {
 
         var ticks = 0
         while !Task.isCancelled {
-            snapshot = await pipeline.snapshot()
-            await refreshHistory()
+            let next = await pipeline.snapshot()
+            applySnapshot(next)
             ticks += 1
             if ticks.isMultiple(of: 5) {
                 await persisting?.flush()
@@ -198,5 +209,10 @@ final class OverviewStore {
 
         await persisting?.flush()
         await pipeline.stop()
+    }
+
+    private func applySnapshot(_ next: LiveSnapshot) {
+        guard !snapshot.hasSameTelemetry(as: next) else { return }
+        snapshot = next
     }
 }

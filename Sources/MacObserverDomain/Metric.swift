@@ -42,6 +42,9 @@ public struct MetricName: Sendable, Hashable, Codable, RawRepresentable {
     public static let processResidentBytes = MetricName(valid: "process.resident_bytes")
     public static let powerBatteryChargeRatio = MetricName(valid: "power.battery_charge_ratio")
     public static let powerLoadWatts = MetricName(valid: "power.load_watts")
+    public static let powerBatteryCharging = MetricName(valid: "power.battery_charging")
+    public static let powerTimeToEmptyMinutes = MetricName(valid: "power.time_to_empty_minutes")
+    public static let powerTimeToFullMinutes = MetricName(valid: "power.time_to_full_minutes")
     public static let thermalState = MetricName(valid: "thermal.state")
 
     public static func isValid(_ rawValue: String) -> Bool {

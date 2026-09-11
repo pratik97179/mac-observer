@@ -107,6 +107,18 @@ struct CollectorContractTests {
         #expect(snapshot.events.map(\.summary) == ["two", "three"])
     }
 
+    @Test func liveBufferKeepsAShortNumericSeries() async {
+        let clock = FakeClock()
+        let buffer = LiveTelemetryBuffer(clock: clock, seriesLimit: 3)
+        let entity = Entity.system(bootSession: boot)
+        for ratio in [0.1, 0.2, 0.3, 0.4] {
+            clock.advance(seconds: 1)
+            await buffer.send(.metric(cpu(ratio: ratio, quality: .direct, entity: entity)))
+        }
+        let snapshot = await buffer.snapshot()
+        #expect(snapshot.series(named: .cpuUtilizationRatio, entityKey: entity.identityKey).map(\.value) == [0.2, 0.3, 0.4])
+    }
+
     @Test func reenablingACollectorEmitsAnAvailabilityEvent() async throws {
         let clock = FakeClock()
         let collector = FakeCollector(clock: clock)

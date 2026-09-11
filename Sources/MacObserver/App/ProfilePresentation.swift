@@ -59,17 +59,17 @@ enum ProfilePresentation {
         let thermal = system.flatMap { snapshot.metric(named: .thermalState, entity: $0) }
 
         var readings: [OverviewReading] = []
-        readings.append(tile("CPU", cpu, "cpu", .blue, missing: "Waiting for host CPU"))
-        readings.append(tile("Memory", used, "memorychip", .indigo, missing: "Waiting for VM statistics"))
-        readings.append(tile("Pressure", pressure, "gauge.with.dots.needle.33percent", .purple, missing: "Pressure unavailable"))
-        readings.append(tile("Thermal", thermal, "thermometer.medium", .green, missing: "Thermal unavailable"))
+        readings.append(tile("CPU", cpu, "cpu", pending: "Waiting for host CPU", availability: snapshot.availability["standard.cpu_memory"]))
+        readings.append(tile("Memory", used, "memorychip", pending: "Waiting for VM statistics", availability: snapshot.availability["standard.cpu_memory"]))
+        readings.append(tile("Pressure", pressure, "gauge.with.dots.needle.33percent", pending: "Waiting for pressure", availability: snapshot.availability["standard.cpu_memory"]))
+        readings.append(tile("Thermal", thermal, "thermometer.medium", pending: "Waiting for thermal", availability: snapshot.availability["standard.cpu_memory"]))
 
         let rows: [ProfileRow] = [
-            ProfileRow(id: "used", cells: ["Used", used.map(MetricFormatter.displayString) ?? "—"]),
-            ProfileRow(id: "total", cells: ["Total", total.map(MetricFormatter.displayString) ?? "—"]),
-            ProfileRow(id: "wired", cells: ["Wired", wired.map(MetricFormatter.displayString) ?? "—"]),
-            ProfileRow(id: "compressed", cells: ["Compressed", compressed.map(MetricFormatter.displayString) ?? "—"]),
-            ProfileRow(id: "swap", cells: ["Swap", swap.map(MetricFormatter.displayString) ?? "—"])
+            ProfileRow(id: "used", cells: ["Used", used.map(MetricFormatter.displayString) ?? "unavailable"]),
+            ProfileRow(id: "total", cells: ["Total", total.map(MetricFormatter.displayString) ?? "unavailable"]),
+            ProfileRow(id: "wired", cells: ["Wired", wired.map(MetricFormatter.displayString) ?? "unavailable"]),
+            ProfileRow(id: "compressed", cells: ["Compressed", compressed.map(MetricFormatter.displayString) ?? "unavailable"]),
+            ProfileRow(id: "swap", cells: ["Swap", swap.map(MetricFormatter.displayString) ?? "unavailable"])
         ]
 
         return ProfileLiveModel(
@@ -102,28 +102,30 @@ enum ProfilePresentation {
                 id: key,
                 cells: [
                     title,
-                    receive.map(MetricFormatter.displayString) ?? "—",
-                    transmit.map(MetricFormatter.displayString) ?? "—"
+                    receive.map(MetricFormatter.displayString) ?? "unavailable",
+                    transmit.map(MetricFormatter.displayString) ?? "unavailable"
                 ]
             )
         }
-
         let totalRX = rx.reduce(0.0) { $0 + numeric($1) }
         let totalTX = tx.reduce(0.0) { $0 + numeric($1) }
+        let networkAvailability = snapshot.availability["standard.network"]
         let readings = [
             OverviewReading(
                 name: "Receive",
-                value: rx.isEmpty ? "Unavailable" : rateString(totalRX, sample: rx.first),
+                value: rx.isEmpty ? placeholderValue(networkAvailability) : rateString(totalRX, sample: rx.first),
                 detail: "Sum of link counters",
                 symbol: "arrow.down.right",
-                tint: .cyan
+                tint: AppTheme.Color.accent,
+                kind: rx.isEmpty ? placeholderKind(networkAvailability) : .live
             ),
             OverviewReading(
                 name: "Transmit",
-                value: tx.isEmpty ? "Unavailable" : rateString(totalTX, sample: tx.first),
+                value: tx.isEmpty ? placeholderValue(networkAvailability) : rateString(totalTX, sample: tx.first),
                 detail: "Not per-process",
                 symbol: "arrow.up.right",
-                tint: .blue
+                tint: AppTheme.Color.accent,
+                kind: tx.isEmpty ? placeholderKind(networkAvailability) : .live
             )
         ]
 
@@ -135,12 +137,12 @@ enum ProfilePresentation {
             readings: readings,
             columns: ["Interface", "Receive", "Transmit"],
             rows: rows,
-            emptyRows: rows.isEmpty ? "Waiting for interface counters. The second sample produces rates." : nil
+            emptyRows: nil
         )
     }
 
     private static func processes(snapshot: LiveSnapshot, freshness: String) -> ProfileLiveModel {
-        let processList = OverviewModel.processRows(from: snapshot, limit: 20)
+        let processList = OverviewModel.processRows(from: snapshot, limit: PanelLayout.tableRowCountProcesses, pad: false)
         let rows = processList.map {
             ProfileRow(id: $0.id, cells: [$0.name, $0.cpu, $0.memory, $0.network])
         }
@@ -152,7 +154,7 @@ enum ProfilePresentation {
             readings: [],
             columns: ["Process", "CPU", "Memory", "Network"],
             rows: rows,
-            emptyRows: rows.isEmpty ? "Waiting for process samples." : nil
+            emptyRows: nil
         )
     }
 
@@ -163,24 +165,26 @@ enum ProfilePresentation {
         let write = snapshot.metrics.filter { $0.name == .storageWriteBytesPerSecond }
 
         var readings: [OverviewReading] = []
-        readings.append(tile("Capacity", capacity, "internaldrive", .orange, missing: "Root volume unavailable"))
-        readings.append(tile("Available", available, "internaldrive.fill", .yellow, missing: "Free space unavailable"))
+        readings.append(tile("Capacity", capacity, "internaldrive", pending: "Waiting for root volume", availability: snapshot.availability["standard.storage"]))
+        readings.append(tile("Available", available, "internaldrive.fill", pending: "Waiting for free space", availability: snapshot.availability["standard.storage"]))
         readings.append(
             OverviewReading(
                 name: "Read",
-                value: read.isEmpty ? "Unavailable" : rateString(read.reduce(0.0) { $0 + numeric($1) }, sample: read.first),
+                value: read.isEmpty ? placeholderValue(snapshot.availability["standard.storage"]) : rateString(read.reduce(0.0) { $0 + numeric($1) }, sample: read.first),
                 detail: "IOBlockStorageDriver when present",
                 symbol: "arrow.down",
-                tint: .orange
+                tint: AppTheme.Color.accent,
+                kind: read.isEmpty ? placeholderKind(snapshot.availability["standard.storage"]) : .live
             )
         )
         readings.append(
             OverviewReading(
                 name: "Write",
-                value: write.isEmpty ? "Unavailable" : rateString(write.reduce(0.0) { $0 + numeric($1) }, sample: write.first),
+                value: write.isEmpty ? placeholderValue(snapshot.availability["standard.storage"]) : rateString(write.reduce(0.0) { $0 + numeric($1) }, sample: write.first),
                 detail: "Second sample produces rates",
                 symbol: "arrow.up",
-                tint: .red
+                tint: AppTheme.Color.accent,
+                kind: write.isEmpty ? placeholderKind(snapshot.availability["standard.storage"]) : .live
             )
         )
 
@@ -201,13 +205,45 @@ enum ProfilePresentation {
         freshness: String,
         readings overviewReadings: [OverviewReading]
     ) -> ProfileLiveModel {
-        let powerTiles = overviewReadings.filter { $0.name == "Power" || $0.name == "Thermal" }
+        let system = systemEntity(in: snapshot)
+        let battery = system.flatMap { snapshot.metric(named: .powerBatteryChargeRatio, entity: $0) }
+        let watts = system.flatMap { snapshot.metric(named: .powerLoadWatts, entity: $0) }
+        let thermal = overviewReadings.first { $0.name == "Thermal" }
+        var readings: [OverviewReading] = []
+        if let battery {
+            readings.append(OverviewReading(
+                name: "Battery",
+                value: MetricFormatter.displayString(for: battery),
+                detail: "Charge remaining",
+                symbol: "battery.100",
+                tint: AppTheme.Color.accent,
+                kind: .live,
+                inspect: .from(title: "Battery", metric: battery)
+            ))
+        }
+        if let watts {
+            readings.append(OverviewReading(
+                name: "Power",
+                value: MetricFormatter.displayString(for: watts),
+                detail: "Estimated from voltage and current",
+                symbol: "bolt",
+                tint: AppTheme.Color.accent,
+                kind: .live,
+                inspect: .from(title: "Power", metric: watts)
+            ))
+        }
+        if readings.isEmpty {
+            readings.append(contentsOf: overviewReadings.filter { $0.name == "Power" })
+        }
+        if let thermal {
+            readings.append(thermal)
+        }
         return ProfileLiveModel(
             title: "Power",
             summary: "Battery charge and estimated load when IOKit publishes voltage and current.",
             freshness: freshness,
             availability: availability(snapshot, prefix: "standard.power"),
-            readings: powerTiles,
+            readings: readings,
             columns: [],
             rows: [],
             emptyRows: nil
@@ -225,17 +261,38 @@ enum ProfilePresentation {
         _ name: String,
         _ metric: Metric?,
         _ symbol: String,
-        _ tint: Color,
-        missing: String
+        pending: String,
+        availability: CapabilityAvailability?
     ) -> OverviewReading {
-        OverviewReading(
+        let readingKind = placeholderKind(availability, hasMetric: metric != nil)
+        let value: String
+        switch readingKind {
+        case .pending: value = ""
+        case .unavailable: value = ""
+        case .live: value = metric.map(MetricFormatter.displayString) ?? ""
+        }
+        return OverviewReading(
             name: name,
-            value: metric.map(MetricFormatter.displayString) ?? "Unavailable",
-            detail: metric == nil ? missing : "Direct sample",
+            value: value,
+            detail: metric == nil ? pending : "Direct sample",
             symbol: symbol,
-            tint: tint,
+            tint: AppTheme.Color.accent,
+            kind: readingKind,
             inspect: .from(title: name, metric: metric)
         )
+    }
+
+    private static func placeholderKind(
+        _ availability: CapabilityAvailability?,
+        hasMetric: Bool = false
+    ) -> OverviewReading.Kind {
+        if case .unavailable = availability { return .unavailable }
+        if hasMetric { return .live }
+        return .pending
+    }
+
+    private static func placeholderValue(_ availability: CapabilityAvailability?) -> String {
+        placeholderKind(availability) == .unavailable ? "unavailable" : ""
     }
 
     private static func numeric(_ metric: Metric) -> Double {
@@ -247,7 +304,7 @@ enum ProfilePresentation {
     }
 
     private static func rateString(_ total: Double, sample: Metric?) -> String {
-        guard let sample else { return "Unavailable" }
+        guard let sample else { return "" }
         let synthetic = Metric(
             time: sample.time,
             domain: sample.domain,

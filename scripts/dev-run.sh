@@ -25,13 +25,19 @@ echo "SDKROOT=$SDKROOT"
 swift --version
 
 swift build --product MacObserver
-bin=$(swift build --show-bin-path)/MacObserver
+bin_dir=$(swift build --show-bin-path)
+bin="$bin_dir/MacObserver"
 app="$root/.build/MacObserver.app"
 
 rm -rf "$app"
-mkdir -p "$app/Contents/MacOS"
+mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin" "$app/Contents/MacOS/MacObserver"
 cp "$root/App/Bundle-Info.plist" "$app/Contents/Info.plist"
+
+resource_bundle="$bin_dir/MacObserver_MacObserver.bundle"
+if [ -d "$resource_bundle" ]; then
+  cp -R "$resource_bundle" "$app/Contents/Resources/"
+fi
 
 echo "Launching $app"
 exec open "$app"

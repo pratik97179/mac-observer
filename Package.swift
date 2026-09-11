@@ -29,6 +29,10 @@ let package = Package(
         .executableTarget(
             name: "MacObserver",
             dependencies: ["MacObserverDomain", "MacObserverCollectors", "MacObserverStorage"],
+            exclude: ["Assets.xcassets"],
+            resources: [
+                .copy("Resources/macbook.png")
+            ],
             linkerSettings: [
                 .linkedFramework("IOKit")
             ]
