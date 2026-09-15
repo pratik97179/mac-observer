@@ -20,6 +20,14 @@ The GUI is a SwiftUI `App`. It must run as a macOS application bundle, not as a 
 
 That script points Swift at Command Line Tools and `MacOSX26.5.sdk` (the SDK this compiler can actually compile), builds `MacObserver`, stages `.build/MacObserver.app`, and opens the bundle.
 
+For layout work with canned telemetry (no live collectors):
+
+```sh
+./scripts/dev-preview.sh
+```
+
+That launches the full app with fake processes, charts, events, and capability rows. Run it again after a UI change; it replaces the previous preview process. Live collectors stay on `./scripts/dev-run.sh`.
+
 Do not use `swift run`. SPM tries to compile `Assets.xcassets` with `actool`, which needs a full Xcode.app. This Mac only has Command Line Tools.
 
 If Xcode matches this Mac, you can also open `MacObserver.xcodeproj`.

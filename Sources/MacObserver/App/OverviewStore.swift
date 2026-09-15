@@ -21,8 +21,23 @@ final class OverviewStore {
     let startedAt: Date
     private var persistedExplanationIDs: Set<String> = []
     private var disabledCapabilityIDs: Set<String> = []
+    private let isLayoutPreview: Bool
+    private var previewEvents: [Event] = []
+    private var previewHistory: [Metric] = []
+
+    static func makeForLaunch() -> OverviewStore {
+        if CommandLine.arguments.contains("--layout-preview") {
+            return layoutPreview()
+        }
+        return OverviewStore()
+    }
+
+    static func layoutPreview(now: Date = Date()) -> OverviewStore {
+        OverviewStore(layoutPreview: LayoutPreviewData.make(now: now))
+    }
 
     init() {
+        isLayoutPreview = false
         startedAt = Date()
         snapshot = LiveSnapshot(
             metrics: [],
@@ -32,7 +47,25 @@ final class OverviewStore {
         )
     }
 
+    private init(layoutPreview payload: LayoutPreviewPayload) {
+        isLayoutPreview = true
+        startedAt = payload.startedAt
+        snapshot = payload.snapshot
+        capabilities = payload.capabilities
+        previewEvents = payload.events
+        previewHistory = payload.historyMetrics
+        historyEvents = payload.events
+            .filter { $0.time.wallTime >= Date().addingTimeInterval(-HistoryWindow.lastHour.duration) }
+            .sorted { $0.time.wallTime > $1.time.wallTime }
+        historyPath = "Layout preview"
+        historyMessage = "Canned telemetry. Collectors are not running."
+        disabledCapabilityIDs = Set(payload.capabilities.compactMap { $0.defaultEnabled ? nil : $0.id })
+    }
+
     func isCapabilityEnabled(_ id: String) -> Bool {
+        if isLayoutPreview {
+            return !disabledCapabilityIDs.contains(id)
+        }
         if let capability = capabilities.first(where: { $0.id == id }) {
             return preferences.isEnabled(capability)
         }
@@ -62,12 +95,13 @@ final class OverviewStore {
 
     func setCapabilityEnabled(_ id: String, enabled: Bool, deleteHistory: Bool = false) {
         guard let capability = capabilities.first(where: { $0.id == id }) else { return }
-        preferences.setEnabled(capability, enabled: enabled)
         if enabled {
             disabledCapabilityIDs.remove(id)
         } else {
             disabledCapabilityIDs.insert(id)
         }
+        if isLayoutPreview { return }
+        preferences.setEnabled(capability, enabled: enabled)
         Task {
             try? await pipeline?.setEnabled(id, enabled: enabled)
             if !enabled, deleteHistory {
@@ -84,6 +118,7 @@ final class OverviewStore {
     }
 
     func runExternalDiagnostic() async {
+        guard !isLayoutPreview else { return }
         guard isCapabilityEnabled(ExternalDiagnosticsCollector.capabilityID) else { return }
         await pipeline?.runExternalDiagnostic()
         if let pipeline {
@@ -93,6 +128,10 @@ final class OverviewStore {
     }
 
     func deleteLocalHistory() async {
+        guard !isLayoutPreview else {
+            historyMessage = "Layout preview has no local history file."
+            return
+        }
         guard store != nil else {
             historyMessage = "No local history file is open."
             return
@@ -118,6 +157,12 @@ final class OverviewStore {
     func refreshHistory() async {
         let end = Date()
         let start = end.addingTimeInterval(-eventWindow.duration)
+        if isLayoutPreview {
+            historyEvents = previewEvents
+                .filter { $0.time.wallTime >= start && $0.time.wallTime <= end }
+                .sorted { $0.time.wallTime > $1.time.wallTime }
+            return
+        }
         if let store {
             await persisting?.flush()
             do {
@@ -139,6 +184,14 @@ final class OverviewStore {
     func metricSeries(for target: MetricInspectTarget, window: HistoryWindow) async -> [Metric] {
         let span = InvestigationInterval.range(for: window.duration)
         let bucket = InvestigationInterval.bucketSeconds(windowDuration: window.duration)
+        if isLayoutPreview {
+            return previewHistory.filter {
+                $0.name == target.metricName
+                    && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
+                    && $0.time.wallTime >= span.start
+                    && $0.time.wallTime <= span.end
+            }.sorted { $0.time.wallTime < $1.time.wallTime }
+        }
         await persisting?.flush()
         if let store {
             return (try? await store.metrics(matching: MetricQuery(
@@ -161,6 +214,13 @@ final class OverviewStore {
     }
 
     func relatedEvents(for target: MetricInspectTarget, range: TimeRange) async -> [Event] {
+        if isLayoutPreview {
+            return previewEvents.filter {
+                $0.domain == target.domain
+                    && $0.time.wallTime >= range.start
+                    && $0.time.wallTime <= range.end
+            }.sorted { $0.time.wallTime > $1.time.wallTime }
+        }
         await persisting?.flush()
         if let store {
             return (try? await store.events(matching: EventQuery(
@@ -177,6 +237,7 @@ final class OverviewStore {
     }
 
     func refreshNow() async {
+        guard !isLayoutPreview else { return }
         guard let pipeline else { return }
         let next = await pipeline.snapshot()
         applySnapshot(next)
@@ -185,6 +246,7 @@ final class OverviewStore {
     }
 
     func refreshExplanation() async {
+        guard !isLayoutPreview else { return }
         let now = Date()
         let eventRange = TimeRange(
             start: now.addingTimeInterval(-ExplanationRules.recentHorizon),
@@ -206,6 +268,7 @@ final class OverviewStore {
     }
 
     func run() async {
+        guard !isLayoutPreview else { return }
         let extraSinks: [any TelemetrySink]
         if let path = try? SQLiteTelemetryStore.applicationSupportPath(),
            let store = try? SQLiteTelemetryStore(path: path) {

@@ -6,7 +6,7 @@ import MacObserverCollectors
 @main
 struct MacObserverApp: App {
     @NSApplicationDelegateAdaptor(MacObserverAppDelegate.self) private var appDelegate
-    @State private var store = OverviewStore()
+    @State private var store = OverviewStore.makeForLaunch()
 
     var body: some Scene {
         WindowGroup {

@@ -20,9 +20,8 @@ struct OverviewCockpit: View {
         let innerWidth = min(max(availableSize.width - cockpitPadding * 2, 1), metrics.contentMaxWidth)
         let compactHeight = innerHeight < 780
         let compactWidth = metrics.regime == .compact || innerWidth < 820
-        OverviewCompositionLayout(spacing: metrics.spacing, compactHeight: compactHeight) {
+        VStack(alignment: .leading, spacing: metrics.spacing.sm) {
             OverviewUtilityHeader(onSearch: onSearch, onRefresh: onRefresh)
-                .overviewBand(.header)
             OverviewHero(
                 model: model,
                 snapshot: snapshot,
@@ -30,13 +29,13 @@ struct OverviewCockpit: View {
                 compactHeight: compactHeight,
                 onOpenProfile: onOpenProfile
             )
-            .overviewBand(.hero)
+            .frame(maxWidth: .infinity)
             SystemActivityRegion(
                 snapshot: snapshot,
                 staleAge: staleAge,
                 compact: compactHeight
             )
-            .overviewBand(.activity)
+            .frame(maxWidth: .infinity, maxHeight: 56)
             OverviewBottomSection(
                 snapshot: snapshot,
                 staleAge: staleAge,
@@ -45,7 +44,7 @@ struct OverviewCockpit: View {
                 onOpenProcess: onOpenProcess,
                 onOpenProfile: onOpenProfile
             )
-            .overviewBand(.bottom)
+            .frame(maxWidth: .infinity)
         }
         .padding(cockpitPadding)
         .frame(width: availableSize.width, height: availableSize.height, alignment: .top)
@@ -59,67 +58,6 @@ struct OverviewCockpit: View {
     }
 }
 
-private enum OverviewBand {
-    case header, hero, activity, bottom
-}
-
-private struct OverviewBandKey: LayoutValueKey {
-    static let defaultValue = OverviewBand.hero
-}
-
-private extension View {
-    func overviewBand(_ band: OverviewBand) -> some View {
-        layoutValue(key: OverviewBandKey.self, value: band)
-    }
-}
-
-private struct OverviewCompositionLayout: Layout {
-    var spacing: SpacingScale
-    var compactHeight: Bool
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        func item(_ band: OverviewBand) -> LayoutSubview? {
-            subviews.first { $0[OverviewBandKey.self] == band }
-        }
-        guard
-            let header = item(.header),
-            let hero = item(.hero),
-            let activity = item(.activity),
-            let bottom = item(.bottom)
-        else { return }
-
-        let headerFit = header.sizeThatFits(.init(width: bounds.width, height: nil))
-        let headerH = min(max(headerFit.height, bounds.height * 0.05), bounds.height * 0.09)
-
-        let bottomCap = bounds.height * (compactHeight ? 0.17 : 0.22)
-        let bottomFit = bottom.sizeThatFits(.init(width: bounds.width, height: bottomCap))
-        let bottomMin = min(compactHeight ? 96 as CGFloat : 120, bottomCap)
-        let bottomH = min(max(bottomFit.height, bottomMin), bottomCap)
-
-        let rest = max(bounds.height - headerH - bottomH - spacing.xs - spacing.sm - spacing.md, 1)
-        var heroH = rest * (compactHeight ? 0.58 : 0.41 / 0.74)
-        var activityH = rest - heroH
-        let activityMin: CGFloat = compactHeight ? 96 : 120
-        if activityH < activityMin {
-            activityH = min(activityMin, rest * 0.38)
-            heroH = rest - activityH
-        }
-
-        var y = bounds.minY
-        header.place(at: CGPoint(x: bounds.minX, y: y), proposal: .init(width: bounds.width, height: headerH))
-        y += headerH + spacing.xs
-        hero.place(at: CGPoint(x: bounds.minX, y: y), proposal: .init(width: bounds.width, height: heroH))
-        y += heroH + spacing.sm
-        activity.place(at: CGPoint(x: bounds.minX, y: y), proposal: .init(width: bounds.width, height: activityH))
-        y += activityH + spacing.md
-        bottom.place(at: CGPoint(x: bounds.minX, y: y), proposal: .init(width: bounds.width, height: bottomH))
-    }
-}
-
 struct OverviewUtilityHeader: View {
     var onSearch: () -> Void
     var onRefresh: () -> Void
@@ -127,7 +65,7 @@ struct OverviewUtilityHeader: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: Theme.Space.compact) {
-            Text("Overview")
+            Text("")
                 .font(Theme.Typography.section)
                 .foregroundStyle(Theme.Color.secondary)
             Spacer(minLength: Theme.Space.standard)
@@ -156,7 +94,7 @@ struct OverviewUtilityHeader: View {
             .accessibilityLabel("Open command palette")
 
             Button(action: onRefresh) {
-                Image(systemName: "arrow.clockwise")
+                Image(systemName: "sun.max.fill")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Theme.Color.secondary)
                     .frame(width: 34, height: 34)
@@ -165,7 +103,7 @@ struct OverviewUtilityHeader: View {
             .glass(.recessed, radius: Theme.Radius.control)
             .help("Refresh")
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -187,10 +125,69 @@ private struct OverviewHeroLayout: Layout {
     var spacing: SpacingScale
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
+        let width = proposal.width ?? 0
+        guard let fit = measure(width: width, maxHeight: proposal.height, subviews: subviews) else {
+            return CGSize(width: width, height: 0)
+        }
+        return CGSize(width: width, height: fit.height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let fit = measure(width: bounds.width, maxHeight: bounds.height, subviews: subviews) else { return }
+
+        let identityY = bounds.minY
+        let machineY = identityY + fit.identityH + spacing.sm
+        let pulseY = machineY + fit.machineRowH + spacing.md
+
+        fit.identity.place(
+            at: CGPoint(x: bounds.midX - min(fit.identitySize.width, fit.identityWidth) / 2, y: identityY),
+            proposal: .init(width: fit.identityWidth, height: fit.identityH)
+        )
+        fit.machine.place(
+            at: CGPoint(x: bounds.midX - fit.machineW / 2, y: machineY),
+            proposal: .init(width: fit.machineW, height: fit.machineH)
+        )
+        fit.pulse.place(
+            at: CGPoint(x: bounds.midX - fit.pulseSize.width / 2, y: pulseY),
+            proposal: .init(width: fit.pulseSize.width, height: fit.pulseSize.height)
+        )
+
+        let cpuX = bounds.minX + 72
+        let gpuX = bounds.minX + 46.8
+        let memoryX = bounds.maxX - fit.memorySize.width - 72
+        let thermalX = bounds.maxX - fit.thermalSize.width - 46.8
+        let columnTop = machineY + max((fit.machineRowH - fit.sideColumnH) * 0.5, 0)
+
+        fit.cpu.place(at: CGPoint(x: cpuX, y: columnTop), proposal: .unspecified)
+        fit.gpu.place(at: CGPoint(x: gpuX, y: columnTop + fit.cpuSize.height + spacing.md), proposal: .unspecified)
+        fit.memory.place(at: CGPoint(x: memoryX, y: columnTop), proposal: .unspecified)
+        fit.thermal.place(at: CGPoint(x: thermalX, y: columnTop + fit.memorySize.height + spacing.md), proposal: .unspecified)
+    }
+
+    private struct Fit {
+        let identity: LayoutSubview
+        let machine: LayoutSubview
+        let cpu: LayoutSubview
+        let memory: LayoutSubview
+        let gpu: LayoutSubview
+        let thermal: LayoutSubview
+        let pulse: LayoutSubview
+        let identityWidth: CGFloat
+        let identitySize: CGSize
+        let pulseSize: CGSize
+        let cpuSize: CGSize
+        let memorySize: CGSize
+        let gpuSize: CGSize
+        let thermalSize: CGSize
+        let identityH: CGFloat
+        let machineH: CGFloat
+        let machineW: CGFloat
+        let machineRowH: CGFloat
+        let sideColumnH: CGFloat
+        let height: CGFloat
+    }
+
+    private func measure(width: CGFloat, maxHeight: CGFloat?, subviews: Subviews) -> Fit? {
         func item(_ slot: OverviewHeroSlot) -> LayoutSubview? {
             subviews.first { $0[OverviewHeroSlotKey.self] == slot }
         }
@@ -202,68 +199,63 @@ private struct OverviewHeroLayout: Layout {
             let gpu = item(.gpu),
             let thermal = item(.thermal),
             let pulse = item(.pulse)
-        else { return }
+        else { return nil }
 
-        let identityWidth = min(max(bounds.width * 0.72, 160), bounds.width)
+        let identityWidth = min(max(width * 0.72, 160), max(width, 160))
         let identitySize = identity.sizeThatFits(.init(width: identityWidth, height: nil))
-        let identityH = min(identitySize.height, bounds.height * 0.30)
-        let pulseWidth = min(max(bounds.width * 0.36, 180), bounds.width * 0.48)
+        let pulseWidth = min(max(width * 0.36, 180), max(width * 0.48, 180))
         let pulseSize = pulse.sizeThatFits(.init(width: pulseWidth, height: nil))
-        let machineSize = machine.sizeThatFits(.unspecified)
-
-        // Center column is a real vertical stack: identity → machine → pulse.
-        // Pulse is never bottom-pinned into the identity/machine area.
-        let identityY = bounds.minY
-        let machineY = identityY + identityH + spacing.sm
-        let pulseY = min(
-            machineY + machineSize.height + spacing.md,
-            bounds.maxY - pulseSize.height
-        )
-
-        identity.place(
-            at: CGPoint(x: bounds.midX - min(identitySize.width, identityWidth) / 2, y: identityY),
-            proposal: .init(width: identityWidth, height: identityH)
-        )
-        machine.place(
-            at: CGPoint(x: bounds.midX - machineSize.width / 2, y: machineY),
-            proposal: .init(width: machineSize.width, height: machineSize.height)
-        )
-        pulse.place(
-            at: CGPoint(x: bounds.midX - pulseSize.width / 2, y: pulseY),
-            proposal: .init(width: pulseSize.width, height: pulseSize.height)
-        )
-
+        let machineIdeal = machine.sizeThatFits(.unspecified)
         let cpuSize = cpu.sizeThatFits(.unspecified)
         let memorySize = memory.sizeThatFits(.unspecified)
         let gpuSize = gpu.sizeThatFits(.unspecified)
         let thermalSize = thermal.sizeThatFits(.unspecified)
-        let cpuLeading: CGFloat = 72
-        let gpuLeading: CGFloat = 46.8
-        let memoryTrailing: CGFloat = 72
-        let thermalTrailing: CGFloat = 46.8
-        let columnGap = spacing.md
+        let sideColumnH = max(
+            cpuSize.height + spacing.md + gpuSize.height,
+            memorySize.height + spacing.md + thermalSize.height
+        )
 
-        // Two fixed columns beside the machine:
-        // Left: CPU → GPU
-        // Right: Memory → Thermal
-        let cpuX = bounds.minX + cpuLeading
-        let gpuX = bounds.minX + gpuLeading
-        let memoryX = bounds.maxX - memorySize.width - memoryTrailing
-        let thermalX = bounds.maxX - thermalSize.width - thermalTrailing
+        let identityH = identitySize.height
+        var machineH = machineIdeal.height
+        var machineW = machineIdeal.width
+        let reserved = identityH + pulseSize.height + spacing.sm + spacing.md
+        if let maxHeight {
+            let room = max(maxHeight - reserved, 48)
+            if machineH > room {
+                let scale = machineIdeal.height > 0 ? room / machineIdeal.height : 1
+                machineH = room
+                machineW = machineIdeal.width * scale
+            }
+        }
 
-        let leftColumnHeight = cpuSize.height + columnGap + gpuSize.height
-        let rightColumnHeight = memorySize.height + columnGap + thermalSize.height
-        let columnTop = machineY + max((machineSize.height - max(leftColumnHeight, rightColumnHeight)) * 0.5, 0)
+        let machineRowH = max(machineH, sideColumnH)
+        var height = identityH + spacing.sm + machineRowH + spacing.md + pulseSize.height
+        if let maxHeight, height > maxHeight {
+            height = maxHeight
+        }
 
-        let cpuY = columnTop
-        let gpuY = cpuY + cpuSize.height + columnGap
-        let memoryY = columnTop
-        let thermalY = memoryY + memorySize.height + columnGap
-
-        cpu.place(at: CGPoint(x: cpuX, y: cpuY), proposal: .unspecified)
-        gpu.place(at: CGPoint(x: gpuX, y: gpuY), proposal: .unspecified)
-        memory.place(at: CGPoint(x: memoryX, y: memoryY), proposal: .unspecified)
-        thermal.place(at: CGPoint(x: thermalX, y: thermalY), proposal: .unspecified)
+        return Fit(
+            identity: identity,
+            machine: machine,
+            cpu: cpu,
+            memory: memory,
+            gpu: gpu,
+            thermal: thermal,
+            pulse: pulse,
+            identityWidth: identityWidth,
+            identitySize: identitySize,
+            pulseSize: pulseSize,
+            cpuSize: cpuSize,
+            memorySize: memorySize,
+            gpuSize: gpuSize,
+            thermalSize: thermalSize,
+            identityH: identityH,
+            machineH: machineH,
+            machineW: machineW,
+            machineRowH: machineRowH,
+            sideColumnH: sideColumnH,
+            height: height
+        )
     }
 }
 
@@ -305,7 +297,7 @@ struct OverviewHero: View {
             )
             .overviewHeroSlot(.pulse)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
         .clipped()
     }
 
@@ -353,7 +345,7 @@ struct HealthState: View {
                     .frame(width: 7, height: 7)
                 Text(title)
                     .font(Theme.Typography.body)
-                    .foregroundStyle(Theme.Color.text)
+                    .foregroundStyle(dot)
             }
             if !compact {
                 Text(subtitle)
@@ -416,12 +408,11 @@ struct MachineVisual: View {
                 image
                     .resizable()
                     .scaledToFit()
-                    .frame(width: Self.maxWidth)
-                    .shadow(color: Color.black.opacity(0.10), radius: 8, y: 5)
-                    .accessibilityLabel(deviceName)
+                    .frame(height: 200)
             } else {
                 Color.clear
-                    .frame(width: Self.maxWidth, height: Self.maxWidth * 2 / 3)
+                    .frame(maxWidth: Self.maxWidth)
+                    .aspectRatio(3 / 2, contentMode: .fit)
                     .overlay {
                         VStack(spacing: Theme.Space.xs) {
                             Text(fallbackName)
@@ -436,8 +427,7 @@ struct MachineVisual: View {
                     .accessibilityLabel("Device visual unavailable")
             }
         }
-        .frame(width: Self.maxWidth)
-        .fixedSize()
+        .frame(maxWidth: Self.maxWidth)
     }
 
     private var fallbackName: String {
@@ -462,19 +452,19 @@ struct CPUObject: View {
             HStack(alignment: .center, spacing: Theme.Space.sm) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("CPU")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Theme.Color.text)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.Color.tertiary)
                     Text(hasValue ? OverviewMetrics.percent(series.last?.value ?? OverviewMetrics.ratio(snapshot, .cpuUtilizationRatio) ?? 0) : "—")
-                        .font(.system(size: 13, weight: .medium).monospacedDigit())
-                        .foregroundStyle(hasValue ? Theme.Color.secondary : Theme.Color.tertiary)
+                        .font(.system(size: 24, weight: .medium).monospacedDigit())
+                        .foregroundStyle(Theme.Color.text)
                         .lineLimit(1)
                     Text(hasValue ? "Host utilization" : "Collecting telemetry")
                         .font(Theme.Typography.micro)
                         .foregroundStyle(Theme.Color.tertiary)
                         .lineLimit(1)
                 }
-                Sparkline(values: series.map(\.value), height: 28, tint: Theme.Color.accent, showsEmptyCaption: false)
-                    .frame(width: 72, height: 28)
+                Sparkline(values: series.map(\.value), height: 28, showsEmptyCaption: false)
+                    .frame(width: 72, height: 20)
             }
         }
         .buttonStyle(.plain)
@@ -501,11 +491,11 @@ struct MemoryObject: View {
             HStack(alignment: .center, spacing: Theme.Space.sm) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Memory")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Theme.Color.text)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.Color.tertiary)
                     Text(hasValue ? "\(OverviewMetrics.bytes(used)) / \(OverviewMetrics.bytes(total))" : "—")
-                        .font(.system(size: 13, weight: .medium).monospacedDigit())
-                        .foregroundStyle(hasValue ? Theme.Color.secondary : Theme.Color.tertiary)
+                        .font(.system(size: 24, weight: .medium).monospacedDigit())
+                        .foregroundStyle(Theme.Color.text)
                         .lineLimit(1)
                     if hasValue {
                         if !compact {
@@ -645,27 +635,14 @@ struct OverviewSystemPulse: View {
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Color.secondary)
                     .tracking(1.2)
-                Sparkline(
-                    values: SystemPulse.series(from: snapshot),
-                    height: 28,
-                    tint: pulseTint,
-                    showsEmptyCaption: false
-                )
-                .frame(height: 28)
-                Text(OverviewVisualFill.pulseLabel(cpu: cpuRatio))
+                Text("Live blend of CPU, memory, disk and network activity")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Color.tertiary)
+                    .foregroundStyle(Theme.Color.secondary)
             }
         }
         .buttonStyle(.plain)
         .help("Open Performance")
         .accessibilityLabel("System pulse, \(OverviewVisualFill.pulseLabel(cpu: cpuRatio))")
-    }
-
-    private var pulseTint: Color {
-        if cpuRatio >= 0.8 { return Theme.Color.critical }
-        if cpuRatio >= 0.45 { return Theme.Color.warning }
-        return Theme.Color.accent
     }
 }
 
@@ -935,7 +912,7 @@ struct OverviewActivityChart: View {
                 }
                 .font(Theme.Typography.micro)
             }
-            if let selection, let summary = selectionSummary(width: width) {
+            if let summary = selectionSummary(width: width) {
                 Text(summary)
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Color.secondary)
@@ -1006,7 +983,7 @@ struct OverviewBottomSection: View {
                 onOpenProfile: onOpenProfile
             )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
 
@@ -1017,43 +994,80 @@ private struct OverviewBottomLayout: Layout {
     var resourceWeight: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
+        let width = proposal.width ?? 0
+        guard let fit = measure(width: width, maxHeight: proposal.height, subviews: subviews) else {
+            return CGSize(width: width, height: 0)
+        }
+        return CGSize(width: width, height: fit.height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        guard subviews.count == 2 else { return }
-        let processes = subviews[0]
-        let resources = subviews[1]
-        let stack = compact && bounds.width < 720
-        if stack {
-            let processFit = processes.sizeThatFits(.init(width: bounds.width, height: nil))
-            let processH = min(max(processFit.height, 1), bounds.height * 0.58)
-            processes.place(
+        guard let fit = measure(width: bounds.width, maxHeight: bounds.height, subviews: subviews) else { return }
+        if fit.stack {
+            fit.processes.place(
                 at: bounds.origin,
-                proposal: .init(width: bounds.width, height: processH)
+                proposal: .init(width: bounds.width, height: fit.processSize.height)
             )
-            let resourceTop = bounds.minY + processH + groupSpacing
-            resources.place(
-                at: CGPoint(x: bounds.minX, y: resourceTop),
-                proposal: .init(width: bounds.width, height: max(bounds.maxY - resourceTop, 1))
+            fit.resources.place(
+                at: CGPoint(x: bounds.minX, y: bounds.minY + fit.processSize.height + groupSpacing),
+                proposal: .init(width: bounds.width, height: fit.resourceSize.height)
             )
             return
         }
-
-        let weightSum = max(processWeight + resourceWeight, 0.001)
-        let available = max(bounds.width - groupSpacing, 1)
-        var processW = available * (processWeight / weightSum)
-        var resourceW = available - processW
-        let resourcePreferred = resources.sizeThatFits(.init(width: available * 0.40, height: bounds.height))
-        resourceW = min(max(resourcePreferred.width, available * 0.33), available * 0.38)
-        processW = max(available - resourceW, available * 0.62)
-        processes.place(
+        fit.processes.place(
             at: CGPoint(x: bounds.minX, y: bounds.minY),
-            proposal: .init(width: processW, height: bounds.height)
+            proposal: .init(width: fit.processW, height: fit.processSize.height)
         )
-        resources.place(
-            at: CGPoint(x: bounds.maxX - resourceW, y: bounds.minY),
-            proposal: .init(width: resourceW, height: bounds.height)
+        fit.resources.place(
+            at: CGPoint(x: bounds.maxX - fit.resourceW, y: bounds.minY),
+            proposal: .init(width: fit.resourceW, height: fit.resourceSize.height)
+        )
+    }
+
+    private struct Fit {
+        let processes: LayoutSubview
+        let resources: LayoutSubview
+        let stack: Bool
+        let processW: CGFloat
+        let resourceW: CGFloat
+        let processSize: CGSize
+        let resourceSize: CGSize
+        let height: CGFloat
+    }
+
+    private func measure(width: CGFloat, maxHeight: CGFloat?, subviews: Subviews) -> Fit? {
+        guard subviews.count == 2 else { return nil }
+        let processes = subviews[0]
+        let resources = subviews[1]
+        let stack = compact && width < 720
+        let processW: CGFloat
+        let resourceW: CGFloat
+        if stack {
+            processW = width
+            resourceW = width
+        } else {
+            let available = max(width - groupSpacing, 1)
+            let resourcePreferred = resources.sizeThatFits(.init(width: available * 0.40, height: nil))
+            resourceW = min(max(resourcePreferred.width, available * 0.33), available * 0.38)
+            processW = max(available - resourceW, available * 0.62)
+        }
+        let processSize = processes.sizeThatFits(.init(width: processW, height: nil))
+        let resourceSize = resources.sizeThatFits(.init(width: resourceW, height: nil))
+        var height = stack
+            ? processSize.height + groupSpacing + resourceSize.height
+            : max(processSize.height, resourceSize.height)
+        if let maxHeight, height > maxHeight {
+            height = maxHeight
+        }
+        return Fit(
+            processes: processes,
+            resources: resources,
+            stack: stack,
+            processW: processW,
+            resourceW: resourceW,
+            processSize: processSize,
+            resourceSize: resourceSize,
+            height: height
         )
     }
 }
@@ -1114,7 +1128,7 @@ struct TopProcesses: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     private var displayedProcesses: [OverviewProcessRow] {
@@ -1244,7 +1258,7 @@ struct SystemResources: View {
                 BatterySummary(snapshot: snapshot, compact: compact, action: { onOpenProfile(.power) })
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
 
@@ -1263,7 +1277,6 @@ private struct SystemResourceLayout: Layout {
             return CGSize(width: width > 0 ? width : rowWidth, height: height)
         }
         let first = sizes.prefix(2)
-        let firstWidth = first.map(\.width).reduce(0, +) + (first.count > 1 ? spacing : 0)
         let firstHeight = first.map(\.height).max() ?? 0
         let batteryHeight = sizes.last?.height ?? 0
         return CGSize(width: width, height: firstHeight + spacing + batteryHeight)

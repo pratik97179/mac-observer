@@ -41,6 +41,7 @@
 		B10000000000000000000033 /* ContentViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000033 /* ContentViewport.swift */; };
 		B10000000000000000000034 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000034 /* DesignSystemPreview.swift */; };
 		B10000000000000000000035 /* ShellLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000035 /* ShellLayout.swift */; };
+		B10000000000000000000038 /* LayoutPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000038 /* LayoutPreviewData.swift */; };
 		B20000000000000000000007 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Health.swift */; };
 		B20000000000000000000008 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* Query.swift */; };
 		B20000000000000000000009 /* SeriesBucketing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* SeriesBucketing.swift */; };
@@ -92,6 +93,7 @@
 		A10000000000000000000007 /* MetricTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricTile.swift; sourceTree = "<group>"; };
 		A10000000000000000000008 /* OverviewPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewPresentation.swift; sourceTree = "<group>"; };
 		A10000000000000000000012 /* OverviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000038 /* LayoutPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutPreviewData.swift; sourceTree = "<group>"; };
 		A10000000000000000000013 /* LiveProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveProfileView.swift; sourceTree = "<group>"; };
 		A10000000000000000000014 /* ProfilePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresentation.swift; sourceTree = "<group>"; };
 		A10000000000000000000015 /* CapabilitiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilitiesView.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 				A10000000000000000000004 /* Sidebar.swift */,
 				A10000000000000000000005 /* PlaceholderView.swift */,
 				A10000000000000000000012 /* OverviewStore.swift */,
+				A10000000000000000000038 /* LayoutPreviewData.swift */,
 				A10000000000000000000013 /* LiveProfileView.swift */,
 				A10000000000000000000014 /* ProfilePresentation.swift */,
 				A10000000000000000000015 /* CapabilitiesView.swift */,
@@ -515,6 +518,7 @@
 				B10000000000000000000007 /* MetricTile.swift in Sources */,
 				B10000000000000000000008 /* OverviewPresentation.swift in Sources */,
 				B10000000000000000000010 /* OverviewStore.swift in Sources */,
+				B10000000000000000000038 /* LayoutPreviewData.swift in Sources */,
 				B10000000000000000000013 /* LiveProfileView.swift in Sources */,
 				B10000000000000000000014 /* ProfilePresentation.swift in Sources */,
 				B10000000000000000000015 /* CapabilitiesView.swift in Sources */,

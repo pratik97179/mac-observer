@@ -57,4 +57,6 @@ Because the kernel is newer than that SDK, collectors may only call Darwin APIs 
 
 Run the app with `./scripts/dev-run.sh`. That produces `.build/MacObserver.app`. Do not `open` the product under `swift build --show-bin-path`; Launch Services treats that file as a command-line tool. Do not use `swift run`; it invokes `actool` for asset catalogs, and Command Line Tools cannot run `actool`.
 
+For SwiftUI layout, use `./scripts/dev-preview.sh`. It launches the same bundle with `--layout-preview`, so every screen is filled with canned telemetry and collectors stay off. `ContentView` also has a `PreviewProvider` for Xcode Canvas when Xcode can launch.
+
 `scripts/dev-test.sh` runs `swift test` with the Testing macros plugin this Command Line Tools install keeps under `usr/lib/swift/host/plugins/testing`.

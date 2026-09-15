@@ -117,3 +117,11 @@ struct ContentView: View {
         .transition(Motion.detail)
     }
 }
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView(store: .layoutPreview())
+            .frame(minWidth: 1_050, minHeight: 700)
+            .preferredColorScheme(.dark)
+    }
+}

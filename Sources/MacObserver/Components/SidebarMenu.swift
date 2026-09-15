@@ -139,14 +139,13 @@ struct SidebarIsland<Content: View>: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            SidebarIslandSurface(cornerRadius: metrics.radius.window)
+            SidebarIslandSurface(cornerRadius: metrics.radius.window/2)
             content
         }
         .frame(width: metrics.sidebarWidth, alignment: .topLeading)
         .frame(maxHeight: .infinity, alignment: .top)
-        .padding(.leading, metrics.spacing.sm)
-        .padding(.top, metrics.spacing.sm)
-        .padding(.bottom, metrics.spacing.sm)
+        .padding(.leading, metrics.spacing.sm/2)
+        .padding(.vertical, metrics.spacing.sm/2)
     }
 }
 
