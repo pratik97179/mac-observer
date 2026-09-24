@@ -1,0 +1,4 @@
+module MacObserverDomain {
+header "MacObserverDomain-Swift.h"
+export *
+}

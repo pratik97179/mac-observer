@@ -1,0 +1,30 @@
+{
+  "/Users/techwork/Desktop/MacObserver/MacObserver/App/CapabilitiesView.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilitiesView.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilitiesView.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilitiesView.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilitiesView.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilitiesView.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/App/CapabilityPreferences.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilityPreferences.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilityPreferences.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilityPreferences.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilityPreferences.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CapabilityPreferences.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/App/ContentView.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ContentView.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ContentView.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/App/EventsView.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EventsView.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EventsView.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EventsView.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EventsView.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EventsView.swiftdeps"
+  }
+}

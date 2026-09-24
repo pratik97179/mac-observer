@@ -1,0 +1,189 @@
+{
+  "" : {
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MacObserverCollectors-primary.dia",
+    "emit-module-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MacObserverCollectors-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MacObserverCollectors-primary-emit-module.dia",
+    "pch" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MacObserverCollectors-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MacObserverCollectors-primary.swiftdeps"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/CPUMemoryCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CPUMemoryCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/Clock.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Clock~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/CollectorPipeline.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/CollectorPipeline~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/DarwinProcessSampler.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/DarwinProcessSampler~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/ExternalDiagnosticsCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ExternalDiagnosticsCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/FakeCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FakeCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/FanoutSink.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/FanoutSink~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/LiveTelemetryBuffer.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LiveTelemetryBuffer~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/LoopingCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/LoopingCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/MachHostSampler.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/MachHostSampler~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/NetworkCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/NetworkPathSource.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/NetworkPathSource~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/PowerCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/PowerCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/ProcessCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/ProcessCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/Sampling.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/Sampling~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/StandardCollectors.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StandardCollectors~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/StorageCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/StorageCollector~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverCollectors/TelemetryCollector.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverCollectors-t.build/Objects-normal/x86_64/TelemetryCollector~partial.swiftmodule"
+  }
+}

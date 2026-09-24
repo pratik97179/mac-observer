@@ -1,0 +1,23 @@
+{
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Overview/OverviewVisualFill.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/OverviewVisualFill.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/OverviewVisualFill.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/OverviewVisualFill.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/OverviewVisualFill.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/OverviewVisualFill.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Theme/AppBackground.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppBackground.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppBackground.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppBackground.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppBackground.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppBackground.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Theme/AppTheme.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppTheme.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppTheme.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppTheme.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppTheme.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/AppTheme.swiftdeps"
+  }
+}

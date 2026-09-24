@@ -1,0 +1,30 @@
+{
+  "/Users/techwork/Desktop/MacObserver/MacObserver/App/SystemPulse.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SystemPulse.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SystemPulse.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SystemPulse.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SystemPulse.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SystemPulse.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/CommandPalette.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CommandPalette.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CommandPalette.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CommandPalette.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CommandPalette.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/CommandPalette.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/EntityRows.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EntityRows.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EntityRows.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EntityRows.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EntityRows.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/EntityRows.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/InstrumentMarks.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/InstrumentMarks.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/InstrumentMarks.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/InstrumentMarks.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/InstrumentMarks.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/InstrumentMarks.swiftdeps"
+  }
+}

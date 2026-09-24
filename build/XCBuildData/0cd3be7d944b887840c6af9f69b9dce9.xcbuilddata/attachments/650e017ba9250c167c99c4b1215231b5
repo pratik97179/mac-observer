@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MacObserverStorage-primary.dia",
+    "emit-module-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MacObserverStorage-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MacObserverStorage-primary-emit-module.dia",
+    "pch" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MacObserverStorage-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MacObserverStorage-primary.swiftdeps"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverStorage/MemoryTelemetryStore.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/MemoryTelemetryStore~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverStorage/SQLiteTelemetryStore.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/SQLiteTelemetryStore~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverStorage/TelemetryStore.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverStorage-t.build/Objects-normal/arm64/TelemetryStore~partial.swiftmodule"
+  }
+}

@@ -1,0 +1,4 @@
+module MacObserverCollectors {
+header "MacObserverCollectors-Swift.h"
+export *
+}

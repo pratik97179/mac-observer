@@ -1,0 +1,30 @@
+{
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/ScreenChrome.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ScreenChrome.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ScreenChrome.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ScreenChrome.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ScreenChrome.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ScreenChrome.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/SidebarMenu.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SidebarMenu.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SidebarMenu.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SidebarMenu.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SidebarMenu.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/SidebarMenu.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Components/TelemetryMarks.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/TelemetryMarks.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/TelemetryMarks.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/TelemetryMarks.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/TelemetryMarks.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/TelemetryMarks.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Overview/MetricTile.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MetricTile.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MetricTile.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MetricTile.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MetricTile.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MetricTile.swiftdeps"
+  }
+}

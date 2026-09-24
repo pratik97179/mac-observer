@@ -1,0 +1,23 @@
+{
+  "/Users/techwork/Desktop/MacObserver/MacObserver/MacObserverApp.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MacObserverApp.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MacObserverApp.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MacObserverApp.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MacObserverApp.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/MacObserverApp.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/MacObserver/Theme/ShellLayout.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ShellLayout.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ShellLayout.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ShellLayout.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ShellLayout.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/ShellLayout.swiftdeps"
+  },
+  "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "object" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/MacObserver/build/MacObserver.build/Debug/MacObserver.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps"
+  }
+}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2600"
+   LastUpgradeVersion = "2700"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E10000000000000000000001"
+               BlueprintIdentifier = "71F01F0A30596D360071B2EC"
                BuildableName = "MacObserver.app"
                BlueprintName = "MacObserver"
                ReferencedContainer = "container:MacObserver.xcodeproj">
@@ -43,7 +43,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E10000000000000000000001"
+            BlueprintIdentifier = "71F01F0A30596D360071B2EC"
             BuildableName = "MacObserver.app"
             BlueprintName = "MacObserver"
             ReferencedContainer = "container:MacObserver.xcodeproj">
@@ -60,7 +60,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E10000000000000000000001"
+            BlueprintIdentifier = "71F01F0A30596D360071B2EC"
             BuildableName = "MacObserver.app"
             BlueprintName = "MacObserver"
             ReferencedContainer = "container:MacObserver.xcodeproj">

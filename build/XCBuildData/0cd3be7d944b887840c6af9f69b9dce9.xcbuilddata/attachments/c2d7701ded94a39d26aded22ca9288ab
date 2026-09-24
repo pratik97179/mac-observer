@@ -1,0 +1,119 @@
+{
+  "" : {
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MacObserverDomain-primary.dia",
+    "emit-module-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MacObserverDomain-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MacObserverDomain-primary-emit-module.dia",
+    "pch" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MacObserverDomain-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MacObserverDomain-primary.swiftdeps"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Capability.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Capability~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Entity.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Entity~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Event.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Event~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Explanation.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Explanation~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Health.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Health~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/InvestigationInterval.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/InvestigationInterval~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Metric.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Metric~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/MetricDownsampler.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/MetricDownsampler~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Observation.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Observation~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Query.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/Query~partial.swiftmodule"
+  },
+  "/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/SeriesBucketing.swift" : {
+    "const-values" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.swiftconstvalues",
+    "dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.d",
+    "diagnostics" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.dia",
+    "index-unit-output-path" : "/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.o",
+    "llvm-bc" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.bc",
+    "object" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.o",
+    "swift-dependencies" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing.swiftdeps",
+    "swiftmodule" : "/Users/techwork/Desktop/project/mac-observer/build/MacObserver.build/Debug/MacObserverDomain-t.build/Objects-normal/arm64/SeriesBucketing~partial.swiftmodule"
+  }
+}

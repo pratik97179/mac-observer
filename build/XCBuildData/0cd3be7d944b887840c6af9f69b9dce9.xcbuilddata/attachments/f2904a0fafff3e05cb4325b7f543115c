@@ -1,0 +1,4 @@
+module MacObserverStorage {
+header "MacObserverStorage-Swift.h"
+export *
+}

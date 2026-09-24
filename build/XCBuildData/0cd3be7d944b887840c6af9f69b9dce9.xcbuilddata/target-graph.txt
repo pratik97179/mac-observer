@@ -1,0 +1,18 @@
+Target dependency graph (7 targets)
+Target 'MacObserver' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverStorage-product' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain-product' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverCollectors-product' in project 'MacObserver'
+Target 'MacObserverCollectors-product' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverCollectors' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain' in project 'MacObserver'
+Target 'MacObserverCollectors' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain' in project 'MacObserver'
+Target 'MacObserverDomain-product' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain' in project 'MacObserver'
+Target 'MacObserverStorage-product' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverStorage' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain' in project 'MacObserver'
+Target 'MacObserverStorage' in project 'MacObserver'
+➜ Explicit dependency on target 'MacObserverDomain' in project 'MacObserver'
+Target 'MacObserverDomain' in project 'MacObserver' (no dependencies)

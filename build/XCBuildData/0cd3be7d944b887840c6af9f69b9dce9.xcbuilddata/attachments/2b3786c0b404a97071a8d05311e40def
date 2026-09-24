@@ -1,0 +1,11 @@
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Capability.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Entity.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Event.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Explanation.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Health.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/InvestigationInterval.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Metric.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/MetricDownsampler.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Observation.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/Query.swift
+/Users/techwork/Desktop/project/mac-observer/Sources/MacObserverDomain/SeriesBucketing.swift
