@@ -1,7 +1,6 @@
 import AppKit
 import SwiftUI
 import MacObserverDomain
-import MacObserverCollectors
 
 @main
 struct MacObserverApp: App {
@@ -12,7 +11,6 @@ struct MacObserverApp: App {
         WindowGroup {
             ContentView(store: store)
                 .frame(minWidth: 1_050, minHeight: 700)
-                .preferredColorScheme(.dark)
                 .containerBackground(.clear, for: .window)
                 .task {
                     await store.run()
@@ -20,12 +18,19 @@ struct MacObserverApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1_280, height: 820)
-        #if DEBUG
         .commands {
-            SidebarMaterialDebugCommands()
+            CommandMenu("Navigate") {
+                Button("Search…") {
+                    NotificationCenter.default.post(name: .macObserverOpenPalette, object: nil)
+                }
+                .keyboardShortcut("k", modifiers: .command)
+            }
         }
-        #endif
     }
+}
+
+extension Notification.Name {
+    static let macObserverOpenPalette = Notification.Name("MacObserver.openPalette")
 }
 
 final class MacObserverAppDelegate: NSObject, NSApplicationDelegate {

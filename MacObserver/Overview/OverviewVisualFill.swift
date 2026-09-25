@@ -2,7 +2,6 @@ import Foundation
 import Darwin
 import AppKit
 import SwiftUI
-import MacObserverCollectors
 import MacObserverDomain
 
 enum OverviewVisualFill {
@@ -171,13 +170,25 @@ enum AppImage {
     }
 
     static func environmentBackdrop() -> Image {
-        if let image = NSImage(named: "EnvironmentBackdrop") {
-            return Image(nsImage: image)
+        lock.lock()
+        defer { lock.unlock() }
+        if let cachedBackdrop {
+            return Image(nsImage: cachedBackdrop)
         }
-        if let url = Bundle.main.url(forResource: "bg", withExtension: "png"),
-           let image = NSImage(contentsOf: url) {
-            return Image(nsImage: image)
+        let loaded: NSImage? = {
+            if let image = NSImage(named: "EnvironmentBackdrop") { return image }
+            if let url = Bundle.main.url(forResource: "bg", withExtension: "png"),
+               let image = NSImage(contentsOf: url) {
+                return image
+            }
+            return nil
+        }()
+        if let loaded {
+            cachedBackdrop = loaded
+            return Image(nsImage: loaded)
         }
         return Image("EnvironmentBackdrop")
     }
+
+    nonisolated(unsafe) private static var cachedBackdrop: NSImage?
 }

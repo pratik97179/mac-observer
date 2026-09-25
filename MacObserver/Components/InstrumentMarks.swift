@@ -1,5 +1,4 @@
 import SwiftUI
-import MacObserverCollectors
 
 struct StatusIndicator: View {
     enum Tone {
@@ -10,7 +9,7 @@ struct StatusIndicator: View {
     var tone: Tone = .healthy
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: tone == .critical && !Motion.reduceMotion ? 0.08 : 10, paused: tone != .critical || Motion.reduceMotion)) { context in
+        TimelineView(.animation(minimumInterval: tone == .critical && !Motion.reduceMotion ? 0.25 : 10, paused: tone != .critical || Motion.reduceMotion)) { context in
             let phase = sin(context.date.timeIntervalSinceReferenceDate / 1.4 * .pi * 2)
             let glow = tone == .critical && !Motion.reduceMotion ? 0.18 + 0.12 * phase : glowBase
             HStack(spacing: Theme.Space.compact) {
@@ -20,7 +19,7 @@ struct StatusIndicator: View {
                     .shadow(color: color.opacity(glow), radius: 4)
                 Text(title)
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.text)
+                    .foregroundStyle(Theme.Color.text)
             }
         }
         .accessibilityElement(children: .combine)
@@ -37,11 +36,11 @@ struct StatusIndicator: View {
 
     private var color: Color {
         switch tone {
-        case .healthy: AppTheme.success
-        case .warning: AppTheme.warning
-        case .critical: AppTheme.critical
-        case .muted: AppTheme.tertiary
-        case .unavailable: AppTheme.unavailable
+        case .healthy: Theme.Color.success
+        case .warning: Theme.Color.warning
+        case .critical: Theme.Color.critical
+        case .muted: Theme.Color.tertiary
+        case .unavailable: Theme.Color.unavailable
         }
     }
 }
@@ -50,22 +49,22 @@ struct MetricBar: View {
     let ratio: Double
     var enabled: Bool = true
     var empty: Bool = false
-    var tint: Color = AppTheme.sage
+    var tint: Color = Theme.Color.sage
     var height: CGFloat = 7
 
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(AppTheme.track)
+                Capsule().fill(Theme.Color.track)
                 if empty {
                     Capsule()
                         .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                         .frame(width: 18, height: 2)
                         .position(x: geo.size.width / 2, y: geo.size.height / 2)
                 } else {
                     Capsule()
-                        .fill(enabled ? tint : AppTheme.unavailable)
+                        .fill(enabled ? tint : Theme.Color.unavailable)
                         .frame(width: geo.size.width * CGFloat(min(max(ratio, 0), 1)))
                 }
             }
@@ -78,7 +77,7 @@ struct MetricBar: View {
 struct CapacityBar: View {
     let used: Double
     let total: Double
-    var tint: Color = AppTheme.sage
+    var tint: Color = Theme.Color.sage
     var showsCaption: Bool = true
 
     private var ratio: Double {
@@ -92,7 +91,7 @@ struct CapacityBar: View {
             if showsCaption, total > 0 {
                 Text("\(Int((ratio * 100).rounded()))% of capacity")
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
         }
     }
@@ -120,39 +119,30 @@ struct MetricBlock<Visualization: View, Metadata: View>: View {
     let label: String
     let value: String
     var loading: Bool = false
+    @Environment(\.designMetrics) private var metrics
     @ViewBuilder var visualization: Visualization
     @ViewBuilder var metadata: Metadata
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(label.uppercased())
-                .font(Theme.Typography.micro)
-                .foregroundStyle(AppTheme.tertiary)
-                .frame(height: 14, alignment: .leading)
-            Spacer().frame(height: Theme.Space.metricLabel)
-            Group {
-                if loading {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(AppTheme.track)
-                        .frame(width: 88, height: 36)
-                } else {
-                    Text(value)
-                        .font(Theme.Typography.hero)
-                        .foregroundStyle(AppTheme.text)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .readoutTransition(value)
-                }
+        VStack(alignment: .leading, spacing: metrics.spacing.xs) {
+            SectionEyebrow(title: label)
+            if loading {
+                Text(" ")
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.tertiary)
+            } else {
+                Text(value)
+                    .font(Theme.Typography.secondary)
+                    .foregroundStyle(Theme.Color.text)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .readoutTransition(value)
             }
-            .frame(height: 48, alignment: .leading)
-            Spacer().frame(height: Theme.Space.metricViz)
             visualization
-                .frame(minHeight: 44, alignment: .top)
-            Spacer().frame(height: Theme.Space.metricMeta)
             metadata
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(AppTheme.tertiary)
-                .frame(minHeight: 28, alignment: .topLeading)
+                .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Color.tertiary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
@@ -178,7 +168,7 @@ struct FlowIndicator: View {
             HStack(spacing: Theme.Space.compact) {
                 Image(systemName: symbol)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(AppTheme.sage)
+                    .foregroundStyle(Theme.Color.sage)
                 Text(value)
                     .font(Theme.Typography.largeMetric)
                     .readoutTransition(value)
@@ -194,7 +184,7 @@ struct FlowTrack: View {
     var body: some View {
         let idle = ratio < 0.02
         let period = cyclePeriod
-        TimelineView(.animation(minimumInterval: Motion.reduceMotion || idle ? 10 : 0.12, paused: Motion.reduceMotion || idle)) { context in
+        TimelineView(.animation(minimumInterval: Motion.reduceMotion || idle ? 10 : 0.25, paused: Motion.reduceMotion || idle)) { context in
             GeometryReader { geo in
                 let width = geo.size.width
                 let fill = width * CGFloat(min(max(ratio, idle ? 0 : 0.08), 1))
@@ -205,13 +195,13 @@ struct FlowTrack: View {
                     return CGFloat(raw)
                 }()
                 ZStack(alignment: .leading) {
-                    Capsule().fill(AppTheme.track)
+                    Capsule().fill(Theme.Color.track)
                     Capsule()
-                        .fill(AppTheme.sage.opacity(0.35))
+                        .fill(Theme.Color.sage.opacity(0.35))
                         .frame(width: fill)
                     if !idle {
                         Capsule()
-                            .fill(AppTheme.sageBright)
+                            .fill(Theme.Color.sageBright)
                             .frame(width: 10, height: 7)
                             .offset(x: travel * t)
                     }
@@ -266,8 +256,8 @@ struct Pulse: View {
 struct LoadingState: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.compact) {
-            RoundedRectangle(cornerRadius: 4).fill(AppTheme.track).frame(width: 40, height: 10)
-            RoundedRectangle(cornerRadius: 6).fill(AppTheme.track).frame(width: 96, height: 32)
+            RoundedRectangle(cornerRadius: 4).fill(Theme.Color.track).frame(width: 40, height: 10)
+            RoundedRectangle(cornerRadius: 6).fill(Theme.Color.track).frame(width: 96, height: 32)
             MetricBar(ratio: 0.35, empty: true)
         }
         .redacted(reason: .placeholder)
@@ -280,7 +270,7 @@ struct StaleState: View {
     var body: some View {
         Text("Updated \(age)s ago")
             .font(Theme.Typography.metadata)
-            .foregroundStyle(AppTheme.tertiary)
+            .foregroundStyle(Theme.Color.tertiary)
     }
 }
 
@@ -293,11 +283,11 @@ struct UnavailableState: View {
         VStack(alignment: .leading, spacing: Theme.Space.compact) {
             Text(title)
                 .font(Theme.Typography.secondary)
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
             if let action, let onAction {
                 Button(action, action: onAction)
                     .buttonStyle(.plain)
-                    .foregroundStyle(AppTheme.sage)
+                    .foregroundStyle(Theme.Color.sage)
                     .font(Theme.Typography.metadata)
             }
         }
@@ -309,15 +299,15 @@ struct PermissionState: View {
     var onCapabilities: () -> Void = {}
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.compact) {
-            Text("Permission required")
-                .font(Theme.Typography.section)
+        VStack(alignment: .leading, spacing: Theme.Space.micro) {
+            SectionEyebrow(title: "Permission required")
             Text(message)
                 .font(Theme.Typography.secondary)
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
             Button("Open Capabilities", action: onCapabilities)
                 .buttonStyle(.plain)
-                .foregroundStyle(AppTheme.sage)
+                .foregroundStyle(Theme.Color.sage)
+                .font(Theme.Typography.secondary)
         }
     }
 }
@@ -329,16 +319,11 @@ struct FreshnessBadge: View {
     var body: some View {
         let seconds = age.map { max(0, Int($0)) } ?? 0
         let band = band(for: age)
-        HStack(spacing: Theme.Space.icon) {
-            Circle()
-                .fill(dotColor(band))
-                .frame(width: 6, height: 6)
-            Text(label(seconds: seconds, band: band))
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(textColor(band))
-                .monospacedDigit()
-        }
-        .accessibilityLabel(label(seconds: seconds, band: band))
+        Text(label(seconds: seconds, band: band))
+            .font(Theme.Typography.micro)
+            .foregroundStyle(Theme.Color.tertiary)
+            .tracking(1.2)
+            .accessibilityLabel(label(seconds: seconds, band: band))
     }
 
     private enum Band {
@@ -359,23 +344,6 @@ struct FreshnessBadge: View {
         case .sampling: "Collecting"
         case .live, .muted: "Live · \(seconds)s ago"
         case .stale, .expired: "Stale · \(seconds)s ago"
-        }
-    }
-
-    private func dotColor(_ band: Band) -> Color {
-        switch band {
-        case .sampling: AppTheme.tertiary
-        case .live: AppTheme.success
-        case .muted: AppTheme.success.opacity(0.55)
-        case .stale, .expired: AppTheme.warning
-        }
-    }
-
-    private func textColor(_ band: Band) -> Color {
-        switch band {
-        case .sampling, .muted, .stale: AppTheme.tertiary
-        case .live: AppTheme.secondary
-        case .expired: AppTheme.warning
         }
     }
 }

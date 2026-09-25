@@ -25,13 +25,13 @@ struct ProcessRow: View {
             Text(process.cpu.isEmpty ? " " : process.cpu)
                 .font(Theme.Typography.secondary)
                 .monospacedDigit()
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
                 .frame(width: 40, alignment: .trailing)
-            MetricBar(ratio: process.cpuRatio, empty: process.cpu.isEmpty, tint: AppTheme.cpu)
+            MetricBar(ratio: process.cpuRatio, empty: process.cpu.isEmpty, tint: Theme.Color.cpu)
                 .frame(width: 72)
             Image(systemName: "chevron.right")
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(AppTheme.tertiary)
+                .foregroundStyle(Theme.Color.tertiary)
         }
         .padding(.vertical, Theme.Space.control)
         .contentShape(Rectangle())
@@ -40,7 +40,7 @@ struct ProcessRow: View {
             if hovering, process.pid != 0 {
                 Text("PID \(process.pid)")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .offset(y: 18)
             }
         }
@@ -53,27 +53,27 @@ struct ProcessRow: View {
                 ProcessGlyph(pid: process.pid, name: process.name)
                 Text(ProcessDisplay.name(pid: process.pid, fallback: process.name))
                     .font(Theme.Typography.body)
-                    .foregroundStyle(process.name.isEmpty ? AppTheme.tertiary : AppTheme.text)
+                    .foregroundStyle(process.name.isEmpty ? Theme.Color.tertiary : Theme.Color.text)
                     .lineLimit(1)
                 Spacer()
                 Text(process.cpu.isEmpty ? " " : process.cpu)
                     .font(Theme.Typography.largeMetric)
                     .readoutTransition(process.cpu)
             }
-            MetricBar(ratio: process.cpuRatio, empty: process.cpu.isEmpty, tint: AppTheme.cpu)
+            MetricBar(ratio: process.cpuRatio, empty: process.cpu.isEmpty, tint: Theme.Color.cpu)
             HStack {
                 Text(process.memory.isEmpty ? "RAM unavailable" : "\(process.memory) RAM")
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
                 Spacer()
                 Text("PID \(process.pid)")
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .opacity(hovering && process.pid != 0 ? 1 : 0)
                     .accessibilityHidden(!hovering || process.pid == 0)
                 Text(process.network == "unavailable" ? "Network unavailable" : process.network)
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
         }
         .padding(.vertical, Theme.Space.compact)
@@ -87,21 +87,25 @@ struct ProcessGlyph: View {
     let pid: Int32
     let name: String
     var size: CGFloat = 22
+    @State private var icon: NSImage?
 
     var body: some View {
         Group {
-            if pid != 0, let icon = ProcessChrome.icon(pid: pid) {
+            if let icon {
                 Image(nsImage: icon)
                     .resizable()
                     .interpolation(.high)
             } else {
                 Image(systemName: fallback)
                     .font(.system(size: size * 0.5, weight: .medium))
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: max(5, size / 5), style: .continuous))
+        .task(id: pid) {
+            icon = await ProcessChrome.iconAsync(pid: pid)
+        }
     }
 
     private var fallback: String {
@@ -121,7 +125,7 @@ struct EntityColumnHeader: View {
             ForEach(Array(columns.enumerated()), id: \.offset) { index, title in
                 Text(title)
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .frame(maxWidth: index == 0 ? .infinity : 120, alignment: index == 0 ? .leading : .trailing)
             }
         }
@@ -140,7 +144,7 @@ struct EntityRow: View {
                     .font(index == 0 ? Theme.Typography.body : Theme.Typography.secondary)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .foregroundStyle(cell.isEmpty || cell == "unavailable" ? AppTheme.unavailable : AppTheme.text)
+                    .foregroundStyle(cell.isEmpty || cell == "unavailable" ? Theme.Color.unavailable : Theme.Color.text)
                     .frame(maxWidth: index == 0 ? .infinity : 120, alignment: index == 0 ? .leading : .trailing)
                     .readoutTransition(cell)
             }
@@ -160,20 +164,20 @@ struct EventRow: View {
                 Text(event.time.wallTime, format: timeFormat)
                     .font(Theme.Typography.metadata)
                     .monospacedDigit()
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .frame(width: showsCalendarDate ? 148 : 72, alignment: .leading)
                 Text(event.domain.rawValue.uppercased())
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.sageMuted)
+                    .foregroundStyle(Theme.Color.sageMuted)
                 Text(event.summary)
                     .font(Theme.Typography.body)
-                    .foregroundStyle(AppTheme.text)
+                    .foregroundStyle(Theme.Color.text)
                 Spacer(minLength: 0)
             }
             if hovering, !event.metadata.isEmpty {
                 Text(event.metadata.sorted(by: { $0.key < $1.key }).map { "\($0.key)=\($0.value)" }.joined(separator: "  "))
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
         }
         .padding(.vertical, Theme.Space.control)
@@ -206,7 +210,7 @@ struct EventGroup: View {
                     Spacer()
                     Text(expanded ? "Collapse" : "Expand")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.sage)
+                        .foregroundStyle(Theme.Color.sage)
                 }
                 .padding(.vertical, Theme.Space.control)
             }

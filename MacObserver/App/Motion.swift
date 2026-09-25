@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 @MainActor
@@ -24,18 +23,40 @@ enum Motion {
         reduceMotion ? .opacity : .opacity.combined(with: .offset(y: 6))
     }
 
+    /// Prefer Environment when available; falls back to AppKit for non-view call sites.
     static var reduceMotion: Bool {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        ReduceMotionGate.current
     }
 
     private static func timed(_ seconds: Double, easeOut: Bool) -> Animation {
-        if reduceMotion { return .linear(duration: 0.001) }
+        if reduceMotion { return .linear(duration: 0) }
         return easeOut ? .easeOut(duration: seconds) : .easeInOut(duration: seconds)
     }
 }
 
+enum ReduceMotionGate {
+    @MainActor
+    static var current = false
+}
+
+private struct ReduceMotionBridge: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { ReduceMotionGate.current = reduceMotion }
+            .onChange(of: reduceMotion) { _, next in
+                ReduceMotionGate.current = next
+            }
+    }
+}
+
 extension View {
-    func readoutTransition(_: some Equatable) -> some View {
-        self
+    func readoutTransition(_ value: some Equatable) -> some View {
+        animation(Motion.readout, value: value)
+    }
+
+    func syncReduceMotion() -> some View {
+        modifier(ReduceMotionBridge())
     }
 }

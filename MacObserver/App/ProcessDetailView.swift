@@ -1,7 +1,6 @@
 import AppKit
 import SwiftUI
 import MacObserverDomain
-import MacObserverCollectors
 
 struct ProcessDetailView: View {
     let store: OverviewStore
@@ -18,27 +17,27 @@ struct ProcessDetailView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.section) {
-            header
-            metrics
-            collectedNote
+        ScreenPage {
+            VStack(alignment: .leading, spacing: Theme.Space.section) {
+                header
+                metrics
+                collectedNote
+            }
         }
-        .padding(Theme.Space.large)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(AppTheme.canvas)
-        .preferredColorScheme(.dark)
     }
 
     private var header: some View {
         HStack(alignment: .center, spacing: Theme.Space.standard) {
             ProcessGlyph(pid: live.pid, name: title, size: 40)
             VStack(alignment: .leading, spacing: Theme.Space.micro) {
+                SectionEyebrow(title: "Process")
                 Text(title)
-                    .font(Theme.Typography.pageTitle)
+                    .font(Theme.Typography.section)
+                    .foregroundStyle(Theme.Color.text)
                     .lineLimit(1)
                 Text(subtitle)
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
             Spacer(minLength: 0)
         }
@@ -60,11 +59,11 @@ struct ProcessDetailView: View {
             Button {
                 inspect(title: "CPU", name: .cpuUtilizationRatio, domain: .cpu)
             } label: {
-                metricCard(title: "CPU", value: live.cpu.isEmpty ? "—" : live.cpu, chevron: inspectEntityKey != nil) {
-                    MetricBar(ratio: live.cpuRatio, empty: live.cpu.isEmpty, tint: AppTheme.cpu, height: 8)
+                metricCard(title: "CPU", value: live.cpu.isEmpty ? "Unavailable" : live.cpu, chevron: inspectEntityKey != nil) {
+                    MetricBar(ratio: live.cpuRatio, empty: live.cpu.isEmpty, tint: Theme.Color.cpu, height: 8)
                     Text("Open history")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                 }
             }
             .buttonStyle(.plain)
@@ -72,13 +71,13 @@ struct ProcessDetailView: View {
             Button {
                 inspect(title: "Memory", name: .processResidentBytes, domain: .memory)
             } label: {
-                metricCard(title: "Memory", value: live.memory.isEmpty ? "—" : live.memory, chevron: inspectEntityKey != nil) {
+                metricCard(title: "Memory", value: live.memory.isEmpty ? "Unavailable" : live.memory, chevron: inspectEntityKey != nil) {
                     Text("Resident size")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                     Text("Open history")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                 }
             }
             .buttonStyle(.plain)
@@ -108,44 +107,35 @@ struct ProcessDetailView: View {
         chevron: Bool = false,
         @ViewBuilder footer: () -> Footer
     ) -> some View {
-        VStack(alignment: .leading, spacing: Theme.Space.standard) {
-            HStack {
-                Text(title)
-                    .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.secondary)
-                Spacer()
+        VStack(alignment: .leading, spacing: Theme.Space.micro) {
+            HStack(spacing: Theme.Space.micro) {
+                SectionEyebrow(title: title)
                 if chevron {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(AppTheme.tertiary)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(Theme.Color.tertiary)
                 }
             }
             Text(value)
-                .font(Theme.Typography.hero)
-                .minimumScaleFactor(0.6)
+                .font(Theme.Typography.secondary)
+                .foregroundStyle(Theme.Color.text)
+                .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 .monospacedDigit()
             footer()
-            Spacer(minLength: 0)
         }
-        .padding(Theme.Space.component)
-        .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
-        .glass(.elevated, radius: Theme.Radius.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
     }
 
     private var collectedNote: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.control) {
-            Text("Not collected")
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(AppTheme.tertiary)
+        VStack(alignment: .leading, spacing: Theme.Space.micro) {
+            SectionEyebrow(title: "Not collected")
             Text("Network · Disk I/O · GPU")
                 .font(Theme.Typography.secondary)
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
         }
-        .padding(Theme.Space.component)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glass(.resting, radius: Theme.Radius.secondary)
     }
 }
 
@@ -194,6 +184,11 @@ enum ProcessChrome {
         record(pid: pid)?.icon
     }
 
+    static func iconAsync(pid: Int32) async -> NSImage? {
+        record(pid: pid)?.icon
+    }
+
+    @discardableResult
     private static func record(pid: Int32) -> Record? {
         guard pid != 0 else { return nil }
         if let existing = records[pid], Date().timeIntervalSince(existing.sampledAt) < ttl {

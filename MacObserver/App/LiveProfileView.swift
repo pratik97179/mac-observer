@@ -7,17 +7,20 @@ struct LiveProfileView: View {
     let profile: Profile
     var onOpenProcess: (OverviewProcessRow) -> Void = { _ in }
     var onOpenCapabilities: () -> Void = {}
+    @Environment(\.designMetrics) private var metrics
+    @State private var model: ProfileLiveModel?
+    @State private var overview: OverviewModel?
 
-    private var model: ProfileLiveModel {
-        ProfilePresentation.model(for: profile, snapshot: store.snapshot)
+    private var resolvedModel: ProfileLiveModel {
+        model ?? ProfilePresentation.model(for: profile, snapshot: store.snapshot)
     }
 
-    private var overview: OverviewModel {
-        OverviewModel.from(snapshot: store.snapshot)
+    private var resolvedOverview: OverviewModel {
+        overview ?? OverviewModel.from(snapshot: store.snapshot)
     }
 
     var body: some View {
-        ScrollView {
+        ScreenPage {
             VStack(alignment: .leading, spacing: Theme.Space.section) {
                 header
                 switch profile {
@@ -35,20 +38,32 @@ struct LiveProfileView: View {
                     EmptyView()
                 }
             }
-            .instrumentContent()
         }
-        .instrumentScreen()
+        .onAppear { refreshModels() }
+        .onChange(of: store.snapshot.capturedAt.wallTime) { _, _ in
+            refreshModels()
+        }
+        .onChange(of: profile) { _, _ in
+            refreshModels()
+        }
+    }
+
+    private func refreshModels() {
+        model = ProfilePresentation.model(for: profile, snapshot: store.snapshot)
+        overview = OverviewModel.from(snapshot: store.snapshot)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Theme.Space.compact) {
-            Text(model.title)
-                .font(Theme.Typography.pageTitle)
-            Text(model.summary)
-                .font(Theme.Typography.body)
-                .foregroundStyle(AppTheme.secondary)
-            FreshnessBadge(age: overview.sampleAge, sampling: overview.presentsSampling)
-            if let availability = model.availability {
+            SectionEyebrow(title: "Live")
+            Text(resolvedModel.title)
+                .font(metrics.type.display)
+                .foregroundStyle(Theme.Color.text)
+            Text(resolvedModel.summary)
+                .font(Theme.Typography.secondary)
+                .foregroundStyle(Theme.Color.secondary)
+            FreshnessBadge(age: resolvedOverview.sampleAge, sampling: resolvedOverview.presentsSampling)
+            if let availability = resolvedModel.availability {
                 PermissionState(message: availability, onCapabilities: onOpenCapabilities)
             }
         }
@@ -62,35 +77,31 @@ struct LiveProfileView: View {
                     InspectPlotPoint(time: point.time, value: point.value, unit: .ratio)
                 })
                 .padding(Theme.Space.standard)
-                .glass(.recessed, radius: Theme.Radius.secondary)
             } else {
                 EmptyState(title: "History unavailable", message: "Historical analysis becomes available after enough telemetry has been recorded.")
                     .padding(Theme.Space.standard)
-                    .glass(.recessed, radius: Theme.Radius.secondary)
             }
 
             Grid(alignment: .topLeading, horizontalSpacing: Theme.Space.cardGap, verticalSpacing: 0) {
                 GridRow(alignment: .top) {
-                    ForEach(model.readings) { reading in
+                    ForEach(resolvedModel.readings) { reading in
                         performanceBlock(reading)
                             .cardCell()
                     }
                 }
             }
             .padding(Theme.Space.component)
-            .glass(.elevated, radius: Theme.Radius.secondary)
 
-            if !model.rows.isEmpty {
+            if !resolvedModel.rows.isEmpty {
                 VStack(alignment: .leading, spacing: Theme.Space.micro) {
                     Text("Memory")
                         .font(Theme.Typography.section)
-                    EntityColumnHeader(columns: model.columns)
-                    ForEach(model.rows) { row in
+                    EntityColumnHeader(columns: resolvedModel.columns)
+                    ForEach(resolvedModel.rows) { row in
                         EntityRow(cells: row.cells)
                     }
                 }
                 .padding(Theme.Space.component)
-                .glass(.elevated, radius: Theme.Radius.secondary)
             }
         }
     }
@@ -103,10 +114,10 @@ struct LiveProfileView: View {
             loading: reading.kind == .pending
         ) {
             if reading.name == "CPU" {
-                MetricBar(ratio: LiveSeries.values(for: reading, snapshot: store.snapshot).last ?? 0, empty: reading.kind != .live, tint: AppTheme.cpu)
+                MetricBar(ratio: LiveSeries.values(for: reading, snapshot: store.snapshot).last ?? 0, empty: reading.kind != .live, tint: Theme.Color.cpu)
             } else if reading.name == "Memory" {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
-                    CapacityBar(used: numeric(.memoryUsedBytes), total: numeric(.memoryTotalBytes), tint: AppTheme.memory)
+                    CapacityBar(used: numeric(.memoryUsedBytes), total: numeric(.memoryTotalBytes), tint: Theme.Color.memory)
                     if !memorySegments.isEmpty {
                         SegmentedBar(segments: memorySegments)
                     }
@@ -125,11 +136,7 @@ struct LiveProfileView: View {
                 Text(reading.detail)
             }
         }
-        .overlay {
-            if let inspect = reading.inspect {
-                NavigationLink(value: inspect) { Color.clear }.buttonStyle(.plain)
-            }
-        }
+        .modifier(InspectLinkModifier(target: reading.inspect))
     }
 
     private var memorySegments: [(Double, Color)] {
@@ -137,9 +144,9 @@ struct LiveProfileView: View {
         let compressed = numeric(.memoryCompressedBytes)
         let swap = numeric(.memorySwapUsedBytes)
         var items: [(Double, Color)] = []
-        if wired > 0 { items.append((wired, AppTheme.sage)) }
-        if compressed > 0 { items.append((compressed, AppTheme.sageMuted)) }
-        if swap > 0 { items.append((swap, AppTheme.warning.opacity(0.8))) }
+        if wired > 0 { items.append((wired, Theme.Color.sage)) }
+        if compressed > 0 { items.append((compressed, Theme.Color.sageMuted)) }
+        if swap > 0 { items.append((swap, Theme.Color.warning.opacity(0.8))) }
         return items
     }
 
@@ -163,21 +170,21 @@ struct LiveProfileView: View {
     }
 
     private var networkBody: some View {
-        let rx = model.readings.first { $0.name == "Receive" }
-        let tx = model.readings.first { $0.name == "Transmit" }
+        let rx = resolvedModel.readings.first { $0.name == "Receive" }
+        let tx = resolvedModel.readings.first { $0.name == "Transmit" }
         return VStack(alignment: .leading, spacing: Theme.Space.section) {
             VStack(alignment: .leading, spacing: Theme.Space.standard) {
                 Text("NETWORK")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                 StatusIndicator(
                     title: rx?.kind == .live ? "Connected" : "unavailable",
                     tone: rx?.kind == .live ? .healthy : .unavailable
                 )
                 if rx?.kind == .live || tx?.kind == .live {
                     FlowIndicator(
-                        inbound: rx?.value.isEmpty == false ? rx!.value : "unavailable",
-                        outbound: tx?.value.isEmpty == false ? tx!.value : "unavailable",
+                        inbound: flowValue(rx),
+                        outbound: flowValue(tx),
                         inboundRatio: flowRatio(.networkRxBytesPerSecond),
                         outboundRatio: flowRatio(.networkTxBytesPerSecond)
                     )
@@ -188,39 +195,37 @@ struct LiveProfileView: View {
                 internetCheck
             }
             .padding(Theme.Space.surface)
-            .glass(.elevated, radius: Theme.Radius.secondary)
 
             VStack(alignment: .leading, spacing: Theme.Space.micro) {
                 Text("Interfaces")
                     .font(Theme.Typography.section)
-                if model.rows.isEmpty {
+                if resolvedModel.rows.isEmpty {
                     EmptyState(title: "No interfaces", message: "Interface counters appear after the network collector publishes a sample.")
                 } else {
-                    EntityColumnHeader(columns: model.columns)
-                    ForEach(model.rows) { row in
+                    EntityColumnHeader(columns: resolvedModel.columns)
+                    ForEach(resolvedModel.rows) { row in
                         EntityRow(cells: row.cells)
                     }
                 }
             }
             .padding(Theme.Space.component)
-            .glass(.elevated, radius: Theme.Radius.secondary)
         }
     }
 
     private var localPath: some View {
-        let gateway = model.readings.first { $0.name == "Gateway" }
-        let dns = model.readings.first { $0.name == "DNS" }
+        let gateway = resolvedModel.readings.first { $0.name == "Gateway" }
+        let dns = resolvedModel.readings.first { $0.name == "DNS" }
         let primary = store.snapshot.metrics.first { $0.name == .networkPrimaryInterface }
         let count = store.snapshot.metrics.first { $0.name == .networkDNSResolverCount }
         return VStack(alignment: .leading, spacing: Theme.Space.micro) {
             if gateway?.kind == .live {
                 Text("Gateway \(gateway?.value ?? "")")
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
             } else {
                 Text("Gateway unavailable")
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
             if dns?.kind == .live {
                 let extra = count.flatMap { metric -> String? in
@@ -231,12 +236,12 @@ struct LiveProfileView: View {
                 } ?? ""
                 Text("DNS \(dns?.value ?? "")\(extra)")
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
             }
             if let primary {
                 Text("Primary \(MetricFormatter.displayString(for: primary))")
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
         }
     }
@@ -255,17 +260,17 @@ struct LiveProfileView: View {
             } else if let address {
                 Text("Public address \(MetricFormatter.displayString(for: address))")
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
                 if let rtt {
                     Text("Round trip \(MetricFormatter.displayString(for: rtt))")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                 }
                 Button("Run internet check") {
                     Task { await store.runExternalDiagnostic() }
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(AppTheme.sage)
+                .foregroundStyle(Theme.Color.sage)
                 .font(Theme.Typography.metadata)
             } else {
                 UnavailableState(
@@ -281,35 +286,34 @@ struct LiveProfileView: View {
         VStack(alignment: .leading, spacing: Theme.Space.section) {
             MetricBlock(
                 label: "Capacity",
-                value: model.readings.first { $0.name == "Capacity" }?.value.nonEmpty ?? " ",
-                loading: model.readings.first { $0.name == "Capacity" }?.kind == .pending
+                value: resolvedModel.readings.first { $0.name == "Capacity" }?.value.nonEmpty ?? " ",
+                loading: resolvedModel.readings.first { $0.name == "Capacity" }?.kind == .pending
             ) {
-                CapacityBar(used: numeric(.storageCapacityBytes) - numeric(.storageAvailableBytes), total: numeric(.storageCapacityBytes), tint: AppTheme.storage, showsCaption: true)
+                CapacityBar(used: numeric(.storageCapacityBytes) - numeric(.storageAvailableBytes), total: numeric(.storageCapacityBytes), tint: Theme.Color.storage, showsCaption: true)
             } metadata: {
-                Text(model.readings.first { $0.name == "Available" }.map { "Available \($0.value)" } ?? "Root volume")
+                Text(resolvedModel.readings.first { $0.name == "Available" }.map { "Available \($0.value)" } ?? "Root volume")
             }
 
             FlowIndicator(
-                inbound: model.readings.first { $0.name == "Read" }?.value.nonEmpty ?? "unavailable",
-                outbound: model.readings.first { $0.name == "Write" }?.value.nonEmpty ?? "unavailable",
+                inbound: resolvedModel.readings.first { $0.name == "Read" }?.value.nonEmpty ?? "unavailable",
+                outbound: resolvedModel.readings.first { $0.name == "Write" }?.value.nonEmpty ?? "unavailable",
                 inboundRatio: flowRatio(.storageReadBytesPerSecond),
                 outboundRatio: flowRatio(.storageWriteBytesPerSecond)
             )
         }
         .padding(Theme.Space.surface)
-        .glass(.elevated, radius: Theme.Radius.secondary)
     }
 
     private var powerBody: some View {
         VStack(alignment: .leading, spacing: Theme.Space.standard) {
-            ForEach(model.readings) { reading in
+            ForEach(resolvedModel.readings) { reading in
                 MetricBlock(
                     label: reading.name,
                     value: reading.value.isEmpty ? " " : reading.value,
                     loading: reading.kind == .pending
                 ) {
                     if reading.name == "Battery" {
-                        CapacityBar(used: batteryRatio, total: 1, tint: AppTheme.battery, showsCaption: false)
+                        CapacityBar(used: batteryRatio, total: 1, tint: Theme.Color.battery, showsCaption: false)
                     } else if reading.name == "Thermal" {
                         StatusIndicator(title: reading.value.isEmpty ? "unavailable" : reading.value, tone: thermalTone(reading.value))
                     } else {
@@ -321,7 +325,6 @@ struct LiveProfileView: View {
             }
         }
         .padding(Theme.Space.surface)
-        .glass(.elevated, radius: Theme.Radius.secondary)
     }
 
     private var processBody: some View {
@@ -330,7 +333,7 @@ struct LiveProfileView: View {
             if processes.isEmpty {
                 EmptyState(title: "No notable activity", message: "The system is currently quiet.")
             } else {
-                EntityColumnHeader(columns: model.columns.isEmpty ? ["Process", "CPU", "Memory", "Network"] : model.columns)
+                EntityColumnHeader(columns: resolvedModel.columns.isEmpty ? ["Process", "CPU", "Memory", "Network"] : resolvedModel.columns)
                 ForEach(processes) { process in
                     Button {
                         onOpenProcess(process)
@@ -342,7 +345,6 @@ struct LiveProfileView: View {
             }
         }
         .padding(Theme.Space.component)
-        .glass(.elevated, radius: Theme.Radius.secondary)
     }
 
     private var batteryRatio: Double {
@@ -364,6 +366,29 @@ struct LiveProfileView: View {
     private func flowRatio(_ name: MetricName) -> Double {
         let total = store.snapshot.series(named: name).last.map(\.value) ?? 0
         return min(1, max(total <= 0 ? 0 : 0.08, total / 12_500_000))
+    }
+
+    private func flowValue(_ reading: OverviewReading?) -> String {
+        guard let reading, !reading.value.isEmpty else { return "unavailable" }
+        return reading.value
+    }
+}
+
+private struct InspectLinkModifier: ViewModifier {
+    let target: MetricInspectTarget?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let target {
+            NavigationLink(value: target) {
+                content
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens metric history")
+        } else {
+            content
+        }
     }
 }
 

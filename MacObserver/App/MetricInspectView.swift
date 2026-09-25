@@ -40,6 +40,7 @@ struct MetricInspectTarget: Hashable, Identifiable {
 struct MetricInspectView: View {
     let store: OverviewStore
     let target: MetricInspectTarget
+    @Environment(\.designMetrics) private var metrics
     @State private var window: HistoryWindow = .lastHour
     @State private var series: [Metric] = []
     @State private var events: [Event] = []
@@ -64,13 +65,17 @@ struct MetricInspectView: View {
     }
 
     var body: some View {
-        ScrollView {
+        ScreenPage {
             VStack(alignment: .leading, spacing: Theme.Space.section) {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    SectionEyebrow(title: "Inspect")
                     Text(target.title)
-                        .font(Theme.Typography.pageTitle)
+                        .font(metrics.type.display)
+                        .foregroundStyle(Theme.Color.text)
                     Text(heroValue)
-                        .font(Theme.Typography.hero)
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.text)
+                        .monospacedDigit()
                         .readoutTransition(heroValue)
                     if let lastAge, lastAge > 15 {
                         StaleState(age: Int(lastAge))
@@ -84,44 +89,37 @@ struct MetricInspectView: View {
                         TelemetryChart(plot: plot, selected: focus?.time, onSelect: select)
                         Text(chartCaption)
                             .font(Theme.Typography.metadata)
-                            .foregroundStyle(AppTheme.tertiary)
+                            .foregroundStyle(Theme.Color.tertiary)
                     }
                     .padding(Theme.Space.standard)
-                    .glass(.recessed, radius: Theme.Radius.secondary)
                     .transition(Motion.fadeUp)
                 } else if !series.isEmpty {
                     stateList
                         .padding(Theme.Space.standard)
-                        .glass(.elevated, radius: Theme.Radius.secondary)
                         .transition(Motion.fadeUp)
                 } else if loading {
                     Text("Loading history")
                         .font(Theme.Typography.secondary)
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .padding(Theme.Space.standard)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .glass(.elevated, radius: Theme.Radius.secondary)
                 } else {
                     EmptyState(
                         title: "History unavailable",
                         message: "Historical analysis becomes available after enough telemetry has been recorded."
                     )
                     .padding(Theme.Space.standard)
-                    .glass(.elevated, radius: Theme.Radius.secondary)
                     .transition(Motion.fadeUp)
                 }
 
                 related
                     .padding(Theme.Space.standard)
-                    .glass(.elevated, radius: Theme.Radius.secondary)
                     .transition(Motion.fadeUp)
             }
             .frame(maxWidth: 1_080, alignment: .leading)
             .animation(Motion.panel, value: window)
             .animation(Motion.panel, value: plot.isEmpty)
-            .instrumentContent()
         }
-        .instrumentScreen()
         .task(id: window) { await reload() }
         .task(id: focus?.time) { await reloadFocusedEvents() }
         .onChange(of: window) { _, _ in
@@ -147,13 +145,13 @@ struct MetricInspectView: View {
         VStack(alignment: .leading, spacing: Theme.Space.compact) {
             Text("State")
                 .font(Theme.Typography.section)
-                .foregroundStyle(AppTheme.tertiary)
+                .foregroundStyle(Theme.Color.tertiary)
             ForEach(series.suffix(40).reversed()) { metric in
                 HStack {
                     Text(metric.time.wallTime, format: timeFormat)
                         .font(Theme.Typography.secondary)
                         .monospacedDigit()
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .frame(width: window.showsCalendarDate ? 148 : 72, alignment: .leading)
                     Text(MetricFormatter.displayString(for: metric))
                         .font(Theme.Typography.body)
@@ -167,7 +165,7 @@ struct MetricInspectView: View {
             HStack {
                 Text(focus == nil ? "Related events" : "Events in this interval")
                     .font(Theme.Typography.section)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                 Spacer()
                 if focus != nil {
                     Button("Show all") {
@@ -176,13 +174,13 @@ struct MetricInspectView: View {
                     }
                     .buttonStyle(.plain)
                     .font(Theme.Typography.metadata)
-                    .foregroundStyle(AppTheme.sage)
+                    .foregroundStyle(Theme.Color.sage)
                 }
             }
             if visibleEvents.isEmpty {
                 Text(focus == nil ? "No stored events in this range." : "No events in this interval.")
                     .font(Theme.Typography.secondary)
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
             } else {
                 ForEach(visibleEvents.reversed()) { event in
                     EventRow(event: event, showsCalendarDate: window.showsCalendarDate)

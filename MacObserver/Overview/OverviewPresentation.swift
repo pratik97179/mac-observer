@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 import MacObserverDomain
-import MacObserverCollectors
 
 struct OverviewReading: Identifiable {
     enum Kind {
@@ -133,7 +132,7 @@ struct OverviewModel {
             value: displayValue(cpu, availability: cpuAvailability),
             detail: cpu == nil ? "Waiting for telemetry" : "Host utilization",
             symbol: "cpu",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: kind(cpu, availability: cpuAvailability),
             inspect: .from(title: "CPU", metric: cpu)
         ))
@@ -142,7 +141,7 @@ struct OverviewModel {
             value: displayValue(memoryUsed, availability: cpuAvailability),
             detail: memoryDetail(used: memoryUsed, total: memoryTotal, pressure: pressure),
             symbol: "memorychip",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: kind(memoryUsed, availability: cpuAvailability),
             inspect: .from(title: "Memory", metric: memoryUsed)
         ))
@@ -151,7 +150,7 @@ struct OverviewModel {
             value: combinedRate(rx + tx, availability: networkAvailability),
             detail: rx.isEmpty && tx.isEmpty ? "Interface counters" : "All interfaces",
             symbol: "arrow.down.right",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: kind(rx.first ?? tx.first, availability: networkAvailability)
         ))
         readings.append(OverviewReading(
@@ -159,7 +158,7 @@ struct OverviewModel {
             value: combinedRate(read + write, availability: storageAvailability),
             detail: storageDetail(capacity: capacity, available: available),
             symbol: "internaldrive",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: kind(read.first ?? write.first ?? capacity, availability: storageAvailability)
         ))
         readings.append(powerReading(watts: watts, battery: battery, availability: powerAvailability))
@@ -168,7 +167,7 @@ struct OverviewModel {
             value: "",
             detail: "No public GPU telemetry in this build.",
             symbol: "cpu.fill",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: .unavailable
         ))
         readings.append(OverviewReading(
@@ -176,7 +175,7 @@ struct OverviewModel {
             value: thermal.map { MetricFormatter.displayString(for: $0).capitalized } ?? displayValue(thermal, availability: cpuAvailability),
             detail: "ProcessInfo thermal state",
             symbol: "thermometer.medium",
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: kind(thermal, availability: cpuAvailability),
             inspect: .from(title: "Thermal", metric: thermal)
         ))
@@ -255,7 +254,7 @@ struct OverviewModel {
                 value: MetricFormatter.displayString(for: watts),
                 detail: battery.map { "Battery \(MetricFormatter.displayString(for: $0))" } ?? "Estimated from voltage and current",
                 symbol: "bolt",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: .live,
                 inspect: .from(title: "Power", metric: watts)
             )
@@ -266,7 +265,7 @@ struct OverviewModel {
                 value: MetricFormatter.displayString(for: battery),
                 detail: "Battery charge",
                 symbol: "bolt",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: .live,
                 inspect: .from(title: "Power", metric: battery)
             )
@@ -276,7 +275,7 @@ struct OverviewModel {
             value: displayValue(nil, availability: availability),
             detail: "No battery or watt reading",
             symbol: "bolt",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
             kind: kind(nil, availability: availability)
         )
     }

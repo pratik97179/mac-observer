@@ -52,7 +52,7 @@ enum Profile: String, Identifiable, Hashable {
         case .capabilities:
             "Each data source, its access level, and how to turn it off."
         case .settings:
-            "Documented retention and local history. The cockpit is always dark."
+            "Documented retention and local history. The app stays on a light canvas."
         }
     }
 }

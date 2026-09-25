@@ -8,22 +8,20 @@ import MacObserverStorage
 @Observable
 final class OverviewStore {
     private var pipeline: CollectorPipeline?
-    private var persisting: PersistingSink?
-    private var store: SQLiteTelemetryStore?
-    private let preferences = CapabilityPreferences()
+    private var history = HistoryRepository()
+    private var capabilitiesController = CapabilityController()
+    private var refreshTask: Task<Void, Never>?
     private(set) var snapshot: LiveSnapshot
     private(set) var capabilities: [CapabilityDescriptor] = []
     private(set) var historyPath: String?
     private(set) var historyMessage: String?
+    private(set) var runtimeError: String?
     private(set) var historyEvents: [Event] = []
     private(set) var eventWindow: HistoryWindow = .lastHour
     private(set) var explanation: Explanation?
     let startedAt: Date
     private var persistedExplanationIDs: Set<String> = []
-    private var disabledCapabilityIDs: Set<String> = []
     private let isLayoutPreview: Bool
-    private var previewEvents: [Event] = []
-    private var previewHistory: [Metric] = []
 
     static func makeForLaunch() -> OverviewStore {
         if CommandLine.arguments.contains("--layout-preview") {
@@ -51,25 +49,20 @@ final class OverviewStore {
         isLayoutPreview = true
         startedAt = payload.startedAt
         snapshot = payload.snapshot
-        capabilities = payload.capabilities
-        previewEvents = payload.events
-        previewHistory = payload.historyMetrics
+        history.isLayoutPreview = true
+        history.previewEvents = payload.events
+        history.previewHistory = payload.historyMetrics
+        capabilitiesController.applyPreviewDefaults(payload.capabilities)
+        capabilities = capabilitiesController.capabilities
         historyEvents = payload.events
             .filter { $0.time.wallTime >= Date().addingTimeInterval(-HistoryWindow.lastHour.duration) }
             .sorted { $0.time.wallTime > $1.time.wallTime }
         historyPath = "Layout preview"
         historyMessage = "Canned telemetry. Collectors are not running."
-        disabledCapabilityIDs = Set(payload.capabilities.compactMap { $0.defaultEnabled ? nil : $0.id })
     }
 
     func isCapabilityEnabled(_ id: String) -> Bool {
-        if isLayoutPreview {
-            return !disabledCapabilityIDs.contains(id)
-        }
-        if let capability = capabilities.first(where: { $0.id == id }) {
-            return preferences.isEnabled(capability)
-        }
-        return !disabledCapabilityIDs.contains(id)
+        capabilitiesController.isEnabled(id, isLayoutPreview: isLayoutPreview)
     }
 
     func capabilityState(_ id: String) -> String {
@@ -94,25 +87,25 @@ final class OverviewStore {
     }
 
     func setCapabilityEnabled(_ id: String, enabled: Bool, deleteHistory: Bool = false) {
-        guard let capability = capabilities.first(where: { $0.id == id }) else { return }
-        if enabled {
-            disabledCapabilityIDs.remove(id)
-        } else {
-            disabledCapabilityIDs.insert(id)
+        guard capabilitiesController.setEnabled(id, enabled: enabled, isLayoutPreview: isLayoutPreview) != nil else {
+            return
         }
+        capabilities = capabilitiesController.capabilities
         if isLayoutPreview { return }
-        preferences.setEnabled(capability, enabled: enabled)
-        Task {
-            try? await pipeline?.setEnabled(id, enabled: enabled)
-            if !enabled, deleteHistory {
-                await persisting?.flush()
-                try? await store?.deleteSource(id)
-            }
-            if let pipeline {
-                let next = await pipeline.snapshot()
-                applySnapshot(next)
-                await refreshHistory()
-                await refreshExplanation()
+        scheduleRefresh {
+            do {
+                try await self.pipeline?.setEnabled(id, enabled: enabled)
+                if !enabled, deleteHistory {
+                    await self.history.persisting?.flush()
+                    try await self.history.store?.deleteSource(id)
+                }
+                if let pipeline = self.pipeline {
+                    self.applySnapshot(await pipeline.snapshot())
+                    await self.refreshHistory()
+                    await self.refreshExplanation()
+                }
+            } catch {
+                self.runtimeError = "Could not update capability \(id)."
             }
         }
     }
@@ -132,80 +125,55 @@ final class OverviewStore {
             historyMessage = "Layout preview has no local history file."
             return
         }
-        guard store != nil else {
+        guard history.store != nil else {
             historyMessage = "No local history file is open."
             return
         }
-        await persisting?.flush()
+        await history.persisting?.flush()
         do {
-            try await store?.deleteAll()
+            try await history.store?.deleteAll()
             historyMessage = "Local history deleted. Live sampling continues."
             explanation = nil
             persistedExplanationIDs = []
+            runtimeError = nil
             await refreshHistory()
             await refreshExplanation()
         } catch {
             historyMessage = "Could not delete local history."
+            runtimeError = historyMessage
         }
     }
 
     func setEventWindow(_ window: HistoryWindow) {
         eventWindow = window
-        Task { await refreshHistory() }
+        scheduleRefresh { await self.refreshHistory() }
     }
 
     func refreshHistory() async {
-        let end = Date()
-        let start = end.addingTimeInterval(-eventWindow.duration)
-        if isLayoutPreview {
-            historyEvents = previewEvents
-                .filter { $0.time.wallTime >= start && $0.time.wallTime <= end }
-                .sorted { $0.time.wallTime > $1.time.wallTime }
-            return
-        }
-        if let store {
-            await persisting?.flush()
-            do {
-                let rows = try await store.events(matching: EventQuery(
-                    range: TimeRange(start: start, end: end),
-                    limit: 500
-                ))
-                historyEvents = Array(rows.reversed())
-                return
-            } catch {
-                historyMessage = "Could not read local event history."
+        do {
+            historyEvents = try await history.events(window: eventWindow, live: snapshot.events)
+            if historyMessage == "Could not read local event history." {
+                historyMessage = nil
             }
+        } catch {
+            historyMessage = "Could not read local event history."
+            runtimeError = historyMessage
+            historyEvents = snapshot.events
+                .filter {
+                    let end = Date()
+                    let start = end.addingTimeInterval(-eventWindow.duration)
+                    return $0.time.wallTime >= start && $0.time.wallTime <= end
+                }
+                .reversed()
         }
-        historyEvents = snapshot.events
-            .filter { $0.time.wallTime >= start && $0.time.wallTime <= end }
-            .reversed()
     }
 
     func metricSeries(for target: MetricInspectTarget, window: HistoryWindow) async -> [Metric] {
-        let span = InvestigationInterval.range(for: window.duration)
-        let bucket = InvestigationInterval.bucketSeconds(windowDuration: window.duration)
-        if isLayoutPreview {
-            return previewHistory.filter {
-                $0.name == target.metricName
-                    && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
-                    && $0.time.wallTime >= span.start
-                    && $0.time.wallTime <= span.end
-            }.sorted { $0.time.wallTime < $1.time.wallTime }
-        }
-        await persisting?.flush()
-        if let store {
-            return (try? await store.metrics(matching: MetricQuery(
-                range: span,
-                entityKey: target.entityKey,
-                name: target.metricName,
-                bucketSeconds: bucket
-            ))) ?? []
-        }
-        return snapshot.metrics.filter {
-            $0.name == target.metricName
-                && (target.entityKey == nil || $0.entity.identityKey == target.entityKey)
-                && $0.time.wallTime >= span.start
-                && $0.time.wallTime <= span.end
+        do {
+            return try await history.metricSeries(for: target, window: window, live: snapshot.metrics)
+        } catch {
+            runtimeError = "Could not load metric history."
+            return []
         }
     }
 
@@ -214,25 +182,11 @@ final class OverviewStore {
     }
 
     func relatedEvents(for target: MetricInspectTarget, range: TimeRange) async -> [Event] {
-        if isLayoutPreview {
-            return previewEvents.filter {
-                $0.domain == target.domain
-                    && $0.time.wallTime >= range.start
-                    && $0.time.wallTime <= range.end
-            }.sorted { $0.time.wallTime > $1.time.wallTime }
-        }
-        await persisting?.flush()
-        if let store {
-            return (try? await store.events(matching: EventQuery(
-                range: range,
-                domain: target.domain,
-                limit: 20
-            ))) ?? []
-        }
-        return snapshot.events.filter {
-            $0.domain == target.domain
-                && $0.time.wallTime >= range.start
-                && $0.time.wallTime <= range.end
+        do {
+            return try await history.relatedEvents(for: target, range: range, live: snapshot.events)
+        } catch {
+            runtimeError = "Could not load related events."
+            return []
         }
     }
 
@@ -262,55 +216,74 @@ final class OverviewStore {
             triggerTime?.addingTimeInterval(-ExplanationRules.lookback) ?? now
         )
         let metrics = await metrics(in: TimeRange(start: metricStart, end: now))
-        let next = ExplanationRules.select(events: events, metrics: metrics, now: now)
+        let next = ExplanationService.select(events: events, metrics: metrics, now: now)
         explanation = next
         await persistExplanationIfNeeded(next, now: now)
     }
 
     func run() async {
         guard !isLayoutPreview else { return }
-        let extraSinks: [any TelemetrySink]
-        if let path = try? SQLiteTelemetryStore.applicationSupportPath(),
-           let store = try? SQLiteTelemetryStore(path: path) {
-            try? await store.applyRetention(.documented, now: Date())
-            let sink = PersistingSink(persist: store)
-            persisting = sink
-            self.store = store
-            historyPath = path
-            extraSinks = [sink]
+
+        if let opened = TelemetrySession.openStore() {
+            do {
+                try await opened.store.applyRetention(.documented, now: Date())
+                history.persisting = opened.sink
+                history.store = opened.store
+                historyPath = opened.path
+            } catch {
+                runtimeError = "Could not prepare local history retention."
+                history.persisting = opened.sink
+                history.store = opened.store
+                historyPath = opened.path
+            }
         } else {
-            extraSinks = []
+            historyMessage = "No local history file is open. Live readings are not being saved."
+            runtimeError = historyMessage
         }
 
-        let collectors = StandardCollectors.make()
-        capabilities = collectors.map(\.capability)
-        let enabled = preferences.enabledIDs(from: capabilities)
-        disabledCapabilityIDs = Set(capabilities.map(\.id)).subtracting(enabled)
+        let sinks: [any TelemetrySink] = history.persisting.map { [$0] } ?? []
+        do {
+            let collectors = StandardCollectors.make()
+            let descriptors = collectors.map(\.capability)
+            let enabled = CapabilityPreferences().enabledIDs(from: descriptors)
+            let pipeline = CollectorPipeline(collectors: collectors, additionalSinks: sinks)
+            try await pipeline.start(enabled: enabled)
+            self.pipeline = pipeline
+            capabilitiesController.bootstrap(from: descriptors)
+            capabilities = capabilitiesController.capabilities
+        } catch {
+            runtimeError = "Could not start metric collectors."
+            return
+        }
 
-        let pipeline = CollectorPipeline(
-            collectors: collectors,
-            additionalSinks: extraSinks
-        )
-        self.pipeline = pipeline
-        try? await pipeline.start(enabled: enabled)
-
+        guard let pipeline else { return }
         var ticks = 0
         while !Task.isCancelled {
             let next = await pipeline.snapshot()
             applySnapshot(next)
             ticks += 1
             if ticks.isMultiple(of: 5) {
-                await persisting?.flush()
+                await history.persisting?.flush()
+                await refreshHistory()
                 await refreshExplanation()
             }
             if ticks.isMultiple(of: 300) {
-                try? await store?.applyRetention(.documented, now: Date())
+                do {
+                    try await history.store?.applyRetention(.documented, now: Date())
+                } catch {
+                    runtimeError = "Could not apply history retention."
+                }
             }
             try? await Task.sleep(for: .seconds(1))
         }
 
-        await persisting?.flush()
+        await history.persisting?.flush()
         await pipeline.stop()
+    }
+
+    private func scheduleRefresh(_ work: @escaping @MainActor () async -> Void) {
+        refreshTask?.cancel()
+        refreshTask = Task { await work() }
     }
 
     private func applySnapshot(_ next: LiveSnapshot) {
@@ -334,15 +307,23 @@ final class OverviewStore {
             return false
         }
         let entity = matched?.entity ?? system?.entity ?? .system(bootSession: BootSessionID("unknown"))
-        try? await store?.insert(events: [explanation.asEvent(now: now, entity: entity)])
-        await refreshHistory()
+        do {
+            try await history.store?.insert(events: [explanation.asEvent(now: now, entity: entity)])
+            await refreshHistory()
+        } catch {
+            runtimeError = "Could not persist explanation."
+        }
     }
 
     private func events(in range: TimeRange) async -> [Event] {
         var rows: [Event] = []
-        if let store {
-            await persisting?.flush()
-            rows = (try? await store.events(matching: EventQuery(range: range, limit: 200))) ?? []
+        if let store = history.store {
+            await history.persisting?.flush()
+            do {
+                rows = try await store.events(matching: EventQuery(range: range, limit: 200))
+            } catch {
+                runtimeError = "Could not read events for explanation."
+            }
         }
         let live = snapshot.events.filter {
             $0.time.wallTime >= range.start && $0.time.wallTime <= range.end
@@ -353,9 +334,13 @@ final class OverviewStore {
 
     private func metrics(in range: TimeRange) async -> [Metric] {
         var rows: [Metric] = []
-        if let store {
-            await persisting?.flush()
-            rows = (try? await store.metrics(matching: MetricQuery(range: range))) ?? []
+        if let store = history.store {
+            await history.persisting?.flush()
+            do {
+                rows = try await store.metrics(matching: MetricQuery(range: range))
+            } catch {
+                runtimeError = "Could not read metrics for explanation."
+            }
         }
         let live = snapshot.metrics.filter {
             $0.time.wallTime >= range.start && $0.time.wallTime <= range.end

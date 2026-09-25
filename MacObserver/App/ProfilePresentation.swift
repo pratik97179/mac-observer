@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 import MacObserverDomain
-import MacObserverCollectors
 
 struct ProfileRow: Identifiable {
     let id: String
@@ -116,7 +115,7 @@ enum ProfilePresentation {
                 value: rx.isEmpty ? placeholderValue(networkAvailability) : rateString(totalRX, sample: rx.first),
                 detail: "Sum of link counters",
                 symbol: "arrow.down.right",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: rx.isEmpty ? placeholderKind(networkAvailability) : .live
             ),
             OverviewReading(
@@ -124,7 +123,7 @@ enum ProfilePresentation {
                 value: tx.isEmpty ? placeholderValue(networkAvailability) : rateString(totalTX, sample: tx.first),
                 detail: "Not per-process",
                 symbol: "arrow.up.right",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: tx.isEmpty ? placeholderKind(networkAvailability) : .live
             ),
             tile(
@@ -187,7 +186,7 @@ enum ProfilePresentation {
                 value: read.isEmpty ? placeholderValue(snapshot.availability["standard.storage"]) : rateString(read.reduce(0.0) { $0 + numeric($1) }, sample: read.first),
                 detail: "IOBlockStorageDriver when present",
                 symbol: "arrow.down",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: read.isEmpty ? placeholderKind(snapshot.availability["standard.storage"]) : .live
             )
         )
@@ -197,7 +196,7 @@ enum ProfilePresentation {
                 value: write.isEmpty ? placeholderValue(snapshot.availability["standard.storage"]) : rateString(write.reduce(0.0) { $0 + numeric($1) }, sample: write.first),
                 detail: "Second sample produces rates",
                 symbol: "arrow.up",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: write.isEmpty ? placeholderKind(snapshot.availability["standard.storage"]) : .live
             )
         )
@@ -230,7 +229,7 @@ enum ProfilePresentation {
                 value: MetricFormatter.displayString(for: battery),
                 detail: "Charge remaining",
                 symbol: "battery.100",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: .live,
                 inspect: .from(title: "Battery", metric: battery)
             ))
@@ -241,7 +240,7 @@ enum ProfilePresentation {
                 value: MetricFormatter.displayString(for: watts),
                 detail: "Estimated from voltage and current",
                 symbol: "bolt",
-                tint: AppTheme.sage,
+                tint: Theme.Color.sage,
                 kind: .live,
                 inspect: .from(title: "Power", metric: watts)
             ))
@@ -290,7 +289,7 @@ enum ProfilePresentation {
             value: value,
             detail: metric == nil ? pending : "Direct sample",
             symbol: symbol,
-            tint: AppTheme.sage,
+            tint: Theme.Color.sage,
             kind: readingKind,
             inspect: .from(title: name, metric: metric)
         )

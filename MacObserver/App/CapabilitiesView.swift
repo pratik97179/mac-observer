@@ -4,19 +4,22 @@ import MacObserverCollectors
 
 struct CapabilitiesView: View {
     @Bindable var store: OverviewStore
+    @Environment(\.designMetrics) private var metrics
     @State private var selectedID: String?
     @State private var pendingEnable: CapabilityDescriptor?
     @State private var pendingDisable: CapabilityDescriptor?
 
     var body: some View {
-        ScrollView {
+        ScreenPage {
             VStack(alignment: .leading, spacing: Theme.Space.section) {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    SectionEyebrow(title: "Sources")
                     Text("Capabilities")
-                        .font(Theme.Typography.pageTitle)
+                        .font(metrics.type.display)
+                        .foregroundStyle(Theme.Color.text)
                     Text("Standard collectors stay on this Mac. Optional sources start off. Turning one off stops future samples from that source.")
-                        .font(Theme.Typography.body)
-                        .foregroundStyle(AppTheme.secondary)
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .frame(maxWidth: 640, alignment: .leading)
                 }
 
@@ -26,20 +29,16 @@ struct CapabilitiesView: View {
                     }
                 }
                 .padding(Theme.Space.standard)
-                    .glass(.elevated, radius: Theme.Radius.secondary)
 
                 if let selected, let capability = store.capabilities.first(where: { $0.id == selected }) {
                     detail(capability)
                         .padding(Theme.Space.standard)
-                        .glass(.elevated, radius: Theme.Radius.secondary)
                         .transition(Motion.fadeUp)
                 }
             }
             .frame(maxWidth: 880, alignment: .leading)
             .animation(Motion.state, value: selectedID)
-            .instrumentContent()
         }
-        .instrumentScreen()
         .onAppear {
             if selectedID == nil {
                 selectedID = store.capabilities.first?.id
@@ -107,21 +106,21 @@ struct CapabilitiesView: View {
                 VStack(alignment: .leading, spacing: Theme.Space.micro) {
                     Text(capability.title)
                         .font(Theme.Typography.section)
-                        .foregroundStyle(AppTheme.text)
+                        .foregroundStyle(Theme.Color.text)
                     Text(accessLabel(capability.accessLevel))
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                 }
                 Spacer()
                 Toggle("Enabled", isOn: enabledBinding(capability))
                     .labelsHidden()
                     .toggleStyle(.switch)
-                    .tint(AppTheme.sage)
+                    .tint(Theme.Color.sage)
             }
             .padding(Theme.Space.control)
             .background {
                 RoundedRectangle(cornerRadius: Theme.Radius.item, style: .continuous)
-                    .fill(selected ? AppTheme.sage.opacity(0.10) : Color.clear)
+                    .fill(selected ? Theme.Color.sage.opacity(0.10) : Color.clear)
             }
         }
         .buttonStyle(.plain)
@@ -143,13 +142,13 @@ struct CapabilitiesView: View {
             labeled("How to enable", enableCopy(enabled: enabled, state: state, capability: capability))
             Text(state)
                 .font(Theme.Typography.metadata)
-                .foregroundStyle(enabled ? AppTheme.success : AppTheme.tertiary)
+                .foregroundStyle(enabled ? Theme.Color.success : Theme.Color.tertiary)
             if capability.id == ExternalDiagnosticsCollector.capabilityID, enabled {
                 Button("Run internet check") {
                     Task { await store.runExternalDiagnostic() }
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(AppTheme.sage)
+                .foregroundStyle(Theme.Color.sage)
             }
         }
     }
@@ -158,10 +157,10 @@ struct CapabilitiesView: View {
         VStack(alignment: .leading, spacing: Theme.Space.micro) {
             Text(title.uppercased())
                 .font(Theme.Typography.micro)
-                .foregroundStyle(AppTheme.tertiary)
+                .foregroundStyle(Theme.Color.tertiary)
             Text(value)
                 .font(Theme.Typography.body)
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
         }
     }
 
@@ -235,10 +234,10 @@ struct CapabilitiesView: View {
     }
 
     private func dotColor(enabled: Bool, state: String) -> Color {
-        if !enabled { return AppTheme.disabled }
-        if state.lowercased().contains("denied") { return AppTheme.warning }
-        if enabled { return AppTheme.success }
-        return AppTheme.tertiary
+        if !enabled { return Theme.Color.disabled }
+        if state.lowercased().contains("denied") { return Theme.Color.warning }
+        if enabled { return Theme.Color.success }
+        return Theme.Color.tertiary
     }
 
     private func domainLabel(_ domains: [TelemetryDomain]) -> String {

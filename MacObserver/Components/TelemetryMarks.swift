@@ -1,6 +1,5 @@
 import Charts
 import SwiftUI
-import MacObserverCollectors
 import MacObserverDomain
 
 struct Sparkline: View {
@@ -10,7 +9,7 @@ struct Sparkline: View {
     var showsTooltip: Bool = false
     var hoverIndex: Binding<Int?>? = nil
     var dimmed: Bool = false
-    var tint: Color = AppTheme.sage
+    var tint: Color = Theme.Color.sage
     var showsEmptyCaption: Bool = true
 
     var body: some View {
@@ -27,7 +26,7 @@ struct Sparkline: View {
                 if showsEmptyCaption {
                     Text("Collecting history…")
                         .font(Theme.Typography.metadata)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                 }
             }
             .frame(height: height, alignment: .center)
@@ -53,7 +52,7 @@ struct LiveSparkline: View {
     var showsTooltip: Bool = false
     var hoverIndex: Binding<Int?>? = nil
     var dimmed: Bool = false
-    var tint: Color = AppTheme.sage
+    var tint: Color = Theme.Color.sage
 
     var body: some View {
         GeometryReader { geo in
@@ -100,7 +99,7 @@ struct LiveSparkline: View {
                 var rule = Path()
                 rule.move(to: CGPoint(x: points[hover].x, y: 0))
                 rule.addLine(to: CGPoint(x: points[hover].x, y: size.height))
-                context.stroke(rule, with: .color(AppTheme.secondary), lineWidth: 0.8)
+                context.stroke(rule, with: .color(Theme.Color.secondary), lineWidth: 0.8)
                 context.fill(
                     Path(ellipseIn: CGRect(x: points[hover].x - 3, y: points[hover].y - 3, width: 6, height: 6)),
                     with: .color(tint)
@@ -123,143 +122,6 @@ struct LiveSparkline: View {
         }
         .frame(height: height)
         .accessibilityHidden(true)
-    }
-}
-
-struct SystemTimeline: View {
-    let traces: [TimelineTrace]
-    var events: [Event] = []
-    @State private var hover: Int?
-    @State private var range: ClosedRange<Int>?
-    @State private var plotWidth: CGFloat = 1
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.control) {
-            Text("System timeline")
-                .font(Theme.Typography.section)
-            if traces.isEmpty {
-                emptyTimeline
-            } else {
-                ForEach(traces) { trace in
-                    HStack(spacing: Theme.Space.control) {
-                        Text(trace.name)
-                            .font(Theme.Typography.micro)
-                            .foregroundStyle(AppTheme.tertiary)
-                            .frame(width: 64, alignment: .leading)
-                        LiveSparkline(
-                            values: trace.points.map(\.value),
-                            times: trace.points.map(\.time),
-                            height: 28,
-                            showsTooltip: true,
-                            hoverIndex: $hover
-                        )
-                        .opacity(trace.opacity)
-                        .background {
-                            GeometryReader { geo in
-                                Color.clear.onAppear { plotWidth = geo.size.width }
-                                    .onChange(of: geo.size.width) { _, width in plotWidth = width }
-                            }
-                        }
-                    }
-                }
-                caption
-            }
-        }
-        .padding(Theme.Space.component)
-        .glass(.recessed, radius: Theme.Radius.secondary)
-        .gesture(rangeGesture)
-        .accessibilityLabel("System timeline")
-    }
-
-    @ViewBuilder
-    private var caption: some View {
-        if let hover, let summary = summary(at: hover) {
-            Text(summary)
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(AppTheme.secondary)
-                .monospacedDigit()
-        } else if let range, let peaks = peakSummary(range) {
-            Text(peaks)
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(AppTheme.secondary)
-                .monospacedDigit()
-        } else {
-            Text("Hover for a shared reading. Drag to select an interval.")
-                .font(Theme.Typography.metadata)
-                .foregroundStyle(AppTheme.tertiary)
-        }
-    }
-
-    private var emptyTimeline: some View {
-        TimelineView(.animation(minimumInterval: Motion.reduceMotion ? 10 : 0.08, paused: Motion.reduceMotion)) { context in
-            GeometryReader { geo in
-                let t = Motion.reduceMotion ? 0.35 : (context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 2.2) / 2.2)
-                ZStack {
-                    RoundedRectangle(cornerRadius: Theme.Radius.compact, style: .continuous)
-                        .fill(AppTheme.canvas)
-                    Rectangle()
-                        .fill(AppTheme.sage.opacity(0.18))
-                        .frame(width: 2)
-                        .offset(x: (geo.size.width - 4) * t - geo.size.width / 2)
-                    Text("Collecting system history…")
-                        .font(Theme.Typography.secondary)
-                        .foregroundStyle(AppTheme.secondary)
-                }
-            }
-        }
-        .frame(height: 96)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.compact, style: .continuous))
-        .accessibilityLabel("Collecting system history")
-    }
-
-    private var rangeGesture: some Gesture {
-        DragGesture(minimumDistance: 8)
-            .onChanged { value in
-                guard let count = traces.first?.points.count, count > 1 else { return }
-                let start = index(for: value.startLocation.x, count: count)
-                let end = index(for: value.location.x, count: count)
-                range = min(start, end)...max(start, end)
-            }
-    }
-
-    private func index(for x: CGFloat, count: Int) -> Int {
-        let plotX = max(x - 76, 0)
-        let width = max(plotWidth, 1)
-        return min(count - 1, max(0, Int((plotX / width) * CGFloat(count - 1))))
-    }
-
-    private func summary(at index: Int) -> String? {
-        var parts: [String] = []
-        for trace in traces {
-            guard index < trace.points.count else { continue }
-            let point = trace.points[index]
-            parts.append("\(trace.name) \(MetricFormatter.displayString(value: point.value, unit: trace.unit))")
-        }
-        guard !parts.isEmpty else { return nil }
-        let time = traces.first.flatMap { index < $0.points.count ? $0.points[index].time : nil }
-        let stamp = time?.formatted(date: .omitted, time: .standard) ?? ""
-        return ([stamp] + parts).filter { !$0.isEmpty }.joined(separator: "  ")
-    }
-
-    private func peakSummary(_ range: ClosedRange<Int>) -> String? {
-        guard let first = traces.first, range.upperBound < first.points.count else { return nil }
-        let start = first.points[range.lowerBound].time
-        let end = first.points[range.upperBound].time
-        let duration = max(1, Int(abs(end.timeIntervalSince(start))))
-        let startText = start.formatted(date: .omitted, time: .standard)
-        let endText = end.formatted(date: .omitted, time: .standard)
-        var parts = ["\(startText) – \(endText)", "\(duration)s"]
-        for trace in traces {
-            let slice = trace.points[range].map(\.value)
-            if let peak = slice.max() {
-                parts.append("peak \(trace.name) \(MetricFormatter.displayString(value: peak, unit: trace.unit))")
-            }
-        }
-        let lo = min(start, end)
-        let hi = max(start, end)
-        let related = events.filter { $0.time.wallTime >= lo && $0.time.wallTime <= hi }.count
-        parts.append("\(related) events")
-        return parts.joined(separator: " · ")
     }
 }
 
@@ -288,13 +150,13 @@ struct TelemetryChart: View {
                     x: .value("Time", point.time),
                     y: .value("Value", point.value)
                 )
-                .foregroundStyle(AppTheme.sage)
+                .foregroundStyle(Theme.Color.sage)
                 .interpolationMethod(.catmullRom)
                 .lineStyle(StrokeStyle(lineWidth: Theme.Chart.stroke))
             }
             if let selected {
                 RuleMark(x: .value("Focus", selected))
-                    .foregroundStyle(AppTheme.secondary.opacity(0.7))
+                    .foregroundStyle(Theme.Color.secondary.opacity(0.7))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
             }
         }
@@ -303,7 +165,7 @@ struct TelemetryChart: View {
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4)) { _ in
                 AxisValueLabel()
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .font(Theme.Typography.metadata)
             }
         }
@@ -359,7 +221,7 @@ struct TimeRangeSelector: View {
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 360)
-        .tint(AppTheme.sage)
+        .tint(Theme.Color.sage)
     }
 }
 
@@ -368,30 +230,28 @@ struct EmptyState: View {
     let message: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.compact) {
+        VStack(alignment: .leading, spacing: Theme.Space.micro) {
             if let title {
-                Text(title)
-                    .font(Theme.Typography.section)
-                    .foregroundStyle(AppTheme.text)
+                SectionEyebrow(title: title)
             }
             Text(message)
-                .font(Theme.Typography.body)
-                .foregroundStyle(AppTheme.secondary)
+                .font(Theme.Typography.secondary)
+                .foregroundStyle(Theme.Color.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, Theme.Space.standard)
+        .padding(.vertical, Theme.Space.compact)
     }
 }
 
 struct DonutChart: View {
     let ratio: Double
-    var tint: Color = AppTheme.storage
+    var tint: Color = Theme.Color.storage
     var label: String
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(AppTheme.track, lineWidth: 10)
+                .stroke(Theme.Color.track, lineWidth: 10)
             Circle()
                 .trim(from: 0, to: min(max(ratio, 0), 1))
                 .stroke(tint, style: StrokeStyle(lineWidth: 10, lineCap: .round))
@@ -402,7 +262,7 @@ struct DonutChart: View {
                     .monospacedDigit()
                 Text(label)
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
             }
         }
         .frame(width: 88, height: 88)
@@ -412,7 +272,7 @@ struct DonutChart: View {
 
 struct HistogramChart: View {
     let values: [Double]
-    var tint: Color = AppTheme.network
+    var tint: Color = Theme.Color.network
     var height: CGFloat = 56
 
     var body: some View {

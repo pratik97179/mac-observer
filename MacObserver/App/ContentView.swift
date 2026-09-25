@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Bindable var store: OverviewStore
-    @State private var  selectedProfile: Profile = .overview
+    @State private var selectedProfile: Profile = .overview
     @State private var path = NavigationPath()
     @State private var showPalette = false
     @State private var selectedProcess: OverviewProcessRow?
@@ -15,34 +15,28 @@ struct ContentView: View {
                 AppBackground()
 
                 VStack(spacing: 0) {
-                    OverviewHeader(selection: $selectedProfile)
+                    OverviewHeader(
+                        selection: $selectedProfile,
+                        onSearch: { showPalette = true }
+                    )
 
                     ContentViewport {
-                        Group {
-                            if selectedProfile == .overview {
-                                OverviewView(
-                                    store: store,
-                                    onOpenProfile: { selectedProfile = $0 }
-                                )
-                            } else {
-                                NavigationStack(path: $path) {
-                                    detail
-                                        .navigationDestination(for: MetricInspectTarget.self) { target in
-                                            MetricInspectView(store: store, target: target)
-                                        }
+                        NavigationStack(path: $path) {
+                            detailRoot
+                                .navigationDestination(for: MetricInspectTarget.self) { target in
+                                    MetricInspectView(store: store, target: target)
                                 }
-                                .scrollContentBackground(.hidden)
-                                .background(.clear)
-                                .toolbar(.hidden, for: .windowToolbar)
-                                .toolbarBackground(.hidden, for: .windowToolbar)
-                            }
                         }
+                        .scrollContentBackground(.hidden)
+                        .background(.clear)
+                        .toolbar(.hidden, for: .windowToolbar)
+                        .toolbarBackground(.hidden, for: .windowToolbar)
                         .animation(nil, value: store.snapshot)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     if selectedProfile == .overview {
-                        OverviewFooter(onViewProcesses: { selectedProfile = .processes })
+                        OverviewFooter(onViewProcesses: { selectProfile(.processes) })
                     }
                 }
                 .ignoresSafeArea()
@@ -50,27 +44,28 @@ struct ContentView: View {
                 if showPalette {
                     CommandPalette(
                         store: store,
-                        selection: $selectedProfile,
+                        selection: profileBinding,
                         path: $path,
                         selectedProcess: $selectedProcess,
                         isPresented: $showPalette
                     )
                 }
             }
-            .preferredColorScheme(.dark)
-            .foregroundStyle(AppTheme.text)
+            .foregroundStyle(Theme.Color.text)
             .background(.clear)
             .containerBackground(.clear, for: .window)
             .ignoresSafeArea()
-            .background {
-                Button("Search") { showPalette = true }
-                    .keyboardShortcut("k", modifiers: .command)
-                    .frame(width: 0, height: 0)
-                    .opacity(0)
-                    .accessibilityHidden(true)
-            }
+            .syncReduceMotion()
         }
         .animation(Motion.panel, value: showPalette)
+        .onReceive(NotificationCenter.default.publisher(for: .macObserverOpenPalette)) { _ in
+            showPalette = true
+        }
+        .onChange(of: selectedProfile) { _, _ in
+            path = NavigationPath()
+            selectedProcess = nil
+            showPalette = false
+        }
         .sheet(item: $selectedProcess) { process in
             ProcessDetailView(
                 store: store,
@@ -84,18 +79,32 @@ struct ContentView: View {
         }
     }
 
+    private var profileBinding: Binding<Profile> {
+        Binding(
+            get: { selectedProfile },
+            set: { selectProfile($0) }
+        )
+    }
+
+    private func selectProfile(_ profile: Profile) {
+        selectedProfile = profile
+    }
+
     @ViewBuilder
-    private var detail: some View {
+    private var detailRoot: some View {
         Group {
             switch selectedProfile {
             case .overview:
-                EmptyView()
+                OverviewView(
+                    store: store,
+                    onOpenProfile: { selectProfile($0) }
+                )
             case .performance, .network, .processes, .storage, .power:
                 LiveProfileView(
                     store: store,
                     profile: selectedProfile,
                     onOpenProcess: { selectedProcess = $0 },
-                    onOpenCapabilities: { selectedProfile = .capabilities }
+                    onOpenCapabilities: { selectProfile(.capabilities) }
                 )
             case .capabilities:
                 CapabilitiesView(store: store)
@@ -110,10 +119,22 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView(store: .layoutPreview())
-            .frame(minWidth: 1_050, minHeight: 700)
-            .preferredColorScheme(.dark)
+#Preview("Content") {
+    ContentView(store: .layoutPreview())
+        .frame(minWidth: 1_050, minHeight: 700)
+}
+
+#Preview("Overview") {
+    DesignMetricsReader {
+        OverviewView(store: .layoutPreview())
     }
+    .frame(width: 1_280, height: 820)
+}
+
+#Preview("Design system") {
+    DesignMetricsReader {
+        DesignSystemPreview()
+            .padding()
+    }
+    .frame(width: 900, height: 700)
 }

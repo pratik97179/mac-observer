@@ -1,10 +1,10 @@
 import AppKit
 import SwiftUI
 import MacObserverDomain
-import MacObserverCollectors
 
 struct OverviewHeader: View {
     @Binding var selection: Profile
+    var onSearch: () -> Void = {}
     @Environment(\.designMetrics) private var metrics
 
     var body: some View {
@@ -12,7 +12,7 @@ struct OverviewHeader: View {
             WindowControls()
             Text("Mac Observer")
                 .font(Theme.Typography.section)
-                .foregroundStyle(AppTheme.text)
+                .foregroundStyle(Theme.Color.text)
                 .lineLimit(1)
                 .fixedSize()
 
@@ -22,7 +22,7 @@ struct OverviewHeader: View {
 
             Spacer(minLength: metrics.spacing.md)
 
-            HeaderUtilities()
+            HeaderUtilities(onSearch: onSearch)
         }
         .padding(.horizontal, metrics.horizontalInset)
         .padding(.top, metrics.topInset)
@@ -30,101 +30,6 @@ struct OverviewHeader: View {
         .frame(maxWidth: .infinity)
         .fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .contain)
-    }
-}
-
-struct WindowControls: View {
-    @State private var hovering = false
-
-    var body: some View {
-        HStack(spacing: 8) {
-            WindowControlButton(
-                fill: Color(red: 1, green: 0.373, blue: 0.341),
-                symbol: "xmark",
-                hovering: hovering,
-                help: "Close"
-            ) {
-                currentWindow()?.performClose(nil)
-            }
-            WindowControlButton(
-                fill: Color(red: 1, green: 0.741, blue: 0.180),
-                symbol: "minus",
-                hovering: hovering,
-                help: "Minimize"
-            ) {
-                currentWindow()?.miniaturize(nil)
-            }
-            WindowControlButton(
-                fill: Color(red: 0.157, green: 0.788, blue: 0.251),
-                symbol: "plus",
-                hovering: hovering,
-                help: "Zoom"
-            ) {
-                currentWindow()?.zoom(nil)
-            }
-        }
-        .onHover { hovering = $0 }
-        .background(NativeWindowButtonHider())
-        .accessibilityElement(children: .contain)
-        .fixedSize()
-    }
-
-    private func currentWindow() -> NSWindow? {
-        NSApp.keyWindow ?? NSApp.windows.first { $0.isVisible }
-    }
-}
-
-private struct WindowControlButton: View {
-    let fill: Color
-    let symbol: String
-    let hovering: Bool
-    let help: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(fill)
-                Image(systemName: symbol)
-                    .font(.system(size: 6, weight: .bold))
-                    .foregroundStyle(.black.opacity(0.72))
-                    .opacity(hovering ? 1 : 0)
-            }
-            .frame(width: 12, height: 12)
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .help(help)
-        .accessibilityLabel(help)
-    }
-}
-
-private struct NativeWindowButtonHider: NSViewRepresentable {
-    func makeNSView(context: Context) -> WindowButtonHidingView {
-        WindowButtonHidingView()
-    }
-
-    func updateNSView(_ nsView: WindowButtonHidingView, context: Context) {
-        nsView.hideButtons()
-    }
-}
-
-private final class WindowButtonHidingView: NSView {
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        hideButtons()
-    }
-
-    override func viewDidMoveToSuperview() {
-        super.viewDidMoveToSuperview()
-        hideButtons()
-    }
-
-    func hideButtons() {
-        window?.standardWindowButton(.closeButton)?.isHidden = true
-        window?.standardWindowButton(.miniaturizeButton)?.isHidden = true
-        window?.standardWindowButton(.zoomButton)?.isHidden = true
     }
 }
 
@@ -141,11 +46,11 @@ struct OverviewNavigation: View {
                     VStack(spacing: 4) {
                         Text(profile.rawValue)
                             .font(Theme.Typography.secondary)
-                            .foregroundStyle(selection == profile ? AppTheme.text : AppTheme.secondary)
+                            .foregroundStyle(selection == profile ? Theme.Color.text : Theme.Color.secondary)
                             .lineLimit(1)
                             .fixedSize()
                         Capsule()
-                            .fill(selection == profile ? AppTheme.text : Color.clear)
+                            .fill(selection == profile ? Theme.Color.text : Color.clear)
                             .frame(height: 1)
                     }
                 }
@@ -158,20 +63,31 @@ struct OverviewNavigation: View {
 }
 
 struct HeaderUtilities: View {
+    var onSearch: () -> Void = {}
     @Environment(\.designMetrics) private var metrics
 
     var body: some View {
         HStack(spacing: metrics.spacing.sm) {
-            AppearanceButton()
+            Button(action: onSearch) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Theme.Color.secondary)
+                    .frame(width: 22, height: 22)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Search")
+            .accessibilityLabel("Open command palette")
+
             Rectangle()
-                .fill(AppTheme.divider)
+                .fill(Theme.Color.divider)
                 .frame(width: 1, height: 12)
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 HStack(spacing: metrics.spacing.sm) {
                     Text(Self.dateText(context.date))
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                     Text(Self.timeText(context.date))
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .monospacedDigit()
                 }
                 .font(Theme.Typography.secondary)
@@ -187,21 +103,6 @@ struct HeaderUtilities: View {
 
     private static func timeText(_ date: Date) -> String {
         date.formatted(date: .omitted, time: .shortened)
-    }
-}
-
-private struct AppearanceButton: View {
-    var body: some View {
-        Button(action: {}) {
-            Image(systemName: "sun.max")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(AppTheme.secondary)
-                .frame(width: 22, height: 22)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help("Appearance stays dark in this cockpit")
-        .accessibilityLabel("Appearance")
     }
 }
 
@@ -238,14 +139,14 @@ struct StatusSection: View {
         VStack(spacing: metrics.spacing.xs) {
             Text("SYSTEM STATUS")
                 .font(Theme.Typography.micro)
-                .foregroundStyle(AppTheme.tertiary)
+                .foregroundStyle(Theme.Color.tertiary)
                 .tracking(1.6)
             Text(title)
                 .font(metrics.type.display)
-                .foregroundStyle(AppTheme.text)
+                .foregroundStyle(Theme.Color.text)
             Text(description)
                 .font(Theme.Typography.secondary)
-                .foregroundStyle(AppTheme.secondary)
+                .foregroundStyle(Theme.Color.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
@@ -279,17 +180,6 @@ struct StatusSection: View {
     }
 }
 
-struct Slogan: View {
-    var body: some View {
-        Text("Live readings from this Mac.")
-            .font(Theme.Typography.secondary)
-            .foregroundStyle(AppTheme.tertiary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .fixedSize(horizontal: false, vertical: true)
-    }
-}
-
 struct MetricsSection: View {
     let snapshot: LiveSnapshot
     var onOpenProfile: (Profile) -> Void
@@ -300,7 +190,7 @@ struct MetricsSection: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 if index > 0 {
                     Rectangle()
-                        .fill(AppTheme.divider)
+                        .fill(Theme.Color.divider)
                         .frame(width: 1)
                         .padding(.vertical, 6)
                 }
@@ -328,18 +218,18 @@ struct MetricGroup: View {
             HStack(alignment: .center, spacing: metrics.spacing.sm) {
                 Image(systemName: item.icon)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(AppTheme.secondary)
+                    .foregroundStyle(Theme.Color.secondary)
                     .frame(width: 18, height: 18)
                     .fixedSize()
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.label)
                         .font(Theme.Typography.micro)
-                        .foregroundStyle(AppTheme.tertiary)
+                        .foregroundStyle(Theme.Color.tertiary)
                         .lineLimit(1)
                     Text(item.value)
                         .font(Theme.Typography.secondary)
-                        .foregroundStyle(item.enabled ? AppTheme.text : AppTheme.tertiary)
+                        .foregroundStyle(item.enabled ? Theme.Color.text : Theme.Color.tertiary)
                         .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
@@ -387,24 +277,24 @@ struct BrandStatement: View {
         HStack(alignment: .center, spacing: metrics.spacing.sm) {
             Image(systemName: "waveform.path.ecg")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(AppTheme.sageMuted)
+                .foregroundStyle(Theme.Color.sageMuted)
                 .frame(width: 18, height: 18)
                 .fixedSize()
             VStack(alignment: .leading, spacing: 1) {
                 Text("Mac Observer")
                     .font(Theme.Typography.section)
-                    .foregroundStyle(AppTheme.text)
+                    .foregroundStyle(Theme.Color.text)
                     .lineLimit(1)
-                Text("Live cockpit")
+                Text("Live on this Mac")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(AppTheme.tertiary)
+                    .foregroundStyle(Theme.Color.tertiary)
                     .lineLimit(1)
             }
             .fixedSize()
         }
         .fixedSize()
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Mac Observer, live cockpit")
+        .accessibilityLabel("Mac Observer, live on this Mac")
     }
 }
 
@@ -419,7 +309,7 @@ struct ViewProcessesButton: View {
                 Image(systemName: "arrow.right")
                     .font(.system(size: 11, weight: .semibold))
             }
-            .foregroundStyle(AppTheme.secondary)
+            .foregroundStyle(Theme.Color.secondary)
             .fixedSize()
             .contentShape(Rectangle())
         }

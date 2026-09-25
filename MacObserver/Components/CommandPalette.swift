@@ -16,7 +16,7 @@ struct CommandPalette: View {
 
     var body: some View {
         ZStack {
-            AppTheme.canvas.opacity(0.55)
+            Theme.Color.canvas.opacity(0.55)
                 .ignoresSafeArea()
                 .onTapGesture { isPresented = false }
 
@@ -30,18 +30,18 @@ struct CommandPalette: View {
                     .overlay {
                         if focused {
                             RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-                                .strokeBorder(AppTheme.sage.opacity(Theme.Sidebar.focusOutline), lineWidth: 1)
+                                .strokeBorder(Theme.Color.sage.opacity(0.28), lineWidth: 1)
                         }
                     }
 
                 Rectangle()
-                    .fill(AppTheme.divider)
+                    .fill(Theme.Color.divider)
                     .frame(height: 1)
 
                 if items.isEmpty {
                     Text("No matches")
                         .font(Theme.Typography.body)
-                        .foregroundStyle(AppTheme.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .padding(Theme.Space.standard)
                 } else {
                     ScrollView {
@@ -53,14 +53,14 @@ struct CommandPalette: View {
                                     HStack(spacing: Theme.Space.control) {
                                         Image(systemName: item.symbol)
                                             .frame(width: 16)
-                                            .foregroundStyle(AppTheme.tertiary)
+                                            .foregroundStyle(Theme.Color.tertiary)
                                         Text(item.title)
-                                            .foregroundStyle(AppTheme.text)
+                                            .foregroundStyle(Theme.Color.text)
                                         Spacer(minLength: Theme.Space.compact)
                                         Text(item.type)
-                                            .foregroundStyle(AppTheme.sageMuted)
+                                            .foregroundStyle(Theme.Color.sageMuted)
                                         Text(item.secondary)
-                                            .foregroundStyle(AppTheme.tertiary)
+                                            .foregroundStyle(Theme.Color.tertiary)
                                             .lineLimit(1)
                                     }
                                     .font(Theme.Typography.body)
@@ -76,7 +76,11 @@ struct CommandPalette: View {
                 }
             }
             .padding(Theme.Space.standard)
-            .glass(.floating, radius: Theme.Radius.palette)
+            .background(Theme.Color.surfaceElevated)
+            .overlay {
+                Rectangle()
+                    .strokeBorder(Theme.Color.divider, lineWidth: 1)
+            }
             .frame(width: 620)
             .padding(.top, Theme.Space.hero)
             .frame(maxHeight: .infinity, alignment: .top)

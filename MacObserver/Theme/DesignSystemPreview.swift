@@ -25,7 +25,7 @@ struct DesignSystemPreview: View {
                 .font(metrics.type.pageTitle)
                 .foregroundStyle(Theme.Color.text)
             Text(
-                "Window \(Int(metrics.containerWidth)) × \(Int(metrics.containerHeight)) · sidebar \(Int(metrics.sidebarWidth)) · canvas \(Int(metrics.canvasWidth)) · \(regimeLabel)"
+                "Window \(Int(metrics.containerWidth)) × \(Int(metrics.containerHeight)) · canvas \(Int(metrics.canvasWidth)) · \(regimeLabel)"
             )
             .font(metrics.type.secondary)
             .foregroundStyle(Theme.Color.secondary)
@@ -74,12 +74,11 @@ struct DesignSystemPreview: View {
     }
 
     private var surfaces: some View {
-        tokenGroup("Surfaces") {
+        tokenGroup("Canvas") {
             HStack(spacing: metrics.spacing.md) {
-                surfaceSwatch("Recessed")
-                surfaceSwatch("Resting")
-                surfaceSwatch("Elevated")
-                surfaceSwatch("Floating")
+                colorSwatch("Canvas", Theme.Color.canvas)
+                colorSwatch("Divider", Theme.Color.divider)
+                colorSwatch("Sage", Theme.Color.sage)
             }
         }
     }
@@ -147,12 +146,18 @@ struct DesignSystemPreview: View {
         }
     }
 
-    private func surfaceSwatch(_ name: String) -> some View {
-        Text(name)
-            .font(metrics.type.metadata)
-            .foregroundStyle(Theme.Color.text)
-            .padding(metrics.spacing.md)
-            .frame(width: 120, height: 72)
+    private func colorSwatch(_ name: String, _ color: Color) -> some View {
+        VStack(alignment: .leading, spacing: metrics.spacing.xs) {
+            Rectangle()
+                .fill(color)
+                .frame(width: 120, height: 48)
+                .overlay {
+                    Rectangle().strokeBorder(Theme.Color.divider, lineWidth: 1)
+                }
+            Text(name)
+                .font(metrics.type.micro)
+                .foregroundStyle(Theme.Color.tertiary)
+        }
     }
 
     private func sizePreview(width: CGFloat, height: CGFloat) -> some View {
@@ -160,13 +165,6 @@ struct DesignSystemPreview: View {
         return VStack(spacing: metrics.spacing.xs) {
             ZStack {
                 AppBackground()
-                HStack(alignment: .top, spacing: 0) {
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(Color.black.opacity(0.28))
-                        .padding(.leading, metrics.spacing.sm * scale)
-                        .padding(.vertical, metrics.spacing.sm * scale)
-                    Color.clear
-                }
             }
             .frame(width: width * scale, height: height * scale)
             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))

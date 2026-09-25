@@ -35,6 +35,7 @@ private enum EventListItem: Identifiable {
 
 struct EventsView: View {
     let store: OverviewStore
+    @Environment(\.designMetrics) private var metrics
     @State private var domainFilter: TelemetryDomain?
     @State private var entityKeyFilter: String?
 
@@ -66,14 +67,16 @@ struct EventsView: View {
     }
 
     var body: some View {
-        ScrollView {
+        ScreenPage {
             VStack(alignment: .leading, spacing: Theme.Space.section) {
                 VStack(alignment: .leading, spacing: Theme.Space.compact) {
+                    SectionEyebrow(title: "History")
                     Text("Events")
-                        .font(Theme.Typography.pageTitle)
+                        .font(metrics.type.display)
+                        .foregroundStyle(Theme.Color.text)
                     Text("History comes from the local SQLite store. Discrete changes only: memory pressure, thermal state, collector enablement, generated explanations, internet checks you run, and local path changes.")
-                        .font(Theme.Typography.body)
-                        .foregroundStyle(AppTheme.secondary)
+                        .font(Theme.Typography.secondary)
+                        .foregroundStyle(Theme.Color.secondary)
                         .frame(maxWidth: 720, alignment: .leading)
                 }
 
@@ -86,7 +89,7 @@ struct EventsView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .tint(AppTheme.sage)
+                    .tint(Theme.Color.sage)
                     Picker("Entity", selection: $entityKeyFilter) {
                         Text("All entities").tag(Optional<String>.none)
                         ForEach(entityOptions, id: \.key) { option in
@@ -94,16 +97,14 @@ struct EventsView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .tint(AppTheme.sage)
+                    .tint(Theme.Color.sage)
                     .help("Filter by the entity that owns the event. Identity is the stored key, not the display name.")
                 }
                 .padding(Theme.Space.standard)
-                .glass(.recessed, radius: Theme.Radius.control)
 
                 if items.isEmpty {
                     EmptyState(title: "No events", message: emptyCopy)
                         .padding(Theme.Space.standard)
-                        .glass(.elevated, radius: Theme.Radius.secondary)
                         .transition(Motion.fadeUp)
                 } else {
                     VStack(alignment: .leading, spacing: 0) {
@@ -117,16 +118,13 @@ struct EventsView: View {
                         }
                     }
                     .padding(Theme.Space.standard)
-                    .glass(.elevated, radius: Theme.Radius.secondary)
                     .transition(Motion.fadeUp)
                 }
             }
             .frame(maxWidth: 1_080, alignment: .leading)
             .animation(Motion.panel, value: domainFilter)
             .animation(Motion.panel, value: entityKeyFilter)
-            .instrumentContent()
         }
-        .instrumentScreen()
         .onChange(of: store.historyEvents) { _, _ in
             if let entityKeyFilter, !entityOptions.contains(where: { $0.key == entityKeyFilter }) {
                 self.entityKeyFilter = nil

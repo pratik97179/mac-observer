@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct SpacingScale: Equatable, Sendable {
@@ -82,17 +83,10 @@ struct DesignMetrics: Equatable, Sendable {
     let topInset: CGFloat
     let bottomInset: CGFloat
     let contentMaxWidth: CGFloat
-    let sidebarWidth: CGFloat
-    let sidebarCompact: Bool
-    let cockpitWidth: CGFloat
     let canvasWidth: CGFloat
     let regime: CockpitRegime
 
     static let contentMaxWidthLimit: CGFloat = 1_520
-    static let minimumSidebarWidth: CGFloat = 208
-    static let maximumSidebarWidth: CGFloat = 260
-    static let compactSidebarWidth: CGFloat = 72
-    static let minimumExpandedCockpit: CGFloat = 760
     static let reference = DesignMetrics(containerWidth: 1_280, containerHeight: 820)
 
     static func == (lhs: DesignMetrics, rhs: DesignMetrics) -> Bool {
@@ -114,11 +108,7 @@ struct DesignMetrics: Equatable, Sendable {
         topInset = min(max(height * 0.032, 20), 32)
         bottomInset = min(max(height * 0.040, 24), 40)
         contentMaxWidth = Self.contentMaxWidthLimit
-        let expandedSidebar = min(max(width * 0.17, Self.minimumSidebarWidth), Self.maximumSidebarWidth)
-        sidebarCompact = (width - expandedSidebar) < Self.minimumExpandedCockpit
-        sidebarWidth = sidebarCompact ? Self.compactSidebarWidth : expandedSidebar
-        cockpitWidth = max(width - sidebarWidth, 1)
-        canvasWidth = min(max(cockpitWidth - (horizontalInset * 2), 1), contentMaxWidth)
+        canvasWidth = min(max(width - (horizontalInset * 2), 1), contentMaxWidth)
         if canvasWidth >= 1_100 {
             regime = .wide
         } else if canvasWidth >= 820 {
@@ -136,6 +126,7 @@ enum CockpitRegime: Equatable, Sendable {
 }
 
 enum DesignMetricsStore {
+    // Retained only for layout-preview tooling compatibility. Prefer `@Environment(\.designMetrics)`.
     private static let lock = NSLock()
     nonisolated(unsafe) private static var value = DesignMetrics.reference
 
@@ -166,20 +157,23 @@ extension EnvironmentValues {
 
 struct DesignMetricsReader<Content: View>: View {
     @ViewBuilder var content: Content
+    @State private var size: CGSize = CGSize(
+        width: DesignMetrics.reference.containerWidth,
+        height: DesignMetrics.reference.containerHeight
+    )
 
     var body: some View {
-        GeometryReader { proxy in
-            let metrics = DesignMetrics(
-                containerWidth: proxy.size.width,
-                containerHeight: proxy.size.height
-            )
-            content
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .environment(\.designMetrics, metrics)
-                .onAppear { DesignMetricsStore.current = metrics }
-                .onChange(of: metrics) { _, next in
-                    DesignMetricsStore.current = next
+        let metrics = DesignMetrics(containerWidth: size.width, containerHeight: size.height)
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .environment(\.designMetrics, metrics)
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                guard abs(newSize.width - size.width) > 0.5 || abs(newSize.height - size.height) > 0.5 else {
+                    return
                 }
-        }
+                size = newSize
+            }
     }
 }
