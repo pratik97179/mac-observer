@@ -111,19 +111,27 @@ struct OverviewMain: View {
     var onOpenProfile: (Profile) -> Void = { _ in }
     @Environment(\.designMetrics) private var metrics
 
-    private var model: OverviewModel { OverviewModel.from(snapshot: store.snapshot) }
-
     var body: some View {
+        let snapshot = store.snapshot
         VStack(spacing: 0) {
-            StatusSection(model: model)
-                .layoutPriority(1)
+            // The store skips identical snapshots, so a stalled collector never triggers a
+            // re-render. Re-evaluate against the clock so "stale" can actually appear.
+            TimelineView(.periodic(from: .now, by: 5)) { context in
+                StatusSection(model: OverviewModel.from(snapshot: snapshot, now: context.date))
+            }
+            .layoutPriority(1)
 
-            Spacer(minLength: metrics.spacing.md)
+            Spacer()
 
-            Spacer(minLength: metrics.spacing.md)
+            Text("\"A CALMER SYSTEM FOR A CLEARER MIND.\"")
+            .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Color.tertiary)
+            .tracking(3)
+            .padding(.bottom, Theme.Space.md)
 
             MetricsSection(snapshot: store.snapshot, onOpenProfile: onOpenProfile)
                 .layoutPriority(1)
+                .padding(.bottom, 50)
         }
         .padding(.horizontal, metrics.horizontalInset)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -192,7 +200,6 @@ struct MetricsSection: View {
                     Rectangle()
                         .fill(Theme.Color.divider)
                         .frame(width: 1)
-                        .padding(.vertical, 6)
                 }
                 MetricGroup(item: item, action: { onOpenProfile(item.profile) })
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -215,16 +222,15 @@ struct MetricGroup: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .center, spacing: metrics.spacing.sm) {
-                Image(systemName: item.icon)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Theme.Color.secondary)
-                    .frame(width: 18, height: 18)
-                    .fixedSize()
+            HStack(alignment: .top, spacing: metrics.spacing.sm) {
+                Image(item.icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 22)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.label)
-                        .font(Theme.Typography.micro)
+                        .font(Theme.Typography.metadata)
                         .foregroundStyle(Theme.Color.tertiary)
                         .lineLimit(1)
                     Text(item.value)
@@ -334,12 +340,12 @@ struct OverviewMetricItem: Identifiable {
     }
 
     private static func cpu(_ snapshot: LiveSnapshot) -> OverviewMetricItem {
-        let ratio = snapshot.series(named: .cpuUtilizationRatio).last?.value
-            ?? OverviewMetrics.ratio(snapshot, .cpuUtilizationRatio)
+        let ratio = snapshot.systemSeries(named: .cpuUtilizationRatio).last?.value
+            ?? OverviewMetrics.systemRatio(snapshot, .cpuUtilizationRatio)
         let enabled = ratio != nil
         return OverviewMetricItem(
             id: "cpu",
-            icon: "cpu",
+            icon: "CPU",
             label: "CPU",
             value: ratio.map(OverviewMetrics.percent) ?? "—",
             caption: "CPU utilisation",
@@ -356,7 +362,7 @@ struct OverviewMetricItem: Identifiable {
         let progress = enabled ? used / total : 0
         return OverviewMetricItem(
             id: "memory",
-            icon: "memorychip",
+            icon: "Memory",
             label: "Memory",
             value: enabled ? "\(OverviewMetrics.bytes(used)) / \(OverviewMetrics.bytes(total))" : "—",
             caption: "Memory utilisation",
@@ -374,7 +380,7 @@ struct OverviewMetricItem: Identifiable {
         let progress = enabled ? used / capacity : 0
         return OverviewMetricItem(
             id: "storage",
-            icon: "internaldrive",
+            icon: "Storage",
             label: "Storage",
             value: enabled ? "\(OverviewMetrics.bytes(used)) / \(OverviewMetrics.bytes(capacity))" : "—",
             caption: "Storage utilisation",
@@ -389,7 +395,7 @@ struct OverviewMetricItem: Identifiable {
         let enabled = state != nil
         return OverviewMetricItem(
             id: "thermal",
-            icon: "thermometer.medium",
+            icon: "Thermal",
             label: "Thermal",
             value: enabled ? OverviewVisualFill.thermalTitle(state: state) : "—",
             caption: "Thermal level",
@@ -404,7 +410,7 @@ struct OverviewMetricItem: Identifiable {
         let enabled = ratio != nil && !OverviewMetrics.isUnavailable(snapshot, "standard.power")
         return OverviewMetricItem(
             id: "battery",
-            icon: "battery.100",
+            icon: "Battery",
             label: "Battery",
             value: ratio.map(OverviewMetrics.percent) ?? "—",
             caption: "Battery charge",
@@ -444,6 +450,17 @@ enum OverviewMetrics {
         guard let metric = snapshot.metrics.first(where: { $0.name == name }) else { return nil }
         if case .ratio(let value) = metric.value { return value }
         return nil
+    }
+
+    /// Like `ratio`, but only from the host entity, so per-process metrics with the same name are ignored.
+    static func systemRatio(_ snapshot: LiveSnapshot, _ name: MetricName) -> Double? {
+        let metric = snapshot.metrics.first { metric in
+            guard metric.name == name else { return false }
+            if case .system = metric.entity { return true }
+            return false
+        }
+        guard let metric, case .ratio(let value) = metric.value else { return nil }
+        return value
     }
 
     static func has(_ snapshot: LiveSnapshot, _ name: MetricName) -> Bool {

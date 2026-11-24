@@ -176,7 +176,7 @@ enum AppImage {
             return Image(nsImage: cachedBackdrop)
         }
         let loaded: NSImage? = {
-            if let image = NSImage(named: "EnvironmentBackdrop") { return image }
+            if let image = NSImage(named: "Background") { return image }
             if let url = Bundle.main.url(forResource: "bg", withExtension: "png"),
                let image = NSImage(contentsOf: url) {
                 return image
@@ -187,7 +187,7 @@ enum AppImage {
             cachedBackdrop = loaded
             return Image(nsImage: loaded)
         }
-        return Image("EnvironmentBackdrop")
+        return Image("Background")
     }
 
     nonisolated(unsafe) private static var cachedBackdrop: NSImage?

@@ -62,7 +62,12 @@ struct LiveProfileView: View {
             Text(resolvedModel.summary)
                 .font(Theme.Typography.secondary)
                 .foregroundStyle(Theme.Color.secondary)
-            FreshnessBadge(age: resolvedOverview.sampleAge, sampling: resolvedOverview.presentsSampling)
+            TimelineView(.periodic(from: .now, by: 5)) { context in
+                FreshnessBadge(
+                    age: store.snapshot.metrics.map(\.time.wallTime).max().map { context.date.timeIntervalSince($0) },
+                    sampling: resolvedOverview.presentsSampling
+                )
+            }
             if let availability = resolvedModel.availability {
                 PermissionState(message: availability, onCapabilities: onOpenCapabilities)
             }
@@ -71,7 +76,7 @@ struct LiveProfileView: View {
 
     private var performanceBody: some View {
         VStack(alignment: .leading, spacing: Theme.Space.section) {
-            let cpuSeries = store.snapshot.series(named: .cpuUtilizationRatio)
+            let cpuSeries = store.snapshot.systemSeries(named: .cpuUtilizationRatio)
             if cpuSeries.count >= 2 {
                 TelemetryChart(plot: cpuSeries.map { point in
                     InspectPlotPoint(time: point.time, value: point.value, unit: .ratio)
@@ -364,7 +369,7 @@ struct LiveProfileView: View {
     }
 
     private func flowRatio(_ name: MetricName) -> Double {
-        let total = store.snapshot.series(named: name).last.map(\.value) ?? 0
+        let total = store.snapshot.latestTotal(named: name)
         return min(1, max(total <= 0 ? 0 : 0.08, total / 12_500_000))
     }
 
